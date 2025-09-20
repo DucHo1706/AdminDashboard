@@ -1,0 +1,31 @@
+﻿@model IEnumerable<AdminDashboard.Models.Tram>
+
+<h2>Danh sách Trạm</h2>
+<p>
+    <a asp-action="Create">Thêm Trạm</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Mã Trạm</th>
+            <th>Tên Trạm</th>
+            <th>Địa Chỉ</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.IdTram</td>
+                <td>@item.TenTram</td>
+                <td>@item.DiaChiTram</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.IdTram">Sửa</a> |
+                    <a asp-action="Details" asp-route-id="@item.IdTram">Chi tiết</a> |
+                    <a asp-action="Delete" asp-route-id="@item.IdTram">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

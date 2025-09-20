@@ -1,0 +1,53 @@
+﻿@model AdminDashboard.Models.Login.DangKy
+
+<h2>Đăng ký tài khoản</h2>
+
+<form asp-action="Register" method="post">
+    <div>
+        <label asp-for="TenDangNhap"></label>
+        <input asp-for="TenDangNhap" />
+        <span asp-validation-for="TenDangNhap"></span>
+    </div>
+
+    <div>
+        <label asp-for="MatKhau"></label>
+        <input asp-for="MatKhau" type="password" />
+        <span asp-validation-for="MatKhau"></span>
+    </div>
+
+    <div>
+        <label asp-for="XacNhanMatKhau"></label>
+        <input asp-for="XacNhanMatKhau" type="password" />
+        <span asp-validation-for="XacNhanMatKhau"></span>
+    </div>
+
+    <div>
+        <label asp-for="Email"></label>
+        <input asp-for="Email" />
+        <span asp-validation-for="Email"></span>
+    </div>
+
+    <div>
+        <label asp-for="HoTen"></label>
+        <input asp-for="HoTen" />
+        <span asp-validation-for="HoTen"></span>
+    </div>
+
+    <div>
+        <label asp-for="SoDienThoai"></label>
+        <input asp-for="SoDienThoai" />
+        <span asp-validation-for="SoDienThoai"></span>
+    </div>
+
+    <div>
+        <label asp-for="NgaySinh"></label>
+        <input asp-for="NgaySinh" type="date" />
+        <span asp-validation-for="NgaySinh"></span>
+    </div>
+
+    <button type="submit">Đăng ký</button>
+</form>
+
+<div>
+    <a asp-controller="Auth" asp-action="Login">Đã có tài khoản? Đăng nhập</a>
+</div>

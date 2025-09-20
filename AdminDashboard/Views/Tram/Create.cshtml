@@ -1,0 +1,19 @@
+﻿@model AdminDashboard.Models.Tram
+
+<h2>Thêm Trạm</h2>
+
+<form asp-action="Create">
+    
+    <div class="form-group">
+        <label asp-for="TenTram" class="control-label"></label>
+        <input asp-for="TenTram" class="form-control" />
+        <span asp-validation-for="TenTram" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="DiaChiTram" class="control-label"></label>
+        <input asp-for="DiaChiTram" class="form-control" />
+        <span asp-validation-for="DiaChiTram" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Lưu</button> |
+    <a asp-action="Index">Quay lại</a>
+</form>
