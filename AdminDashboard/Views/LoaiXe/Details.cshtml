@@ -1,0 +1,20 @@
+﻿@model AdminDashboard.Models.LoaiXe
+
+<h2>Chi tiết Trạm</h2>
+<div>
+    <h4>Trạm</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Mã Loại Xe</dt>
+        <dd class="col-sm-10">@Model.LoaiXeId</dd>
+
+        <dt class="col-sm-2">Tên Trạm</dt>
+        <dd class="col-sm-10">@Model.TenLoaiXe</dd>
+
+     
+    </dl>
+</div>
+<p>
+    <a asp-action="Edit" asp-route-id="@Model.LoaiXeId">Sửa</a> |
+    <a asp-action="Index">Quay lại</a>
+</p>

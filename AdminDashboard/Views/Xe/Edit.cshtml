@@ -1,23 +1,15 @@
 ﻿@model AdminDashboard.Models.Xe
 
-@{
-    ViewData["Title"] = "Thêm Xe";
-}
+<h2>Sửa Xe</h2>
 
-<h2>Thêm Xe</h2>
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="XeId" />
 
-<form asp-action="Create" method="post">
     <div class="form-group">
         <label asp-for="BienSoXe" class="control-label"></label>
         <input asp-for="BienSoXe" class="form-control" />
         <span asp-validation-for="BienSoXe" class="text-danger"></span>
     </div>
-
-   <!-- <div class="form-group">
-        <label asp-for="TenXe" class="control-label"></label>
-        <input asp-for="TenXe" class="form-control" />
-        <span asp-validation-for="TenXe" class="text-danger"></span>
-	 </div>-->
 
     <div class="form-group">
         <label asp-for="LoaiXeId" class="control-label">Loại Xe</label>
@@ -27,5 +19,6 @@
         <span asp-validation-for="LoaiXeId" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">Lưu</button>
+    <button type="submit" class="btn btn-success">Cập nhật</button> |
+    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
 </form>

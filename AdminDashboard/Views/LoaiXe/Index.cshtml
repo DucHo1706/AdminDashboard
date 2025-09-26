@@ -1,0 +1,30 @@
+﻿@model IEnumerable<AdminDashboard.Models.LoaiXe>
+
+<h2>Danh sách Trạm</h2>
+<p>
+    <a asp-action="Create">Thêm Loại Xe</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Mã LoạiXe</th>
+            <th>Tên Loại Xe</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.LoaiXeId</td>
+                <td>@item.TenLoaiXe</td>
+             
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.LoaiXeId">Sửa</a> |
+                    <a asp-action="Details" asp-route-id="@item.LoaiXeId">Chi tiết</a> |
+                    <a asp-action="Delete" asp-route-id="@item.LoaiXeId">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

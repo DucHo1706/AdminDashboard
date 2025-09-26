@@ -1,0 +1,21 @@
+﻿@model AdminDashboard.Models.Xe
+
+<h2>Chi tiết Xe</h2>
+<div>
+    <h4>Xe</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Mã Xe</dt>
+        <dd class="col-sm-10">@Model.XeId</dd>
+
+        <dt class="col-sm-2">Tên Xe</dt>
+        <dd class="col-sm-10">@Model.BienSoXe</dd>
+
+        <dt class="col-sm-2">Loại Xe </dt>
+        <dd class="col-sm-10">@Model.LoaiXe?.TenLoaiXe</dd>
+    </dl>
+</div>
+<p>
+    <a asp-action="Edit" asp-route-id="@Model.XeId">Sửa</a> |
+    <a asp-action="Index">Quay lại</a>
+</p>
