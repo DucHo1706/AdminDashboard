@@ -1,0 +1,24 @@
+﻿@model AdminDashboard.Models.Xe
+
+<h2>Sửa Xe</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="XeId" />
+
+    <div class="form-group">
+        <label asp-for="BienSoXe" class="control-label"></label>
+        <input asp-for="BienSoXe" class="form-control" />
+        <span asp-validation-for="BienSoXe" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="LoaiXeId" class="control-label">Loại Xe</label>
+        <select asp-for="LoaiXeId" class="form-control" asp-items="ViewBag.LoaiXeId">
+            <option value="">-- Chọn loại xe --</option>
+        </select>
+        <span asp-validation-for="LoaiXeId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Cập nhật</button> |
+    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+</form>

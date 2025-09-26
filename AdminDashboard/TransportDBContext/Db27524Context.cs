@@ -86,9 +86,11 @@ namespace AdminDashboard.TransportDBContext
                 .HasIndex(x => x.BienSoXe).IsUnique();
 
             modelBuilder.Entity<Xe>()
-                .HasOne<LoaiXe>()
-                .WithMany()
-                .HasForeignKey(x => x.LoaiXeId);
+                  .HasOne(x => x.LoaiXe)        // dùng property trong class Xe
+                  .WithMany()                   // 1 LoaiXe có nhiều Xe
+                  .HasForeignKey(x => x.LoaiXeId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
 
             //   LoTrinh  
             modelBuilder.Entity<LoTrinh>()

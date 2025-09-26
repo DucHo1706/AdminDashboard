@@ -1,21 +1,31 @@
 ﻿@model AdminDashboard.Models.Xe
 
+@{
+    ViewData["Title"] = "Thêm Xe";
+}
+
 <h2>Thêm Xe</h2>
 
-<form asp-action="Create">
+<form asp-action="Create" method="post">
     <div class="form-group">
         <label asp-for="BienSoXe" class="control-label"></label>
         <input asp-for="BienSoXe" class="form-control" />
         <span asp-validation-for="BienSoXe" class="text-danger"></span>
     </div>
 
+   <!-- <div class="form-group">
+        <label asp-for="TenXe" class="control-label"></label>
+        <input asp-for="TenXe" class="form-control" />
+        <span asp-validation-for="TenXe" class="text-danger"></span>
+	 </div>-->
+
     <div class="form-group">
-        <label asp-for="LoaiXe" class="control-label"></label>
-        <input asp-for="LoaiXe" class="form-control" />
-        <span asp-validation-for="LoaiXe" class="text-danger"></span>
+        <label asp-for="LoaiXeId" class="control-label">Loại Xe</label>
+        <select asp-for="LoaiXeId" class="form-control" asp-items="ViewBag.LoaiXeId">
+            <option value="">-- Chọn loại xe --</option>
+        </select>
+        <span asp-validation-for="LoaiXeId" class="text-danger"></span>
     </div>
 
-
-    <button type="submit" class="btn btn-primary">Lưu</button> |
-    <a asp-action="Index">Quay lại</a>
+    <button type="submit" class="btn btn-primary">Lưu</button>
 </form>
