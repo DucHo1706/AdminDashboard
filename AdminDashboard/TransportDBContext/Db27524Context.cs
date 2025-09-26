@@ -92,41 +92,80 @@ namespace AdminDashboard.TransportDBContext
                   .OnDelete(DeleteBehavior.Restrict);
 
 
-            //   LoTrinh  
-            modelBuilder.Entity<LoTrinh>()
-                .HasKey(lt => lt.LoTrinhId);
+            modelBuilder.Entity<LoTrinh>(entity =>
+            {
+                entity.HasKey(lt => lt.LoTrinhId);
 
-            modelBuilder.Entity<LoTrinh>()
-                .HasOne<Tram>()
-                .WithMany()
-                .HasForeignKey(lt => lt.TramDi)
-                .OnDelete(DeleteBehavior.Restrict);
+                entity.Property(lt => lt.LoTrinhId)
+                      .HasMaxLength(10)
+                      .IsRequired();
 
-            modelBuilder.Entity<LoTrinh>()
-                .HasOne<Tram>()
-                .WithMany()
-                .HasForeignKey(lt => lt.TramToi)
-                .OnDelete(DeleteBehavior.Restrict);
+                entity.Property(lt => lt.TramDi)
+                      .HasMaxLength(10)
+                      .IsRequired();
 
-            modelBuilder.Entity<LoTrinh>()
-                .HasIndex(lt => new { lt.TramDi, lt.TramToi });
+                entity.Property(lt => lt.TramToi)
+                      .HasMaxLength(10)
+                      .IsRequired();
+
+                entity.Property(lt => lt.GiaVeCoDinh)
+                      .HasColumnType("numeric(10,2)");
+
+                // Quan hệ TramDi
+                entity.HasOne(lt => lt.TramDiNavigation)
+                      .WithMany()
+                      .HasForeignKey(lt => lt.TramDi)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // Quan hệ TramToi
+                entity.HasOne(lt => lt.TramToiNavigation)
+                      .WithMany()
+                      .HasForeignKey(lt => lt.TramToi)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(lt => new { lt.TramDi, lt.TramToi });
+            });
 
             //   ChuyenXe  
-            modelBuilder.Entity<ChuyenXe>()
-                .HasKey(cx => cx.ChuyenId);
+            modelBuilder.Entity<ChuyenXe>(entity =>
+            {
+                entity.HasKey(cx => cx.ChuyenId);
 
-            modelBuilder.Entity<ChuyenXe>()
-                .HasOne<LoTrinh>()
-                .WithMany()
-                .HasForeignKey(cx => cx.LoTrinhId);
+                entity.Property(cx => cx.ChuyenId)
+                      .HasMaxLength(10)
+                      .IsRequired();
 
-            modelBuilder.Entity<ChuyenXe>()
-                .HasOne<Xe>()
-                .WithMany()
-                .HasForeignKey(cx => cx.XeId);
+                entity.Property(cx => cx.LoTrinhId)
+                      .HasMaxLength(10)
+                      .IsRequired();
 
-            modelBuilder.Entity<ChuyenXe>()
-                .HasIndex(cx => cx.NgayDi);
+                entity.Property(cx => cx.XeId)
+                      .HasMaxLength(10)
+                      .IsRequired();
+
+                entity.Property(cx => cx.TrangThai)
+                      .HasMaxLength(50)
+                      .IsRequired();
+
+                entity.Property(cx => cx.NgayDi)
+                      .IsRequired();
+
+                entity.Property(cx => cx.GioDi)
+                      .IsRequired();
+
+                entity.Property(cx => cx.GioDenDuKien)
+                      .IsRequired();
+
+                entity.HasOne(cx => cx.LoTrinh)
+                      .WithMany()
+                      .HasForeignKey(cx => cx.LoTrinhId);
+
+                entity.HasOne(cx => cx.Xe)
+                      .WithMany()
+                      .HasForeignKey(cx => cx.XeId);
+
+                entity.HasIndex(cx => cx.NgayDi);
+            });
 
             //   Ghe  
             modelBuilder.Entity<Ghe>()
