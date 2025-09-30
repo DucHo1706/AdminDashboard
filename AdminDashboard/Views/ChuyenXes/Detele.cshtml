@@ -1,0 +1,34 @@
+﻿@model AdminDashboard.Models.ChuyenXe
+
+@{
+    ViewData["Title"] = "Xác Nhận Xóa";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h3 class="text-danger">Bạn có chắc chắn muốn xóa chuyến xe này không?</h3>
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">Mã Chuyến</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.ChuyenId)</dd>
+
+        <dt class="col-sm-3">Lộ Trình</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.LoTrinh.LoTrinhId)</dd>
+
+        <dt class="col-sm-3">Biển Số Xe</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Xe.XeId)</dd>
+
+        <dt class="col-sm-3">Ngày Đi</dt>
+        <dd class="col-sm-9">@Model.NgayDi.ToString("dd/MM/yyyy")</dd>
+    </dl>
+
+    <form asp-action="Delete">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" asp-for="ChuyenId" />
+
+        <input type="submit" value="Xóa" class="btn btn-danger" /> |
+        <a asp-action="Index" class="btn btn-secondary">Hủy bỏ</a>
+    </form>
+</div>

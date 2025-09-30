@@ -1,0 +1,44 @@
+﻿@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+
+@{
+    ViewData["Title"] = "Danh Sách Chuyến Xe";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Thêm Chuyến Xe Mới</a>
+</p>
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.ChuyenId)</th>
+            <th>Lộ Trình</th>
+            <th>Biển Số Xe</th>
+            <th>@Html.DisplayNameFor(model => model.NgayDi)</th>
+            <th>@Html.DisplayNameFor(model => model.GioDi)</th>
+            <th>@Html.DisplayNameFor(model => model.GioDenDuKien)</th>
+            <th>@Html.DisplayNameFor(model => model.TrangThai)</th>
+            <th>Hành Động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.ChuyenId)</td>
+                <td>@Html.DisplayFor(modelItem => item.LoTrinh.LoTrinhId)</td>
+                <td>@Html.DisplayFor(modelItem => item.Xe.XeId)</td>
+                <td>@item.NgayDi.ToString("dd/MM/yyyy")</td>
+                <td>@Html.DisplayFor(modelItem => item.GioDi)</td>
+                <td>@Html.DisplayFor(modelItem => item.GioDenDuKien)</td>
+                <td>@Html.DisplayFor(modelItem => item.TrangThai)</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-warning">Sửa</a> |
+                    <a asp-action="Details" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-info">Chi tiết</a> |
+                    <a asp-action="Delete" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-danger">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

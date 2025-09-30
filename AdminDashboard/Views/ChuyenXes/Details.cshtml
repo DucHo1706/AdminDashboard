@@ -1,0 +1,38 @@
+﻿@model AdminDashboard.Models.ChuyenXe
+
+@{
+    ViewData["Title"] = "Chi Tiết Chuyến Xe";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div>
+    <h4>Chuyến Xe: @Model.ChuyenId</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">Mã Chuyến</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.ChuyenId)</dd>
+
+        <dt class="col-sm-3">Lộ Trình</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.LoTrinh.LoTrinhId)</dd>
+
+        <dt class="col-sm-3">Biển Số Xe</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Xe.XeId)</dd>
+
+        <dt class="col-sm-3">Ngày Đi</dt>
+        <dd class="col-sm-9">@Model.NgayDi.ToString("dd/MM/yyyy")</dd>
+
+        <dt class="col-sm-3">Giờ Đi</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.GioDi)</dd>
+
+        <dt class="col-sm-3">Giờ Đến Dự Kiến</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.GioDenDuKien)</dd>
+
+        <dt class="col-sm-3">Trạng Thái</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.TrangThai)</dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.ChuyenId" class="btn btn-warning">Chỉnh Sửa</a> |
+    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+</div>
