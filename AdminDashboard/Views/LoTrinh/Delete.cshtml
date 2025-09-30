@@ -1,0 +1,44 @@
+﻿@model AdminDashboard.Models.LoTrinh
+
+@{
+    ViewData["Title"] = "Xóa Lộ Trình";
+}
+
+<h2>Xóa Lộ Trình</h2>
+
+<h3>Bạn có chắc chắn muốn xóa lộ trình này?</h3>
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.LoTrinhId)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.LoTrinhId)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.TramDiNavigation.TenTram)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.TramDiNavigation.TenTram)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.TramToiNavigation.TenTram)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.TramToiNavigation.TenTram)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.GiaVeCoDinh)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.GiaVeCoDinh)
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="LoTrinhId" />
+        <input type="submit" value="Xóa" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </form>
+</div>
