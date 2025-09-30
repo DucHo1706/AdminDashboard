@@ -16,6 +16,10 @@ namespace AdminDashboard.Controllers
         {
             _context = context;
         }
+        public IActionResult ForgotPass()
+        {
+            return View();
+        }
 
         [HttpGet]
         public IActionResult Login()

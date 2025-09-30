@@ -9,13 +9,13 @@ namespace AdminDashboard.Models
         [StringLength(10)]
         public string XeId { get; set; }
 
-        [Required, StringLength(9)]
+        [Required]
         public string BienSoXe { get; set; }
 
-        [Required, StringLength(10)]
+        [Required]
         public string LoaiXeId { get; set; }
 
         [ForeignKey(nameof(LoaiXeId))]
-        public LoaiXe LoaiXe { get; set; }
+        public LoaiXe? LoaiXe { get; set; }
     }
 }

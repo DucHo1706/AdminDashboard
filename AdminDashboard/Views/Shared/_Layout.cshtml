@@ -108,6 +108,16 @@
                         <li class="nav-item">
                             <a class="nav-link hover-text" asp-area="" asp-controller="Tram" asp-action="Index">Tram</a>
                         </li>
+
+                          <li class="nav-item">
+                            <a class="nav-link hover-text" asp-area="" asp-controller="ChuyenXe" asp-action="Index">Chuyen Xe</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link hover-text" asp-area="Admin" asp-controller="LoaiXe" asp-action="Index">Loại Xe</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link hover-text" asp-area="Admin" asp-controller="Xe" asp-action="Index"> Xe</a>
+                            </li>
                         <li class="nav-item">
                             @if (User.Identity.IsAuthenticated)
                             {
@@ -116,7 +126,8 @@
                                         @User.Identity.Name
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="userDropdown">
-                                        <li><a class="dropdown-item" asp-area="" asp-controller="Auth" asp-action="Logout">Đăng xuất</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Auth" asp-action="Account">Thông tin tài khoản</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Auth" asp-action="Logout">Đăng xuất</a></li>
                                     </ul>
                                 </div>
                             }
@@ -137,7 +148,7 @@
                                 </script>
                             }
                         </li>
-                        
+
                     </ul>
                 </div>
             </div>

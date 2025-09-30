@@ -1,0 +1,24 @@
+﻿@model AdminDashboard.Models.Xe
+
+<h2>Xóa Xe</h2>
+<h3>Bạn có chắc muốn xóa xe này?</h3>
+<div>
+    <h4>Trạm</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Mã Xe</dt>
+        <dd class="col-sm-10">@Model.XeId</dd>
+
+        <dt class="col-sm-2">Tên Xe</dt>
+        <dd class="col-sm-10">@Model.BienSoXe</dd>
+
+        <dt class="col-sm-2">Loại Xe</dt>
+        <dd class="col-sm-10">@Model.LoaiXe?.TenLoaiXe</dd>
+    </dl>
+</div>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="XeId" />
+    <button type="submit" class="btn btn-danger">Xóa</button> |
+    <a asp-action="Index">Quay lại</a>
+</form>
