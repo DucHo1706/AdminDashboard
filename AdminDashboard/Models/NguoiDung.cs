@@ -14,7 +14,7 @@ namespace AdminDashboard.Models
         [Required, StringLength(255)]
         public string MatKhau { get; set; }
 
-        [Required, StringLength(100)]
+        [Required(ErrorMessage = "Email chưa được điền...")]
         public string Email { get; set; }
 
         [Required, StringLength(100)]

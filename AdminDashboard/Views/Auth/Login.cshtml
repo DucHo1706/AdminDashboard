@@ -1,5 +1,6 @@
 ﻿@model AdminDashboard.Models.Login.DangNhap
 @{
+    Layout = "~/Views/Shared/_Layout_User.cshtml";
     ViewData["Title"] = "Đăng nhập tài khoản";
 }
 <!DOCTYPE html>
@@ -351,7 +352,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <form asp-action="Login" method="post" novalidate class="form">
-                        <div class="title">Đăng nhập</div>
+                        <div class="title text-center">Đăng nhập</div>
 
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
@@ -361,7 +362,7 @@
 
                         <div class="frg_pss">
                             <label asp-for="MatKhau" class="label_input">Mật khẩu</label>
-                            <a href="#">Quên mật khẩu?</a>
+                            <a href="/Auth/ForgotPass">Quên mật khẩu?</a>
                         </div>
                         <div class="password-container">
                             <input asp-for="MatKhau" spellcheck="false" class="input" type="password" id="password-input" placeholder="Nhập mật khẩu..." />

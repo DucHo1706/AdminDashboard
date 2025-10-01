@@ -1,0 +1,52 @@
+﻿
+@model AdminDashboard.Models.NguoiDung
+
+@{
+    ViewData["Title"] = "Chỉnh sửa thông tin tài khoản";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Chỉnh sửa thông tin tài khoản</h2>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form asp-action="EditAccount" method="post">
+                <div class="row">
+                    <div class="col-md-6 mx-auto">
+                        <div class="mb-3">
+                            <label asp-for="TenDangNhap" class="form-label">Tên đăng nhập</label>
+                            <input asp-for="TenDangNhap" class="form-control" readonly />
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="HoTen" class="form-label">Họ tên</label>
+                            <input asp-for="HoTen" class="form-control" />
+                            <span asp-validation-for="HoTen" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">Email</label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="SoDienThoai" class="form-label">Số điện thoại</label>
+                            <input asp-for="SoDienThoai" class="form-control" />
+                            <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="NgaySinh" class="form-label">Ngày sinh</label>
+                            <input asp-for="NgaySinh" class="form-control" type="date" />
+                            <span asp-validation-for="NgaySinh" class="text-danger"></span>
+                        </div>
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-success me-2">Lưu</button>
+                            <a asp-controller="Home_User" asp-action="Account" class="btn btn-secondary">Hủy</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
