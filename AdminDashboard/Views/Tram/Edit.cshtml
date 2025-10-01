@@ -4,16 +4,281 @@
 
 <form asp-action="Edit">
     <input type="hidden" asp-for="IdTram" />
+
     <div class="form-group">
         <label asp-for="TenTram" class="control-label"></label>
         <input asp-for="TenTram" class="form-control" />
         <span asp-validation-for="TenTram" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <label asp-for="DiaChiTram" class="control-label"></label>
-        <input asp-for="DiaChiTram" class="form-control" />
-        <span asp-validation-for="DiaChiTram" class="text-danger"></span>
+        <label class="control-label">Tỉnh/Thành phố</label>
+        <select id="province" class="form-control" required>
+            <option value="">Chọn Tỉnh/Thành phố</option>
+        </select>
+        @Html.HiddenFor(model => model.Tinh, new { id = "hiddenTinh" })
+        <span class="text-danger" id="provinceValidation" style="display:none;">Vui lòng chọn tỉnh/thành phố</span>
     </div>
-    <button type="submit" class="btn btn-success">Cập nhật</button> |
-    <a asp-action="Index">Quay lại</a>
+
+    <div class="form-group">
+        <label class="control-label">Quận/Huyện</label>
+        <select id="district" class="form-control" disabled required>
+            <option value="">Chọn Quận/Huyện</option>
+        </select>
+        @Html.HiddenFor(model => model.Huyen, new { id = "hiddenHuyen" })
+        <span class="text-danger" id="districtValidation" style="display:none;">Vui lòng chọn quận/huyện</span>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label">Phường/Xã</label>
+        <select id="ward" class="form-control" disabled required>
+            <option value="">Chọn Phường/Xã</option>
+        </select>
+        @Html.HiddenFor(model => model.Xa, new { id = "hiddenXa" })
+        <span class="text-danger" id="wardValidation" style="display:none;">Vui lòng chọn phường/xã</span>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label">Địa chỉ chi tiết (Số nhà, tên đường)</label>
+        <input id="detailAddress" class="form-control" required />
+        <span class="text-danger" id="detailAddressValidation" style="display:none;">Vui lòng nhập địa chỉ chi tiết</span>
+    </div>
+
+    <!-- Hidden để lưu địa chỉ đầy đủ -->
+    @Html.HiddenFor(model => model.DiaChiTram, new { id = "fullAddress" })
+
+    <div class="form-group mt-3">
+        <button type="submit" class="btn btn-success" onclick="return validateForm()">Cập nhật</button>
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </div>
 </form>
+
+@section Scripts {
+    <script>
+        const provinceApi = 'https://provinces.open-api.vn/api/p/';
+        const districtApi = 'https://provinces.open-api.vn/api/d/';
+        const wardApi = 'https://provinces.open-api.vn/api/w/';
+
+        // Biến toàn cục để lưu dữ liệu
+        let allProvinces = [];
+        let allDistricts = [];
+        let allWards = [];
+
+        // Hàm tách địa chỉ cũ
+        function parseOldAddress() {
+            const oldAddress = "@Html.Raw(Model.DiaChiTram)";
+            const oldTinh = "@Html.Raw(Model.Tinh)";
+            const oldHuyen = "@Html.Raw(Model.Huyen)";
+            const oldXa = "@Html.Raw(Model.Xa)";
+
+            // Ưu tiên sử dụng các trường riêng biệt nếu có
+            if (oldTinh && oldHuyen && oldXa) {
+                return {
+                    province: oldTinh,
+                    district: oldHuyen,
+                    ward: oldXa,
+                    detail: oldAddress.replace(`${oldXa}, ${oldHuyen}, ${oldTinh}`, '').replace(/,+$/, '').trim()
+                };
+            }
+
+            // Fallback: phân tích từ DiaChiTram
+            const parts = oldAddress.split(',').map(part => part.trim());
+            if (parts.length >= 3) {
+                return {
+                    province: parts[parts.length - 1],
+                    district: parts[parts.length - 2],
+                    ward: parts[parts.length - 3],
+                    detail: parts.slice(0, parts.length - 3).join(', ')
+                };
+            }
+
+            return { province: '', district: '', ward: '', detail: oldAddress };
+        }
+
+        // Load tất cả tỉnh/thành phố
+        async function loadProvinces() {
+            try {
+                const response = await fetch(provinceApi);
+                allProvinces = await response.json();
+                const provinceSelect = document.getElementById('province');
+
+                allProvinces.forEach(province => {
+                    const option = document.createElement('option');
+                    option.value = province.code;
+                    option.textContent = province.name;
+                    provinceSelect.appendChild(option);
+                });
+
+                // Chọn tỉnh cũ nếu có
+                const oldAddress = parseOldAddress();
+                if (oldAddress.province) {
+                    const oldProvince = allProvinces.find(p => p.name === oldAddress.province);
+                    if (oldProvince) {
+                        provinceSelect.value = oldProvince.code;
+                        await loadDistricts(oldProvince.code, oldAddress.district);
+                    }
+                }
+
+                // Điền địa chỉ chi tiết
+                document.getElementById('detailAddress').value = oldAddress.detail || '';
+                combineAddress();
+            } catch (error) {
+                console.error('Lỗi khi tải tỉnh/thành phố:', error);
+            }
+        }
+
+        // Load quận/huyện
+        async function loadDistricts(provinceCode, selectedDistrictName = '') {
+            try {
+                const response = await fetch(`${provinceApi}${provinceCode}?depth=2`);
+                const province = await response.json();
+                const districtSelect = document.getElementById('district');
+
+                districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                districtSelect.disabled = false;
+                allDistricts = province.districts;
+
+                allDistricts.forEach(district => {
+                    const option = document.createElement('option');
+                    option.value = district.code;
+                    option.textContent = district.name;
+                    districtSelect.appendChild(option);
+                });
+
+                // Chọn huyện cũ nếu có
+                if (selectedDistrictName) {
+                    const oldDistrict = allDistricts.find(d => d.name === selectedDistrictName);
+                    if (oldDistrict) {
+                        districtSelect.value = oldDistrict.code;
+                        await loadWards(oldDistrict.code, parseOldAddress().ward);
+                    }
+                }
+
+                combineAddress();
+            } catch (error) {
+                console.error('Lỗi khi tải quận/huyện:', error);
+            }
+        }
+
+        // Load phường/xã
+        async function loadWards(districtCode, selectedWardName = '') {
+            try {
+                const response = await fetch(`${districtApi}${districtCode}?depth=2`);
+                const district = await response.json();
+                const wardSelect = document.getElementById('ward');
+
+                wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                wardSelect.disabled = false;
+                allWards = district.wards;
+
+                allWards.forEach(ward => {
+                    const option = document.createElement('option');
+                    option.value = ward.code;
+                    option.textContent = ward.name;
+                    wardSelect.appendChild(option);
+                });
+
+                // Chọn xã cũ nếu có
+                if (selectedWardName) {
+                    const oldWard = allWards.find(w => w.name === selectedWardName);
+                    if (oldWard) {
+                        wardSelect.value = oldWard.code;
+                    }
+                }
+
+                combineAddress();
+            } catch (error) {
+                console.error('Lỗi khi tải phường/xã:', error);
+            }
+        }
+
+        // Hàm kết hợp địa chỉ
+        function combineAddress() {
+            const provinceText = document.getElementById('province').selectedOptions[0]?.textContent || '';
+            const districtText = document.getElementById('district').selectedOptions[0]?.textContent || '';
+            const wardText = document.getElementById('ward').selectedOptions[0]?.textContent || '';
+            const detailAddress = document.getElementById('detailAddress').value;
+
+            // Cập nhật các trường ẩn
+            document.getElementById('hiddenTinh').value = provinceText;
+            document.getElementById('hiddenHuyen').value = districtText;
+            document.getElementById('hiddenXa').value = wardText;
+
+            const fullAddress = [detailAddress, wardText, districtText, provinceText]
+                .filter(part => part && part.trim() !== '')
+                .join(', ');
+            document.getElementById('fullAddress').value = fullAddress;
+        }
+
+        // Hàm validate form
+        function validateForm() {
+            let isValid = true;
+
+            // Reset validation messages
+            document.getElementById('provinceValidation').style.display = 'none';
+            document.getElementById('districtValidation').style.display = 'none';
+            document.getElementById('wardValidation').style.display = 'none';
+            document.getElementById('detailAddressValidation').style.display = 'none';
+
+            // Validate province
+            if (!document.getElementById('province').value) {
+                document.getElementById('provinceValidation').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate district
+            if (!document.getElementById('district').value) {
+                document.getElementById('districtValidation').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate ward
+            if (!document.getElementById('ward').value) {
+                document.getElementById('wardValidation').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate detail address
+            if (!document.getElementById('detailAddress').value.trim()) {
+                document.getElementById('detailAddressValidation').style.display = 'block';
+                isValid = false;
+            }
+
+            if (!isValid) {
+                alert('Vui lòng điền đầy đủ thông tin địa chỉ.');
+            }
+
+            return isValid;
+        }
+
+        // Khởi tạo
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProvinces();
+
+            document.getElementById('province').addEventListener('change', e => {
+                if (e.target.value) {
+                    loadDistricts(e.target.value);
+                } else {
+                    document.getElementById('district').disabled = true;
+                    document.getElementById('ward').disabled = true;
+                    document.getElementById('hiddenHuyen').value = '';
+                    document.getElementById('hiddenXa').value = '';
+                    combineAddress();
+                }
+            });
+
+            document.getElementById('district').addEventListener('change', e => {
+                if (e.target.value) {
+                    loadWards(e.target.value);
+                } else {
+                    document.getElementById('ward').disabled = true;
+                    document.getElementById('hiddenXa').value = '';
+                    combineAddress();
+                }
+            });
+
+            document.getElementById('ward').addEventListener('change', combineAddress);
+            document.getElementById('detailAddress').addEventListener('input', combineAddress);
+        });
+    </script>
+}

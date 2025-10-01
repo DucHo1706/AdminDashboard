@@ -76,7 +76,11 @@ namespace AdminDashboard.Controllers
 			}
 
 			// Nếu model không hợp lệ, tải lại dropdown và hiển thị lại form
-			PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
+			ViewData["LoTrinhId"] = new SelectList(_context.LoTrinh, "LoTrinhId", "TramDi", chuyenXe.LoTrinhId);
+				var loi = ModelState.Values.SelectMany(v => v.Errors)
+				.Select(e => e.ErrorMessage)
+				.ToList();
+			Console.WriteLine("Loi :" +  loi);
 			return View(chuyenXe);
 		}
 
