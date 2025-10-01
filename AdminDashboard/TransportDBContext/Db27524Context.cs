@@ -22,6 +22,8 @@ namespace AdminDashboard.TransportDBContext
         public DbSet<Ve> Ve { get; set; }
         public DbSet<BaiViet> BaiViet { get; set; }
         public DbSet<Menu> Menu { get; set; }
+        public object LoTrinhId { get; internal set; }
+        public object XeId { get; internal set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

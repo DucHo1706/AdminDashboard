@@ -43,24 +43,36 @@ namespace AdminDashboard.Controllers
         // GET: ChuyenXe/Create
         public IActionResult Create()
         {
-            ViewBag.LoTrinhId = new SelectList(_context.LoTrinh, "Id", "TenLoTrinh");
-            ViewBag.XeId = new SelectList(_context.Xe, "Id", "BienSoXe");
+            // Dùng hàm dùng chung để luôn đổ ra đủ các key cần thiết cho View
+            PopulateDropdownLists();
             return View();
         }
 
         // POST: ChuyenXe/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("...")] ChuyenXe chuyenXe)
+        public async Task<IActionResult> Create([Bind("ChuyenId,LoTrinhId,XeId,NgayDi,GioDi,GioDenDuKien,TrangThai")] ChuyenXe chuyenXe)
         {
+            // Loại bỏ navigation để tránh ModelState lỗi
+            ModelState.Remove("LoTrinh");
+            ModelState.Remove("Xe");
+
+            if (string.IsNullOrWhiteSpace(chuyenXe.ChuyenId))
+            {
+                // ChuyenId tối đa 10 ký tự theo cấu hình -> dùng "CX" + 8 ký tự
+                chuyenXe.ChuyenId = "CX" + Guid.NewGuid().ToString("N").Substring(0, 8);
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(chuyenXe);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Đã tạo chuyến xe thành công.";
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.LoTrinhId = new SelectList(_context.LoTrinh, "LoTrinhId", "TenLoTrinh", chuyenXe.LoTrinhId);
-            ViewBag.XeId = new SelectList(_context.Xe, "XeId", "BienSo", chuyenXe.XeId);
+
+            // Khi ModelState không hợp lệ, cần nạp lại dropdowns
+            PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
 
             return View(chuyenXe);
         }
@@ -90,11 +102,12 @@ namespace AdminDashboard.Controllers
 
 			if (ModelState.IsValid)
 			{
-				try
-				{
-					_context.Update(chuyenXe);
-					await _context.SaveChangesAsync();
-				}
+                try
+                {
+                    _context.Update(chuyenXe);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Đã cập nhật chuyến xe.";
+                }
 				catch (DbUpdateConcurrencyException)
 				{
 					if (!_context.ChuyenXe.Any(e => e.ChuyenId == chuyenXe.ChuyenId))
@@ -133,17 +146,27 @@ namespace AdminDashboard.Controllers
 			if (chuyenXe != null)
 			{
 				_context.ChuyenXe.Remove(chuyenXe);
-				await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Đã xoá chuyến xe.";
 			}
 			return RedirectToAction(nameof(Index));
 		}
 
 		// Hàm hỗ trợ để lấy dữ liệu cho dropdown, tránh lặp code
-		private void PopulateDropdownLists(object selectedLoTrinh = null, object selectedXe = null)
-		{
-			// Giả định Model LoTrinh có thuộc tính TenLoTrinh và Xe có thuộc tính BienSoXe để hiển thị
-			ViewData["LoTrinhId"] = new SelectList(_context.Set<LoTrinh>(), "LoTrinhId", "TenLoTrinh", selectedLoTrinh);
-			ViewData["XeId"] = new SelectList(_context.Set<Xe>(), "XeId", "BienSoXe", selectedXe);
-		}
+        private void PopulateDropdownLists(object? selectedLoTrinh = null, object? selectedXe = null)
+        {
+            var loTrinhList = _context.LoTrinh
+                .Select(lt => new { lt.LoTrinhId, Ten = lt.TramDi + " -> " + lt.TramToi })
+                .ToList();
+            var xeList = _context.Xe
+                .Select(x => new { x.XeId, Ten = x.BienSoXe })
+                .ToList();
+
+            // Cung cấp cả hai bộ key để phù hợp với các View hiện có
+            ViewData["LoTrinhId"] = new SelectList(loTrinhList, "LoTrinhId", "Ten", selectedLoTrinh);
+            ViewData["XeId"] = new SelectList(xeList, "XeId", "Ten", selectedXe);
+            ViewBag.LoTrinhList = new SelectList(loTrinhList, "LoTrinhId", "Ten", selectedLoTrinh);
+            ViewBag.XeList = new SelectList(xeList, "XeId", "Ten", selectedXe);
+        }
 	}
 }
