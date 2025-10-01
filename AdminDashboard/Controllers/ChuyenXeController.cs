@@ -40,48 +40,34 @@ namespace AdminDashboard.Controllers
 			return View(chuyenXe);
 		}
 
-		// GET: ChuyenXe/Create
-		public IActionResult Create()
-		{
-			// Chuẩn bị dữ liệu cho các dropdown list
-			PopulateDropdownLists();
-			return View();
-		}
+        // GET: ChuyenXe/Create
+        public IActionResult Create()
+        {
+            ViewBag.LoTrinhId = new SelectList(_context.LoTrinh, "Id", "TenLoTrinh");
+            ViewBag.XeId = new SelectList(_context.Xe, "Id", "BienSoXe");
+            return View();
+        }
 
-		// POST: ChuyenXe/Create
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create([Bind("LoTrinhId,XeId,NgayDi,GioDi,GioDenDuKien,TrangThai")] ChuyenXe chuyenXe)
-		{
-			// Bỏ qua validation cho các thuộc tính không được binding từ form
-			ModelState.Remove("ChuyenId");
-			ModelState.Remove("LoTrinh");
-			ModelState.Remove("Xe");
+        // POST: ChuyenXe/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("...")] ChuyenXe chuyenXe)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(chuyenXe);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            ViewBag.LoTrinhId = new SelectList(_context.LoTrinh, "LoTrinhId", "TenLoTrinh", chuyenXe.LoTrinhId);
+            ViewBag.XeId = new SelectList(_context.Xe, "XeId", "BienSo", chuyenXe.XeId);
 
-			if (ModelState.IsValid)
-			{
-				// Logic tự động sinh Id mới
-				var lastItem = await _context.ChuyenXe.OrderByDescending(c => c.ChuyenId).FirstOrDefaultAsync();
-				string newId = "C000000001";
-				if (lastItem != null)
-				{
-					int lastNumber = int.Parse(lastItem.ChuyenId.Substring(1));
-					newId = "C" + (lastNumber + 1).ToString("D9"); // D9 để đảm bảo có 9 chữ số
-				}
-				chuyenXe.ChuyenId = newId;
+            return View(chuyenXe);
+        }
 
-				_context.Add(chuyenXe);
-				await _context.SaveChangesAsync();
-				return RedirectToAction(nameof(Index));
-			}
 
-			// Nếu model không hợp lệ, tải lại dropdown và hiển thị lại form
-			PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
-			return View(chuyenXe);
-		}
-
-		// GET: ChuyenXe/Edit/5
-		public async Task<IActionResult> Edit(string id)
+        // GET: ChuyenXe/Edit/5
+        public async Task<IActionResult> Edit(string id)
 		{
 			if (id == null) return NotFound();
 

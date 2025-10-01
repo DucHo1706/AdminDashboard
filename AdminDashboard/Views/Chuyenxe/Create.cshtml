@@ -14,15 +14,18 @@
 
             <div class="form-group mb-3">
                 <label asp-for="LoTrinhId" class="control-label">Lộ Trình</label>
-                <select asp-for="LoTrinhId" class="form-control" asp-items="ViewBag.LoTrinhId">
+                @* Thêm asp-items và trỏ tới ViewBag.LoTrinhList *@
+                <select asp-for="LoTrinhId" class="form-control" asp-items="ViewBag.LoTrinhList">
                     <option value="">-- Chọn Lộ Trình --</option>
                 </select>
                 <span asp-validation-for="LoTrinhId" class="text-danger"></span>
             </div>
 
+            @* Sửa khối Xe *@
             <div class="form-group mb-3">
                 <label asp-for="XeId" class="control-label">Xe</label>
-                <select asp-for="XeId" class="form-control" asp-items="ViewBag.XeId">
+                @* Sửa lại asp-items trỏ tới ViewBag.XeList cho đúng *@
+                <select asp-for="XeId" class="form-control" asp-items="ViewBag.XeList">
                     <option value="">-- Chọn Xe --</option>
                 </select>
                 <span asp-validation-for="XeId" class="text-danger"></span>
