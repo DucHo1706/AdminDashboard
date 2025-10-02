@@ -43,24 +43,32 @@ namespace AdminDashboard.Controllers
         // GET: ChuyenXe/Create
         public IActionResult Create()
         {
-            // Dùng hàm dùng chung để luôn đổ ra đủ các key cần thiết cho View
+
             PopulateDropdownLists();
+
+            var loTrinhList = _context.LoTrinh.ToList();
+            var xeList = _context.Xe.ToList();
+            ViewBag.LoTrinhId = new SelectList(_context.LoTrinh, "Id", "TenLoTrinh");
+            ViewBag.XeId = new SelectList(_context.Xe, "Id", "BienSoXe");
+
             return View();
         }
 
         // POST: ChuyenXe/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ChuyenId,LoTrinhId,XeId,NgayDi,GioDi,GioDenDuKien,TrangThai")] ChuyenXe chuyenXe)
+        public async Task<IActionResult> Create([Bind("LoTrinhId,XeId,NgayDi,GioDi,GioDenDuKien,TrangThai")] ChuyenXe chuyenXe)
         {
             // Loại bỏ navigation để tránh ModelState lỗi
             ModelState.Remove("LoTrinh");
             ModelState.Remove("Xe");
+            ModelState.Remove("ChuyenId");
+
 
             if (string.IsNullOrWhiteSpace(chuyenXe.ChuyenId))
             {
                 // ChuyenId tối đa 10 ký tự theo cấu hình -> dùng "CX" + 8 ký tự
-                chuyenXe.ChuyenId = "CX" + Guid.NewGuid().ToString("N").Substring(0, 8);
+                chuyenXe.ChuyenId =  Guid.NewGuid().ToString("N").Substring(0, 8);
             }
 
             if (ModelState.IsValid)
