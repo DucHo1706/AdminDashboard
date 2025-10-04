@@ -16,6 +16,119 @@ namespace AdminDashboard.Controllers
         {
             _context = context;
         }
+        //ACCOUNT
+        public async Task<IActionResult> Account()
+        {
+            // Get the current user's UserId from claims
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                // If user is not authenticated, redirect to login
+                return RedirectToAction("Login", "Auth");
+            }
+
+            // Fetch the user from the database
+            var user = await _context.NguoiDung
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null)
+            {
+                // Handle case where user is not found
+                return View(new NguoiDung()); // Pass an empty model to avoid null reference in view
+            }
+
+            // Fetch the user's role
+            var role = await (from ur in _context.UserRole
+                              join r in _context.VaiTro on ur.RoleId equals r.RoleId
+                              where ur.UserId == user.UserId
+                              select r.TenVaiTro).FirstOrDefaultAsync() ?? "Khach";
+
+            // Pass the role to the view via ViewData
+            ViewData["VaiTro"] = role;
+
+            // Pass the user model to the view
+            return View(user);
+        }
+
+
+        //EditAccount
+        //EditAccount
+        // GET: EditAccount
+        [HttpGet]
+        public async Task<IActionResult> EditAccount()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var user = await _context.NguoiDung
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
+        }
+
+        // POST: EditAccount
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditAccount(NguoiDung model)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var user = await _context.NguoiDung
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                // Cập nhật thông tin User
+                user.HoTen = model.HoTen;
+                user.Email = model.Email;
+                user.SoDienThoai = model.SoDienThoai;
+                user.NgaySinh = model.NgaySinh;
+
+                // Nếu có KhachHang mapping thì update luôn
+                var khachHang = await _context.KhachHang.FirstOrDefaultAsync(kh => kh.UserId == userId);
+                if (khachHang != null)
+                {
+                    khachHang.TenKhachHang = model.HoTen;
+                    khachHang.DiaChiMail = model.Email;
+                    khachHang.SoDienThoai = model.SoDienThoai;
+                    khachHang.NgaySinh = model.NgaySinh;
+                }
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Cập nhật thông tin thành công!";
+                    return RedirectToAction("Account");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"Lỗi khi lưu thông tin: {ex.Message}");
+                }
+            }
+
+            return View(model);
+        }
+
         public IActionResult ForgotPass()
         {
             return View();
@@ -71,7 +184,7 @@ namespace AdminDashboard.Controllers
             // Chuyển hướng dựa trên vai trò
             if (role == "Admin")
             {
-                return RedirectToAction("Dashboard", "Admin");
+                return RedirectToAction("Index", "Home");
             }
             else if (role == "KhachHang")
             {
