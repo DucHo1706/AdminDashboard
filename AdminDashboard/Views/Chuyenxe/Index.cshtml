@@ -27,7 +27,7 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.LoTrinh.LoTrinhId)
+                    @(item.LoTrinh?.TramDiNavigation?.TenTram) -> @(item.LoTrinh?.TramToiNavigation?.TenTram)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Xe.BienSoXe)

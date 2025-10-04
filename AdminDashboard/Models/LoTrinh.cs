@@ -7,21 +7,30 @@ namespace AdminDashboard.Models
     {
         [Key]
         [StringLength(10)]
+        [Display(Name = "Mã Lộ Trình")]
         public string LoTrinhId { get; set; }
 
-        [Required, StringLength(10)]
+        [Required(ErrorMessage = "Trạm đi là bắt buộc")]
+        [StringLength(10)]
+        [Display(Name = "Trạm Đi")]
         public string TramDi { get; set; }
 
-        [Required, StringLength(10)]
+        [Required(ErrorMessage = "Trạm đến là bắt buộc")]
+        [StringLength(10)]
+        [Display(Name = "Trạm Đến")]
         public string TramToi { get; set; }
 
-        [Column(TypeName = "numeric(10,2)")]
+        [Display(Name = "Giá Vé Cố Định")]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal? GiaVeCoDinh { get; set; }
 
-        [ForeignKey(nameof(TramDi))]
-        public Tram TramDiNavigation { get; set; }
+        [ForeignKey("TramDi")]
+        [Display(Name = "Trạm Đi")]
+        public virtual Tram TramDiNavigation { get; set; }
 
-        [ForeignKey(nameof(TramToi))]
-        public Tram TramToiNavigation { get; set; }
+        [ForeignKey("TramToi")]
+        [Display(Name = "Trạm Đến")]
+        public virtual Tram TramToiNavigation { get; set; }
+       
     }
 }

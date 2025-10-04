@@ -18,15 +18,19 @@ namespace AdminDashboard.Controllers
 		// GET: ChuyenXe
 		public async Task<IActionResult> Index()
 		{
-			// Dùng Include để lấy thông tin của Lộ trình và Xe liên quan
-			var chuyenXes = _context.ChuyenXe
-				.Include(c => c.LoTrinh)
-				.Include(c => c.Xe);
-			return View(await chuyenXes.ToListAsync());
-		}
+            var chuyenXes = await _context.ChuyenXe
+         .Include(c => c.LoTrinh)
+             .ThenInclude(lt => lt.TramDiNavigation)
+         .Include(c => c.LoTrinh)
+             .ThenInclude(lt => lt.TramToiNavigation)
+         .Include(c => c.Xe)
+         .ToListAsync();
 
-		// GET: ChuyenXe/Details/5
-		public async Task<IActionResult> Details(string id)
+            return View(chuyenXes);
+        }
+
+        // GET: ChuyenXe/Details/5
+        public async Task<IActionResult> Details(string id)
 		{
 			if (id == null) return NotFound();
 
@@ -43,9 +47,8 @@ namespace AdminDashboard.Controllers
 		// GET: ChuyenXe/Create
 		public IActionResult Create()
 		{
-			// Chuẩn bị dữ liệu cho các dropdown list
 			PopulateDropdownLists();
-			return View();
+            return View();
 		}
 
 		// POST: ChuyenXe/Create
@@ -58,27 +61,20 @@ namespace AdminDashboard.Controllers
 			ModelState.Remove("LoTrinh");
 			ModelState.Remove("Xe");
 
-			if (ModelState.IsValid)
-			{
-				// Logic tự động sinh Id mới
-				var lastItem = await _context.ChuyenXe.OrderByDescending(c => c.ChuyenId).FirstOrDefaultAsync();
-				string newId = "C000000001";
-				if (lastItem != null)
-				{
-					int lastNumber = int.Parse(lastItem.ChuyenId.Substring(1));
-					newId = "C" + (lastNumber + 1).ToString("D9"); // D9 để đảm bảo có 9 chữ số
-				}
-				chuyenXe.ChuyenId = newId;
+            if (ModelState.IsValid)
+            {
+                chuyenXe.ChuyenId = Guid.NewGuid().ToString("N").Substring(0, 8);
+                _context.Add(chuyenXe);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Đã tạo chuyến xe thành công.";
+                return RedirectToAction(nameof(Index));
+            }
 
-				_context.Add(chuyenXe);
-				await _context.SaveChangesAsync();
-				return RedirectToAction(nameof(Index));
-			}
+            // Khi ModelState không hợp lệ, cần nạp lại dropdowns
+            PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
 
-			// Nếu model không hợp lệ, tải lại dropdown và hiển thị lại form
-			PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
-			return View(chuyenXe);
-		}
+            return View(chuyenXe);
+        }
 
 		// GET: ChuyenXe/Edit/5
 		public async Task<IActionResult> Edit(string id)
@@ -152,12 +148,24 @@ namespace AdminDashboard.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
-		// Hàm hỗ trợ để lấy dữ liệu cho dropdown, tránh lặp code
-		private void PopulateDropdownLists(object selectedLoTrinh = null, object selectedXe = null)
-		{
-			// Giả định Model LoTrinh có thuộc tính TenLoTrinh và Xe có thuộc tính BienSoXe để hiển thị
-			ViewData["LoTrinhId"] = new SelectList(_context.Set<LoTrinh>(), "LoTrinhId", "TenLoTrinh", selectedLoTrinh);
-			ViewData["XeId"] = new SelectList(_context.Set<Xe>(), "XeId", "BienSoXe", selectedXe);
-		}
-	}
+        // Hàm hỗ trợ để lấy dữ liệu cho dropdown, tránh lặp code
+        private void PopulateDropdownLists(object selectedLoTrinh = null, object selectedXe = null)
+        {
+            var loTrinhs = _context.LoTrinh
+                .Include(lt => lt.TramDiNavigation)
+                .Include(lt => lt.TramToiNavigation)
+                .ToList();
+
+            var loTrinhDisplay = loTrinhs.Select(lt => new
+            {
+                LoTrinhId = lt.LoTrinhId,
+                Name = lt.TramDiNavigation.TenTram + " - " + lt.TramToiNavigation.TenTram
+            }).ToList();
+
+            ViewBag.LoTrinhId = new SelectList(loTrinhDisplay, "LoTrinhId", "Name", selectedLoTrinh);
+
+            ViewBag.XeId = new SelectList(_context.Xe.ToList(), "XeId", "BienSoXe", selectedXe);
+        }
+
+    }
 }
