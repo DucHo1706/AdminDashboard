@@ -260,5 +260,79 @@ namespace AdminDashboard.Controllers
 
             return RedirectToAction("Account", "Auth");
         }
+
+        // ==============================
+        //  HIỂN THỊ FORM ĐẶT LẠI MẬT KHẨU
+        // ==============================
+        [HttpGet]
+        public async Task<IActionResult> ResetPassword()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+                return RedirectToAction("Login", "Auth");
+
+            var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null)
+                return RedirectToAction("Login", "Auth");
+
+            ViewBag.Phone = user.SoDienThoai ?? "(Chưa cập nhật)";
+            return View();
+        }
+
+        // ==============================
+        //  XỬ LÝ CẬP NHẬT MẬT KHẨU
+        // ==============================
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(string oldPassword, string newPassword, string confirmPassword)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+                return RedirectToAction("Login", "Auth");
+
+            var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null)
+            {
+                ViewBag.Error = "Không tìm thấy người dùng.";
+                return View();
+            }
+
+            if (string.IsNullOrWhiteSpace(oldPassword) || string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
+            {
+                ViewBag.Error = "Vui lòng nhập đầy đủ thông tin.";
+                ViewBag.Phone = user.SoDienThoai;
+                return View();
+            }
+
+            if (user.MatKhau != oldPassword)
+            {
+                ViewBag.Error = "Mật khẩu cũ không đúng.";
+                ViewBag.Phone = user.SoDienThoai;
+                return View();
+            }
+
+            if (newPassword != confirmPassword)
+            {
+                ViewBag.Error = "Mật khẩu xác nhận không khớp.";
+                ViewBag.Phone = user.SoDienThoai;
+                return View();
+            }
+
+            user.MatKhau = newPassword;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                ViewBag.Success = "Đổi mật khẩu thành công!";
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = $"Lỗi khi lưu: {ex.Message}";
+            }
+
+            ViewBag.Phone = user.SoDienThoai;
+            return View();
+        }
     }
 }
