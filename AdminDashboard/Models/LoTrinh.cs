@@ -26,11 +26,11 @@ namespace AdminDashboard.Models
 
         [ForeignKey("TramDi")]
         [Display(Name = "Trạm Đi")]
-        public Tram TramDiNavigation { get; set; }
+        public virtual Tram TramDiNavigation { get; set; }
 
         [ForeignKey("TramToi")]
         [Display(Name = "Trạm Đến")]
-        public Tram TramToiNavigation { get; set; }
+        public virtual Tram TramToiNavigation { get; set; }
        
     }
 }
