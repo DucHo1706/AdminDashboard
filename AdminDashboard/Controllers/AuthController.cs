@@ -16,124 +16,81 @@ namespace AdminDashboard.Controllers
         {
             _context = context;
         }
-        //ACCOUNT
+
+        // ==============================
+        //  TRANG THÔNG TIN TÀI KHOẢN
+        // ==============================
         public async Task<IActionResult> Account()
         {
-            // Get the current user's UserId from claims
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
             if (string.IsNullOrEmpty(userId))
-            {
-                // If user is not authenticated, redirect to login
                 return RedirectToAction("Login", "Auth");
-            }
 
-            // Fetch the user from the database
-            var user = await _context.NguoiDung
-                .FirstOrDefaultAsync(u => u.UserId == userId);
-
+            var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null)
-            {
-                // Handle case where user is not found
-                return View(new NguoiDung()); // Pass an empty model to avoid null reference in view
-            }
+                return View(new NguoiDung());
 
-            // Fetch the user's role
             var role = await (from ur in _context.UserRole
                               join r in _context.VaiTro on ur.RoleId equals r.RoleId
                               where ur.UserId == user.UserId
                               select r.TenVaiTro).FirstOrDefaultAsync() ?? "Khach";
 
-            // Pass the role to the view via ViewData
             ViewData["VaiTro"] = role;
-
-            // Pass the user model to the view
             return View(user);
         }
 
-
-        //EditAccount
-        //EditAccount
-        // GET: EditAccount
-        [HttpGet]
-        public async Task<IActionResult> EditAccount()
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return RedirectToAction("Login", "Auth");
-            }
-
-            var user = await _context.NguoiDung
-                .FirstOrDefaultAsync(u => u.UserId == userId);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
-        }
-
-        // POST: EditAccount
+        // ==============================
+        //  CẬP NHẬT THÔNG TIN TÀI KHOẢN (AJAX)
+        // ==============================
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditAccount(NguoiDung model)
+        public async Task<IActionResult> EditAccount([FromForm] NguoiDung model)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
             if (string.IsNullOrEmpty(userId))
-            {
-                return RedirectToAction("Login", "Auth");
-            }
+                return Unauthorized(new { success = false, message = "Người dùng chưa đăng nhập." });
 
-            var user = await _context.NguoiDung
-                .FirstOrDefaultAsync(u => u.UserId == userId);
-
+            var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null)
+                return NotFound(new { success = false, message = "Không tìm thấy người dùng." });
+
+            // Cập nhật thông tin
+            user.HoTen = model.HoTen;
+            user.Email = model.Email;
+            user.SoDienThoai = model.SoDienThoai;
+            user.NgaySinh = model.NgaySinh;
+
+            // Cập nhật qua bảng KhachHang
+            var khachHang = await _context.KhachHang.FirstOrDefaultAsync(kh => kh.UserId == userId);
+            if (khachHang != null)
             {
-                return NotFound();
+                khachHang.TenKhachHang = model.HoTen;
+                khachHang.DiaChiMail = model.Email;
+                khachHang.SoDienThoai = model.SoDienThoai;
+                khachHang.NgaySinh = model.NgaySinh;
             }
 
-            if (ModelState.IsValid)
+            try
             {
-                // Cập nhật thông tin User
-                user.HoTen = model.HoTen;
-                user.Email = model.Email;
-                user.SoDienThoai = model.SoDienThoai;
-                user.NgaySinh = model.NgaySinh;
-
-                // Nếu có KhachHang mapping thì update luôn
-                var khachHang = await _context.KhachHang.FirstOrDefaultAsync(kh => kh.UserId == userId);
-                if (khachHang != null)
-                {
-                    khachHang.TenKhachHang = model.HoTen;
-                    khachHang.DiaChiMail = model.Email;
-                    khachHang.SoDienThoai = model.SoDienThoai;
-                    khachHang.NgaySinh = model.NgaySinh;
-                }
-
-                try
-                {
-                    await _context.SaveChangesAsync();
-                    TempData["SuccessMessage"] = "Cập nhật thông tin thành công!";
-                    return RedirectToAction("Account");
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Lỗi khi lưu thông tin: {ex.Message}");
-                }
+                await _context.SaveChangesAsync();
+                return Ok(new { success = true, message = "Cập nhật thông tin thành công!" });
             }
-
-            return View(model);
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = $"Lỗi khi lưu dữ liệu: {ex.Message}" });
+            }
         }
 
+        // ==============================
+        //  TRANG QUÊN MẬT KHẨU
+        // ==============================
         public IActionResult ForgotPass()
         {
             return View();
         }
 
+        // ==============================
+        //  ĐĂNG NHẬP
+        // ==============================
         [HttpGet]
         public IActionResult Login()
         {
@@ -167,7 +124,7 @@ namespace AdminDashboard.Controllers
             var role = await (from ur in _context.UserRole
                               join r in _context.VaiTro on ur.RoleId equals r.RoleId
                               where ur.UserId == user.UserId
-                              select r.TenVaiTro).FirstOrDefaultAsync() ?? "Khach";
+                              select r.TenVaiTro).FirstOrDefaultAsync() ?? "KhachHang";
 
             var claims = new List<Claim>
             {
@@ -181,21 +138,18 @@ namespace AdminDashboard.Controllers
 
             await HttpContext.SignInAsync("CookieAuth", claimsPrincipal);
 
-            // Chuyển hướng dựa trên vai trò
+            // Chuyển hướng theo vai trò
             if (role == "Admin")
-            {
                 return RedirectToAction("Index", "Home");
-            }
             else if (role == "KhachHang")
-            {
                 return RedirectToAction("Home_User", "Home_User");
-            }
             else
-            {
                 return RedirectToAction("Index", "Home");
-            }
         }
 
+        // ==============================
+        //  ĐĂNG XUẤT
+        // ==============================
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
@@ -203,6 +157,9 @@ namespace AdminDashboard.Controllers
             return RedirectToAction("Login", "Auth");
         }
 
+        // ==============================
+        //  ĐĂNG KÝ
+        // ==============================
         [HttpGet]
         public IActionResult Register()
         {
@@ -218,7 +175,6 @@ namespace AdminDashboard.Controllers
                 return View(model);
             }
 
-            // Kiểm tra tên đăng nhập hoặc email đã tồn tại
             if (await _context.NguoiDung.AnyAsync(u => u.TenDangNhap == model.TenDangNhap))
             {
                 ModelState.AddModelError("TenDangNhap", "Tên đăng nhập đã được sử dụng.");
@@ -231,7 +187,7 @@ namespace AdminDashboard.Controllers
                 return View(model);
             }
 
-            // Tạo UserId mới
+            // Tạo ID
             string newUserId;
             do
             {
@@ -242,7 +198,7 @@ namespace AdminDashboard.Controllers
             {
                 UserId = newUserId,
                 TenDangNhap = model.TenDangNhap,
-                MatKhau = model.MatKhau, // Lưu plaintext như yêu cầu (KHÔNG AN TOÀN)
+                MatKhau = model.MatKhau, // Chưa mã hoá (demo)
                 Email = model.Email,
                 HoTen = model.HoTen,
                 SoDienThoai = model.SoDienThoai,
@@ -252,7 +208,7 @@ namespace AdminDashboard.Controllers
 
             _context.NguoiDung.Add(user);
 
-            // Gán role mặc định là "KhachHang"
+            // Vai trò Khách hàng
             var roleId = await _context.VaiTro
                 .Where(r => r.TenVaiTro == "KhachHang")
                 .Select(r => r.RoleId)
@@ -260,7 +216,7 @@ namespace AdminDashboard.Controllers
 
             if (roleId == null)
             {
-                ModelState.AddModelError("", "Vai trò KhachHang không tồn tại trong hệ thống.");
+                ModelState.AddModelError("", "Vai trò 'KhachHang' không tồn tại trong hệ thống.");
                 return View(model);
             }
 
@@ -270,7 +226,7 @@ namespace AdminDashboard.Controllers
                 RoleId = roleId
             });
 
-            // Tạo KhachHang mapping
+            // Tạo khách hàng tương ứng
             string newKhId;
             do
             {
@@ -287,17 +243,9 @@ namespace AdminDashboard.Controllers
                 UserId = newUserId
             });
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Lỗi khi lưu dữ liệu: {ex.Message}");
-                return View(model);
-            }
+            await _context.SaveChangesAsync();
 
-            // Tự động đăng nhập sau đăng ký
+            // Đăng nhập luôn sau đăng ký
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserId),
@@ -310,7 +258,6 @@ namespace AdminDashboard.Controllers
 
             await HttpContext.SignInAsync("CookieAuth", claimsPrincipal);
 
-            // Chuyển hướng đến trang thông tin tài khoản
             return RedirectToAction("Account", "Auth");
         }
     }
