@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace AdminDashboard.Controllers
 {
@@ -200,5 +201,19 @@ namespace AdminDashboard.Controllers
             // Chuyển hướng đến trang thông tin tài khoản
             return RedirectToAction("Account", "Auth");
         }
+
+
+        [HttpGet]
+        public async Task<IActionResult> Account()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == userId);
+            return View(user);
+        }
+
+
+
+
+
     }
 }
