@@ -9,16 +9,18 @@
 
 <style>
     body {
-        background: #f6f8fa;
+        background: url('https://phongnhaexplorer.com/wp-content/uploads/2021/08/cay-thot-not-tinh-yeu-tay-ninh.jpg') no-repeat center center fixed;
+        background-size: cover;
+        height: 100vh;
         font-family: 'Segoe UI', Roboto, sans-serif;
     }
     .container {
         margin-top: 40px;
     }
     .sidebar {
-        background: #fff;
+        background-color: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         border-radius: 16px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         padding: 25px;
         position: sticky;
         top: 100px;
@@ -68,11 +70,12 @@
 
     /* thông tin tài khoản */
     .account-info-card {
-        background: #fff;
         border-radius: 20px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         padding: 40px 50px;
         transition: 0.3s ease;
+        background-color: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-top: 40px;
     }
 
     .account-info-card:hover {
@@ -81,12 +84,17 @@
     }
 
     .account-info-card h3 {
+        justify-content: center;
+        text-align: center;
         font-weight: 700;
         margin-bottom: 5px;
-        color: #333;
+            color: #ff6600;
     }
 
     .account-info-card small {
+        display: flex;
+        justify-content: center;
+        text-align: center;
         color: #888;
         font-size: 15px;
     }
@@ -214,15 +222,14 @@
         <div class="col-md-3">
             <div class="sidebar">
                 <h5 class="fw-bold mb-4 ms-2">TÀI KHOẢN CÁ NHÂN</h5>
-                <a href="#" class="menu-item active"><i class="bi bi-person-circle text-warning"></i>Thông tin tài khoản</a>
+                <a asp-controller="Auth" asp-action="Account" class="menu-item active"><i class="bi bi-person-circle text-warning"></i>Thông tin tài khoản</a>
                 <a href="#" class="menu-item"><i class="bi bi-clock-history text-info"></i>Lịch sử mua vé</a>
-                <a href="#" class="menu-item"><i class="bi bi-geo-alt-fill text-danger"></i>Địa chỉ của bạn</a>
                 <a asp-controller="Auth" asp-action="ResetPassword" class="menu-item"><i class="bi bi-key-fill text-warning"></i>Đặt lại mật khẩu</a>
                 <a asp-controller="Auth" asp-action="Logout" class="menu-item"><i class="bi bi-box-arrow-right text-danger"></i>Đăng xuất</a>
             </div>
         </div>
 
-        <div class="col-md-8">
+        <div class="col-md-8 ">
             <div class="account-info-card">
                 <h3>Thông tin tài khoản</h3>
                 <small>Quản lý thông tin hồ sơ để bảo mật tài khoản</small>
