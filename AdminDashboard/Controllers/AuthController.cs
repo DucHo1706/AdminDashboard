@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace AdminDashboard.Controllers
 {
@@ -261,6 +262,7 @@ namespace AdminDashboard.Controllers
             return RedirectToAction("Account", "Auth");
         }
 
+
         // ==============================
         //  HIỂN THỊ FORM ĐẶT LẠI MẬT KHẨU
         // ==============================
@@ -334,5 +336,8 @@ namespace AdminDashboard.Controllers
             ViewBag.Phone = user.SoDienThoai;
             return View();
         }
+
+
+        
     }
 }

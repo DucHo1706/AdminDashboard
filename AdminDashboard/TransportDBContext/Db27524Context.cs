@@ -230,6 +230,49 @@ namespace AdminDashboard.TransportDBContext
                 .HasKey(m => m.Id);
 
             base.OnModelCreating(modelBuilder);
+
+            // cập nhật thêm nha mấy em iu
+
+
+            modelBuilder.Entity<Xe>(entity =>
+            {
+                entity.HasKey(e => e.XeId);
+                entity.Property(e => e.XeId).HasMaxLength(10);
+                entity.Property(e => e.BienSoXe).HasMaxLength(20).IsRequired();
+                entity.Property(e => e.LoaiXeId).HasMaxLength(10).IsRequired();
+
+                // Quan hệ với LoaiXe
+                entity.HasOne(x => x.LoaiXe)
+                      .WithMany()
+                      .HasForeignKey(x => x.LoaiXeId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // Quan hệ với Ghe
+                entity.HasMany(x => x.DanhSachGhe)
+                      .WithOne(g => g.Xe)
+                      .HasForeignKey(g => g.XeId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Cấu hình cho entity Ghe
+            modelBuilder.Entity<Ghe>(entity =>
+            {
+                entity.HasKey(e => e.GheID);
+                entity.Property(e => e.GheID).HasMaxLength(10);
+                entity.Property(e => e.XeId).HasMaxLength(10).IsRequired();
+                entity.Property(e => e.SoGhe).HasMaxLength(6).IsRequired();
+                entity.Property(e => e.TrangThai).HasMaxLength(50).IsRequired();
+            });
+
+            // Cấu hình cho entity LoaiXe (nếu có)
+            modelBuilder.Entity<LoaiXe>(entity =>
+            {
+                entity.HasKey(e => e.LoaiXeId);
+                entity.Property(e => e.LoaiXeId).HasMaxLength(10);
+                // Thêm các cấu hình khác nếu cần
+            });
+
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

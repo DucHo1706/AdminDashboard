@@ -18,9 +18,7 @@ namespace AdminDashboard.Models
         [Required, StringLength(50)]
         public string TrangThai { get; set; }
 
-        [ForeignKey(nameof(XeId))]
-        public Xe Xe { get; set; }
-
-
+        [ForeignKey("XeId")]
+        public virtual Xe Xe { get; set; }
     }
 }
