@@ -20,10 +20,23 @@
         main {
             flex: 1 0 auto;
         }
-
         footer {
             flex-shrink: 0;
+            background-color: #343a40;
+            color: #ffffff;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
         }
+
+        footer a:hover {
+            color: #ffffff !important;
+        }
+
+        footer hr {
+            opacity: 0.2;
+        }
+
 
         .hover-text {
             color: black;
@@ -84,6 +97,7 @@
                 font-weight: bold;
                 text-decoration: underline;
             }
+
     </style>
 </head>
 <body>
@@ -99,7 +113,7 @@
                 <div class="collapse navbar-collapse" id="navbarContent" style="padding-right: 20px">
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link hover-text" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link hover-text" asp-area="" asp-controller="Home_User" asp-action="Home_User">Vé xe khách</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link hover-text" asp-area="" asp-controller="Home_User" asp-action="Home_User">Privacy</a>
@@ -148,11 +162,53 @@
         </main>
     </div>
 
-    <footer class="bg-dark text-white py-4 mt-auto">
-        <div class="container text-center">
-            &copy; 2025 - GoSix - <a class="text-light text-decoration-underline" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="bg-dark text-light pt-5 pb-3 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h6 class="fw-bold mb-3">Thông tin</h6>
+                    <ul class="list-unstyled text-secondary">
+                        <li><a href="#" class="text-secondary ">Điều khoản & Điều kiện</a></li>
+                        <li><a href="#" class="text-secondary ">Chính sách bảo mật</a></li>
+                        <li><a href="#" class="text-secondary ">Quy chế</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h6 class="fw-bold mb-3">Về GOSIX</h6>
+                    <ul class="list-unstyled text-secondary">
+                        <li><a href="#" class="text-secondary">Về chúng tôi</a></li>
+                        <li><a href="#" class="text-secondary">Liên hệ</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h6 class="fw-bold mb-3">ĐẶT</h6>
+                    <ul class="list-unstyled text-secondary">
+                        <li><a href="#" class="text-secondary">Nhà xe Limousine</a></li>
+                    </ul>
+                    <img src="~/css/Images/logo_web.png"
+                         alt="GOSIX Logo"
+                         class="img-fluid mt-3"
+                         style="max-width: 120px;">
+                </div>
+            </div>
+
+            <hr class="border-secondary">
+
+            <div class="text-center text-secondary small">
+                <p class="mb-1">© 2025 GoSix Vietnam All Rights Reserved</p>
+                <p class="mb-1">Công ty TNHH GoSix Việt Nam</p>
+                <p class="mb-1">
+                    Email: <a href="mailto:contact@gosix.vn" class="text-light text-decoration-none">contact@redbus.vn</a> |
+                    Liên hệ: <a href="tel:1900190024" class="text-light text-decoration-none">1900190024</a>
+                </p>
+                <p class="mb-0">
+                    Địa chỉ văn phòng: 806 Lê Quang Đạo, Xã Hóc Môn, TP. Hồ Chí Minh.<br>
+                    Số Giấy chứng nhận đăng ký doanh nghiệp: 03177772069 được cấp bởi Sở KH&ĐT TP.HCM lần đầu ngày 4/6/2023.
+                </p>
+            </div>
         </div>
     </footer>
+
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
