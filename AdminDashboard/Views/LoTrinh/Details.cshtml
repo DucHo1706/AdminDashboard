@@ -1,0 +1,42 @@
+﻿@model AdminDashboard.Models.LoTrinh
+
+@{
+    ViewData["Title"] = "Chi tiết Lộ Trình";
+}
+
+<h2>Chi tiết Lộ Trình</h2>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.LoTrinhId)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.LoTrinhId)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.TramDiNavigation.TenTram)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.TramDiNavigation.TenTram)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.TramToiNavigation.TenTram)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.TramToiNavigation.TenTram)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.GiaVeCoDinh)
+        </dt>
+        <dd class="col-sm-9">
+            @String.Format("{0:N0}", Model.GiaVeCoDinh) VNĐ
+
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.LoTrinhId" class="btn btn-warning">Sửa</a>
+    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+</div>

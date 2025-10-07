@@ -1,0 +1,28 @@
+﻿@* Vị trí: Views/ChuyenXe/Delete.cshtml *@
+@model AdminDashboard.Models.ChuyenXe
+
+@{
+    ViewData["Title"] = "Xóa Chuyến xe";
+}
+
+<h1>@ViewData["Title"]</h1>
+<h3 class="text-danger">Bạn có chắc chắn muốn xóa chuyến xe này không?</h3>
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">Lộ Trình</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.LoTrinh.LoTrinhId)</dd>
+
+        <dt class="col-sm-3">Xe</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Xe.BienSoXe)</dd>
+
+        <dt class="col-sm-3">Ngày Đi</dt>
+        <dd class="col-sm-9">@Model.NgayDi.ToString("dd/MM/yyyy")</dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="ChuyenId" />
+        <input type="submit" value="Xóa" class="btn btn-danger" /> |
+        <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+    </form>
+</div>
