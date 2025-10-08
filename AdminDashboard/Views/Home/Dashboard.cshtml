@@ -1,0 +1,64 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h2>📊 Thống kê hệ thống</h2>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Tổng Khách Hàng</div>
+            <div class="card-body">
+                <h3 class="card-title">@ViewBag.TongKhachHang</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Tổng Đơn Hàng</div>
+            <div class="card-body">
+                <h3 class="card-title">@ViewBag.TongDonHang</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-header">Doanh Thu Hôm Nay</div>
+            <div class="card-body">
+                <h3 class="card-title">@string.Format("{0:N0} VNĐ", ViewBag.DoanhThuHomNay)</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<h3>👥 Danh sách khách hàng</h3>
+<table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Mã KH</th>
+            <th>Tên Khách Hàng</th>
+            <th>Email</th>
+            <th>Số Điện Thoại</th>
+            <th>Ngày Sinh</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var kh in ViewBag.DanhSachKhachHang)
+        {
+            <tr>
+                <td>@kh.IDKhachHang</td>
+                <td>@kh.TenKhachHang</td>
+                <td>@kh.DiaChiMail</td>
+                <td>@kh.SoDienThoai</td>
+                <td>@(kh.NgaySinh != null ? ((DateTime)kh.NgaySinh).ToString("dd/MM/yyyy") : "-")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+@if (User.Identity.IsAuthenticated)
+{
+    <a asp-controller="Auth" asp-action="Logout" class="btn btn-link">Đăng xuất</a>
+}
+

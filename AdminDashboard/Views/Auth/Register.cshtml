@@ -1,0 +1,222 @@
+﻿@model AdminDashboard.Models.Login.DangKy
+@{
+    Layout = "~/Views/Shared/_Layout_User.cshtml";
+    ViewData["Title"] = "Đăng ký tài khoản";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <style>
+        body {
+            background: url('/css/images/background.png') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .register-container {
+            max-width: 600px;
+            margin: auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            background-color: #ff6200;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+            .form label {
+                position: relative;
+                width: 100%;
+            }
+
+            .form .input {
+                background-color: white;
+                color: black;
+                width: 100%;
+                padding: 15px 10px 5px 10px;
+                outline: 0;
+                border: 1px solid rgba(105, 105, 105, 0.397);
+                border-radius: 10px;
+                font-size: 15px;
+            }
+
+            .form label span {
+                position: absolute;
+                left: 12px;
+                top: 12px;
+                font-size: 14px;
+                color: #666;
+                transition: all 0.3s ease;
+                pointer-events: none;
+            }
+
+            .form .input:focus + span,
+            .form .input.filled + span {
+                color: #d30073;
+                top: -6px;
+                font-size: 12px;
+                font-weight: 600;
+                background: #fff;
+                padding: 0 5px;
+                border-radius: 5px;
+            }
+
+        .submit {
+            border: none;
+            outline: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 16px;
+            background-color: #FF6600;
+            color: #fff;
+            cursor: pointer;
+        }
+
+            .submit:hover {
+                background-color: #FF3333;
+            }
+
+        .signin {
+            text-align: center;
+            font-size: 14px;
+        }
+
+            .signin a {
+                color: #d30073;
+                text-decoration: none;
+            }
+
+                .signin a:hover {
+                    text-decoration: underline;
+                }
+
+        .text-danger {
+            font-size: 13px;
+            color: red;
+        }
+
+            /* Ẩn span text-danger khi rỗng */
+            .text-danger:empty {
+                display: none;
+            }
+
+        .flex {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="header">
+            <h2>Đăng Ký Tài Khoản</h2>
+        </div>
+        <form class="form" asp-action="Register" method="post">
+            <div class="flex">
+                <label>
+                    <input asp-for="HoTen" type="text" class="input" />
+                    <span>Họ và tên</span>
+                </label>
+            </div>
+            <span asp-validation-for="HoTen" class="text-danger"></span>
+            <div class="flex">
+                <label>
+                    <input asp-for="Email" type="email" class="input" />
+                    <span>Email</span>
+                </label>
+                <label>
+                    <input asp-for="NgaySinh"
+                           type="text"
+                           class="input"
+                           id="NgaySinh"
+                           placeholder="Ngày sinh" />
+                </label>
+            </div>
+            <span asp-validation-for="Email" class="text-danger"></span>
+            <span asp-validation-for="NgaySinh" class="text-danger"></span>
+
+            <label>
+                <input asp-for="MatKhau" type="password" class="input"
+                       pattern="^(?=\S*[^\w\s])\S{8,20}$"
+                       title="Mật khẩu phải dài 8-20 ký tự, chứa ít nhất 1 ký tự đặc biệt và không có khoảng trắng" />
+                <span>Mật khẩu</span>
+            </label>
+            <span asp-validation-for="MatKhau" class="text-danger"></span>
+
+            <label>
+                <input asp-for="XacNhanMatKhau" type="password" class="input"
+                       pattern="^(?=\S*[^\w\s])\S{8,20}$"
+                       title="Xác nhận mật khẩu phải dài 8-20 ký tự, chứa ít nhất 1 ký tự đặc biệt và không có khoảng trắng" />
+                <span>Xác nhận mật khẩu</span>
+            </label>
+            <span asp-validation-for="XacNhanMatKhau" class="text-danger"></span>
+            <label>
+                <input asp-for="SoDienThoai" type="tel" maxlength="10" pattern="[0-9]{10}" class="input" />
+                <span>Số điện thoại</span>
+            </label>
+            <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+
+            <button type="submit" class="submit">Đăng ký</button>
+            <p class="signin">Bạn đã có tài khoản? <a href="/Auth/Login">Đăng nhập</a></p>
+        </form>
+    </div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        flatpickr("#NgaySinh", {
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
+            maxDate: "today",
+            onChange: function (selectedDates, dateStr, instance) {
+                const input = document.getElementById("NgaySinh");
+                input.classList.toggle("filled", !!dateStr);
+            }
+        });
+
+        document.querySelectorAll('.input').forEach(input => {
+            input.addEventListener('input', function () {
+                this.classList.toggle('filled', this.value !== '');
+            });
+            if (input.value) {
+                input.classList.add('filled');
+            }
+        });
+
+        document.querySelectorAll('input[type="password"]').forEach(input => {
+            input.addEventListener('invalid', function (event) {
+                event.target.setCustomValidity('Mật khẩu phải dài 8-20 ký tự, chứa ít nhất 1 ký tự đặc biệt và không có khoảng trắng');
+            });
+            input.addEventListener('input', function (event) {
+                event.target.setCustomValidity('');
+            });
+        });
+
+        // Xóa thông báo lỗi khi focus vào input
+        document.querySelectorAll('.form .input').forEach(input => {
+            input.addEventListener('focus', function () {
+                document.querySelectorAll('.text-danger').forEach(errorSpan => {
+                    errorSpan.innerHTML = '';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

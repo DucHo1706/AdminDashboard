@@ -1,0 +1,21 @@
+﻿@model AdminDashboard.Models.Tram
+
+<h2>Chi tiết Trạm</h2>
+<div>
+    <h4>Trạm</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Mã Trạm</dt>
+        <dd class="col-sm-10">@Model.IdTram</dd>
+
+        <dt class="col-sm-2">Tên Trạm</dt>
+        <dd class="col-sm-10">@Model.TenTram</dd>
+
+        <dt class="col-sm-2">Địa Chỉ</dt>
+        <dd class="col-sm-10">@Model.DiaChiTram</dd>
+    </dl>
+</div>
+<p>
+    <a asp-action="Edit" asp-route-id="@Model.IdTram">Sửa</a> |
+    <a asp-action="Index">Quay lại</a>
+</p>

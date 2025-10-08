@@ -1,0 +1,37 @@
+﻿@model AdminDashboard.Models.Xe
+
+@{
+    ViewData["Title"] = "Sửa Thông Tin Xe";
+}
+
+<h1>Sửa Thông Tin Xe</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="XeId" />
+            <div class="form-group">
+                <label asp-for="BienSoXe" class="control-label">Biển số xe</label>
+                <input asp-for="BienSoXe" class="form-control" />
+                <span asp-validation-for="BienSoXe" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="LoaiXeId" class="control-label">Loại xe</label>
+                <select asp-for="LoaiXeId" class="form-control" asp-items="ViewBag.LoaiXeId"></select>
+                <span asp-validation-for="LoaiXeId" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-3">
+                <input type="submit" value="Lưu" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
