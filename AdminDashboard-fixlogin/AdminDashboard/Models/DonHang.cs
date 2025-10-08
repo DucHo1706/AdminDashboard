@@ -1,0 +1,33 @@
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace AdminDashboard.Models
+{
+    public class DonHang
+    {
+        [Key]
+        [StringLength(10)]
+        public string DonHangId { get; set; }
+
+        [Required, StringLength(10)]
+        public string IDKhachHang { get; set; }
+
+        [Required, StringLength(10)]
+        public string ChuyenId { get; set; }
+
+        [Required]
+        public DateTime NgayDat { get; set; }
+
+        [Required, Column(TypeName = "numeric(10,2)")]
+        public decimal TongTien { get; set; }
+
+        [Required, StringLength(50)]
+        public string TrangThaiThanhToan { get; set; }
+
+        [ForeignKey(nameof(IDKhachHang))]
+        public KhachHang KhachHang { get; set; }
+
+        [ForeignKey(nameof(ChuyenId))]
+        public ChuyenXe ChuyenXe { get; set; }
+    }
+}
