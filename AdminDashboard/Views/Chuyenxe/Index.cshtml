@@ -5,48 +5,98 @@
     ViewData["Title"] = "Danh sách Chuyến xe";
 }
 
-<h1>@ViewData["Title"]</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Tạo Chuyến xe mới</a>
-</p>
-
-<table class="table table-bordered table-hover">
-    <thead>
-        <tr class="table-primary">
-            <th>Lộ Trình</th>
-            <th>Biển Số Xe</th>
-            <th>Ngày Đi</th>
-            <th>Giờ Đi</th>
-            <th>Trạng Thái</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @(item.LoTrinh?.TramDiNavigation?.TenTram) -> @(item.LoTrinh?.TramToiNavigation?.TenTram)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Xe.BienSoXe)
-                </td>
-                <td>
-                    @item.NgayDi.ToString("dd/MM/yyyy")
-                </td>
-                <td>
-                    @item.GioDi.ToString(@"hh\:mm")
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.TrangThai)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-success">Sửa</a> |
-                    <a asp-action="Details" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-info">Chi tiết</a> |
-                    <a asp-action="Delete" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-danger">Xóa</a>
-                </td>
-            </tr>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        h1 {
+            text-align: center;
+            margin-top: 1em;
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #111827;
+            text-transform: uppercase;
+            margin-bottom: 0.5em;
         }
-    </tbody>
-</table>
+        p {
+            text-align: center;
+        }
+
+        button {
+            position: relative;
+            display: inline-block;
+            margin: 15px;
+            padding: 15px 30px;
+            text-align: center;
+            font-size: 18px;
+            letter-spacing: 1px;
+            text-decoration: none;
+            color: #FF6600;
+            background: transparent;
+            cursor: pointer;
+            transition: ease-out 0.5s;
+            border: 2px solid #FF6600;
+            border-radius: 10px;
+            box-shadow: inset 0 0 0 0 #FF6600;
+        }
+
+            button:hover {
+                color: white;
+                box-shadow: inset 0 -100px 0 0 #725AC1;
+            }
+
+            button:active {
+                transform: scale(0.9);
+            }
+
+    </style>
+</head>
+<body>
+    <h1>@ViewData["Title"]</h1>
+
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr class="table-primary">
+                <th>Lộ Trình</th>
+                <th>Biển Số Xe</th>
+                <th>Ngày Đi</th>
+                <th>Giờ Đi</th>
+                <th>Trạng Thái</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @(item.LoTrinh?.TramDiNavigation?.TenTram) -> @(item.LoTrinh?.TramToiNavigation?.TenTram)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Xe.BienSoXe)
+                    </td>
+                    <td>
+                        @item.NgayDi.ToString("dd/MM/yyyy")
+                    </td>
+                    <td>
+                        @item.GioDi.ToString(@"hh\:mm")
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TrangThai)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-success">Sửa</a> |
+                        <a asp-action="Details" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-info">Chi tiết</a> |
+                        <a asp-action="Delete" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-danger">Xóa</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p>
+        <a asp-action="Create">
+            <button>Thêm chuyến xe mới</button>
+        </a>
+    </p>
+</body>
