@@ -6,13 +6,13 @@ namespace AdminDashboard.Models
     public class DonHang
     {
         [Key]
-        [StringLength(10)]
+        [StringLength(255)]
         public string DonHangId { get; set; }
 
-        [Required, StringLength(10)]
+        [Required, StringLength(255)]
         public string IDKhachHang { get; set; }
 
-        [Required, StringLength(10)]
+        [Required, StringLength(255)]
         public string ChuyenId { get; set; }
 
         [Required]
@@ -25,7 +25,7 @@ namespace AdminDashboard.Models
         public string TrangThaiThanhToan { get; set; }
 
         [ForeignKey(nameof(IDKhachHang))]
-        public KhachHang KhachHang { get; set; }
+        public NguoiDung nguoiDung { get; set; }
 
         [ForeignKey(nameof(ChuyenId))]
         public ChuyenXe ChuyenXe { get; set; }

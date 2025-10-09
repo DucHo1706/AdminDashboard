@@ -1,4 +1,4 @@
-﻿@* Vị trí: Views/ChuyenXe/Edit.cshtml *@
+﻿@using AdminDashboard.Models.TrangThai
 @model AdminDashboard.Models.ChuyenXe
 
 @{
@@ -44,8 +44,9 @@
             </div>
 
             <div class="form-group mb-3">
-                <label asp-for="TrangThai" class="control-label">Trạng Thái</label>
-                <input asp-for="TrangThai" class="form-control" />
+                <label asp-for="TrangThai" class="control-label"></label>
+            
+                <select asp-for="TrangThai" asp-items="Html.GetEnumSelectList<TrangThaiChuyenXe>()" class="form-control"></select>
                 <span asp-validation-for="TrangThai" class="text-danger"></span>
             </div>
 

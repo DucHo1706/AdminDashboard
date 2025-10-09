@@ -7,14 +7,11 @@ namespace AdminDashboard.Models
     public class UserRole
     {
 
-        [Key, Column(Order = 0)]
-        [ForeignKey(nameof(NguoiDung))]
+        // Composite Key (Khóa phức hợp)
         public string UserId { get; set; }
-
-        [Key, Column(Order = 1)]
-        [ForeignKey(nameof(VaiTro))]
         public string RoleId { get; set; }
 
+        // Navigation properties
         public NguoiDung NguoiDung { get; set; }
         public VaiTro VaiTro { get; set; }
     }

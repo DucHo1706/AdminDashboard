@@ -6,7 +6,7 @@ namespace AdminDashboard.Models
     public class BaiViet
     {
         [Key]
-        [StringLength(10)]
+        [StringLength(255)]
         public string Id { get; set; }
 
         [Required, StringLength(200)]
@@ -21,7 +21,7 @@ namespace AdminDashboard.Models
         [Required, StringLength(50)]
         public string TrangThai { get; set; } = "Đã Đăng";
 
-        [StringLength(10)]
+        [StringLength(255)]
         public string? AdminId { get; set; }
 
         [ForeignKey(nameof(AdminId))]

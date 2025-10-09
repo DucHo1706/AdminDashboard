@@ -88,11 +88,11 @@ namespace AdminDashboard.Controllers
             user.SoDienThoai = model.SoDienThoai;
             user.NgaySinh = model.NgaySinh;
 
-            var khachHang = await _context.KhachHang.FirstOrDefaultAsync(kh => kh.UserId == userId);
+            var khachHang = await _context.NguoiDung.FirstOrDefaultAsync(kh => kh.UserId == userId);
             if (khachHang != null)
             {
-                khachHang.TenKhachHang = model.HoTen;
-                khachHang.DiaChiMail = model.Email;
+                khachHang.HoTen = model.HoTen;
+                khachHang.Email = model.Email;
                 khachHang.SoDienThoai = model.SoDienThoai;
                 khachHang.NgaySinh = model.NgaySinh;
             }

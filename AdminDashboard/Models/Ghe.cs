@@ -6,10 +6,10 @@ namespace AdminDashboard.Models
     public class Ghe
     {
         [Key]
-        [StringLength(10)]
+        [StringLength(255)]
         public string GheID { get; set; }
 
-        [Required, StringLength(10)]
+        [Required, StringLength(255)]
         public string XeId { get; set; }
 
         [Required, StringLength(6)]

@@ -18,8 +18,11 @@
             <th>Biển Số Xe</th>
             <th>Ngày Đi</th>
             <th>Giờ Đi</th>
+			<th>Thời gian dự kiến</th>
+            <th>Tài xế</th>
             <th>Trạng Thái</th>
-            <th></th>
+            <th>Hành động</th>
+            
         </tr>
     </thead>
     <tbody>
@@ -32,6 +35,7 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.Xe.BienSoXe)
                 </td>
+
                 <td>
                     @item.NgayDi.ToString("dd/MM/yyyy")
                 </td>
@@ -39,11 +43,35 @@
                     @item.GioDi.ToString(@"hh\:mm")
                 </td>
                 <td>
+                    @item.GioDenDuKien.ToString(@"hh\:mm")
+                </td>
+                <td>
+                    @if (item.TaiXe != null)
+                    {
+                        <span class="fw-bold">@item.TaiXe.HoTen</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted"><em>Chưa phân công</em></span>
+                    }
+                </td>
+                <td>
+                 
                     @Html.DisplayFor(modelItem => item.TrangThai)
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-success">Sửa</a> |
-                    <a asp-action="Details" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-info">Chi tiết</a> |
+                  
+                    @if (item.TaiXeId == null)
+                    {
+                        <a asp-action="AssignDriver" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-success">Phân công</a>
+                    }
+                    else
+                    {
+                        <a asp-action="AssignDriver" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-warning">Đổi tài xế</a>
+                    }
+
+                    <a asp-action="Edit" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-primary">Sửa</a>
+                    <a asp-action="Details" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-info">Chi tiết</a>              
                     <a asp-action="Delete" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-danger">Xóa</a>
                 </td>
             </tr>

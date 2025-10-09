@@ -1,9 +1,12 @@
-﻿@model AdminDashboard.Models.ChuyenXe
+﻿@using AdminDashboard.Models.TrangThai
+@model AdminDashboard.Models.ChuyenXe
 
+<h2>Tạo Chuyến Xe Mới</h2>
 <hr />
 <div class="row">
     <div class="col-md-6">
-        <form asp-action="Create">
+        @* Thêm class="form-submit-once" vào đây *@
+        <form asp-action="Create" class="form-submit-once">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="form-group mb-3">
@@ -39,15 +42,15 @@
                 <input asp-for="GioDenDuKien" class="form-control" type="time" />
                 <span asp-validation-for="GioDenDuKien" class="text-danger"></span>
             </div>
-
             <div class="form-group mb-3">
-                <label asp-for="TrangThai" class="control-label">Trạng Thái</label>
-                <input asp-for="TrangThai" class="form-control" />
+                <label asp-for="TrangThai" class="control-label"></label>
+                <select asp-for="TrangThai" asp-items="Html.GetEnumSelectList<TrangThaiChuyenXe>()" class="form-control">
+                    <option value="">-- Chọn trạng thái ban đầu --</option>
+                </select>
                 <span asp-validation-for="TrangThai" class="text-danger"></span>
             </div>
-
             <div class="form-group">
-                <input type="submit" value="Tạo mới" class="btn btn-primary" />
+                <button type="submit" class="btn btn-primary">Tạo mới</button>
                 <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
             </div>
         </form>

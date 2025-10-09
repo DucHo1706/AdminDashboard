@@ -23,9 +23,9 @@ namespace AdminDashboard.Controllers
 
         public IActionResult Dashboard()
         {
-            var tongKhachHang = _context.KhachHang.Count();
+            var tongKhachHang = _context.NguoiDung.Count();
             var tongDonHang = _context.DonHang.Count();
-            var danhSachKhachHang = _context.KhachHang.ToList();
+            var danhSachKhachHang = _context.NguoiDung.ToList();
 
             // Tính doanh thu hôm nay dựa trên TongTien
             var doanhThuHomNay = _context.DonHang

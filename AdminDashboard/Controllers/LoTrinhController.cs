@@ -70,16 +70,11 @@ namespace AdminDashboard.Controllers
                     return View(loTrinh);
                 }
 
-                 var lastLoTrinh = await _context.LoTrinh
-                    .OrderByDescending(lt => lt.LoTrinhId)
-                    .FirstOrDefaultAsync();
-
-                string newId = "LT001";
-                if (lastLoTrinh != null)
-                {
-                    int lastNumber = int.Parse(lastLoTrinh.LoTrinhId.Substring(2));
-                    newId = "LT" + (lastNumber + 1).ToString("D3");
-                }
+            
+                
+                   
+                   var newId = Guid.NewGuid().ToString();
+                
 
                 loTrinh.LoTrinhId = newId;
 

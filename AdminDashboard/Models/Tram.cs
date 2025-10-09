@@ -5,7 +5,7 @@ namespace AdminDashboard.Models
     public class Tram
     {
         [Key]
-        [StringLength(10)]
+        [StringLength(255)]
         [Display(Name = "Mã Trạm")]
         public string IdTram { get; set; }
 

@@ -48,9 +48,9 @@
         @foreach (var kh in ViewBag.DanhSachKhachHang)
         {
             <tr>
-                <td>@kh.IDKhachHang</td>
-                <td>@kh.TenKhachHang</td>
-                <td>@kh.DiaChiMail</td>
+                <td>@kh.UserId</td>
+                <td>@kh.HoTen</td>
+                <td>@kh.Email</td>
                 <td>@kh.SoDienThoai</td>
                 <td>@(kh.NgaySinh != null ? ((DateTime)kh.NgaySinh).ToString("dd/MM/yyyy") : "-")</td>
             </tr>

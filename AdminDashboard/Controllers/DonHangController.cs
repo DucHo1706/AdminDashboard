@@ -25,7 +25,7 @@ namespace AdminDashboard.Controllers
         // Hiển thị form đặt vé mới
         public IActionResult Create()
         {
-            ViewBag.KhachHangs = _context.KhachHang.ToList();
+            ViewBag.KhachHangs = _context.NguoiDung.ToList();
             ViewBag.LoTrinhs = _context.LoTrinh.ToList();
             // Nếu cần, load thêm dữ liệu như Xe, LoaiXe, Trạm, v.v.
             return View();
@@ -42,7 +42,7 @@ namespace AdminDashboard.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.KhachHangs = _context.KhachHang.ToList();
+            ViewBag.KhachHangs = _context.NguoiDung.ToList();
             ViewBag.LoTrinhs = _context.LoTrinh.ToList();
             return View(donHang);
         }

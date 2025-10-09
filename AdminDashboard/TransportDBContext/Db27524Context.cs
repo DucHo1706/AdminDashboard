@@ -12,7 +12,6 @@ namespace AdminDashboard.TransportDBContext
         public DbSet<NguoiDung> NguoiDung { get; set; }
         public DbSet<VaiTro> VaiTro { get; set; }
         public DbSet<UserRole> UserRole { get; set; }
-        public DbSet<KhachHang> KhachHang { get; set; }
         public DbSet<LoaiXe> LoaiXe { get; set; }
         public DbSet<Xe> Xe { get; set; }
         public DbSet<LoTrinh> LoTrinh { get; set; }
@@ -21,255 +20,85 @@ namespace AdminDashboard.TransportDBContext
         public DbSet<DonHang> DonHang { get; set; }
         public DbSet<Ve> Ve { get; set; }
         public DbSet<BaiViet> BaiViet { get; set; }
-        public DbSet<Menu> Menu { get; set; }
-
+      
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            /* https://learn.microsoft.com/en-us/ef/ef6/modeling/code-first/fluent/types-and-properties 
-            
-             */
-            //   Tram  
-            modelBuilder.Entity<Tram>()
-                .HasKey(t => t.IdTram);
+            base.OnModelCreating(modelBuilder);
 
-            //   NguoiDung  
-            modelBuilder.Entity<NguoiDung>()
-                .HasKey(u => u.UserId);
-
-            modelBuilder.Entity<NguoiDung>()
-                .HasIndex(u => u.Email).IsUnique();
-
-            //   VaiTro  
-            modelBuilder.Entity<VaiTro>()
-                .HasKey(r => r.RoleId);
-
-            modelBuilder.Entity<VaiTro>()
-                .HasIndex(r => r.TenVaiTro).IsUnique();
-
-            //   UserRole  
+            // Cấu hình khóa chính phức hợp cho bảng UserRole
             modelBuilder.Entity<UserRole>()
-          .HasKey(ur => new { ur.UserId, ur.RoleId });
+                .HasKey(ur => new { ur.UserId, ur.RoleId });
+
+            // Cấu hình mối quan hệ nhiều-nhiều giữa NguoiDung và VaiTro
+            modelBuilder.Entity<UserRole>()
+                .HasOne(ur => ur.NguoiDung)          // Mỗi UserRole thuộc về một NguoiDung
+                .WithMany(u => u.UserRoles)        // Mỗi NguoiDung có nhiều UserRole
+                .HasForeignKey(ur => ur.UserId);   // Khóa ngoại là UserId
 
             modelBuilder.Entity<UserRole>()
-                .HasOne(ur => ur.NguoiDung)
-                .WithMany(nd => nd.UserRoles) // nếu có collection, không có thì .WithMany()
-                .HasForeignKey(ur => ur.UserId);
+                .HasOne(ur => ur.VaiTro)             // Mỗi UserRole thuộc về một VaiTro
+                .WithMany(r => r.UserRoles)        // Mỗi VaiTro có nhiều UserRole
+                .HasForeignKey(ur => ur.RoleId);   // Khóa ngoại là RoleId
 
-            modelBuilder.Entity<UserRole>()
-                .HasOne(ur => ur.VaiTro)
-                .WithMany(vt => vt.UserRoles) // nếu có collection, không có thì .WithMany()
-                .HasForeignKey(ur => ur.RoleId);
-
-
-            //   KhachHang  
-            modelBuilder.Entity<KhachHang>()
-                .HasKey(kh => kh.IDKhachHang);
-
-            modelBuilder.Entity<KhachHang>()
-                .HasIndex(kh => kh.DiaChiMail).IsUnique();
-
-            modelBuilder.Entity<KhachHang>()
-                .HasIndex(kh => kh.UserId).IsUnique();
-
-            //   LoaiXe  
-            modelBuilder.Entity<LoaiXe>()
-                .HasKey(lx => lx.LoaiXeId);
-
-            //   Xe  
-            modelBuilder.Entity<Xe>()
-                .HasKey(x => x.XeId);
-
-            modelBuilder.Entity<Xe>()
-                .HasIndex(x => x.BienSoXe).IsUnique();
-
-            modelBuilder.Entity<Xe>()
-                  .HasOne(x => x.LoaiXe)        // dùng property trong class Xe
-                  .WithMany()                   // 1 LoaiXe có nhiều Xe
-                  .HasForeignKey(x => x.LoaiXeId)
-                  .OnDelete(DeleteBehavior.Restrict);
-
-
+            // Cấu hình mối quan hệ giữa LoTrinh và Tram 
             modelBuilder.Entity<LoTrinh>(entity =>
             {
-                entity.HasKey(lt => lt.LoTrinhId);
+                // Cấu hình mối quan hệ cho Trạm Đi
+                entity.HasOne(l => l.TramDiNavigation)
+                      .WithMany() 
+                      .HasForeignKey(l => l.TramDi)
+                      .OnDelete(DeleteBehavior.Restrict); 
 
-                entity.Property(lt => lt.LoTrinhId)
-                      .HasMaxLength(10)
-                      .IsRequired();
-
-                entity.Property(lt => lt.TramDi)
-                      .HasMaxLength(10)
-                      .IsRequired();
-
-                entity.Property(lt => lt.TramToi)
-                      .HasMaxLength(10)
-                      .IsRequired();
-
-                entity.Property(lt => lt.GiaVeCoDinh)
-                      .HasColumnType("numeric(10,2)");
-
-                // Quan hệ TramDi
-                entity.HasOne(lt => lt.TramDiNavigation)
-                      .WithMany()
-                      .HasForeignKey(lt => lt.TramDi)
+                // Cấu hình mối quan hệ cho Trạm Tới
+                entity.HasOne(l => l.TramToiNavigation)
+                      .WithMany() 
+                      .HasForeignKey(l => l.TramToi)
                       .OnDelete(DeleteBehavior.Restrict);
-
-                // Quan hệ TramToi
-                entity.HasOne(lt => lt.TramToiNavigation)
-                      .WithMany()
-                      .HasForeignKey(lt => lt.TramToi)
-                      .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasIndex(lt => new { lt.TramDi, lt.TramToi });
             });
 
-            //   ChuyenXe  
-            modelBuilder.Entity<ChuyenXe>(entity =>
+
+
+            // 1. Cấu hình bảng Ve (Vé)
+            modelBuilder.Entity<Ve>(entity =>
             {
-                entity.HasKey(cx => cx.ChuyenId);
+             
+                entity.HasOne(v => v.DonHang)
+                    .WithMany() // Một Đơn Hàng có thể có nhiều Vé (nhưng không cần thuộc tính điều hướng ngược lại trong DonHang)
+                    .HasForeignKey(v => v.DonHangId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-                entity.Property(cx => cx.ChuyenId)
-                      .HasMaxLength(10)
-                      .IsRequired();
-
-                entity.Property(cx => cx.LoTrinhId)
-                      .HasMaxLength(10)
-                      .IsRequired();
-
-                entity.Property(cx => cx.XeId)
-                      .HasMaxLength(10)
-                      .IsRequired();
-
-                entity.Property(cx => cx.TrangThai)
-                      .HasMaxLength(50)
-                      .IsRequired();
-
-                entity.Property(cx => cx.NgayDi)
-                      .IsRequired();
-
-                entity.Property(cx => cx.GioDi)
-                      .IsRequired();
-
-                entity.Property(cx => cx.GioDenDuKien)
-                      .IsRequired();
-
-                entity.HasOne(cx => cx.LoTrinh)
-                      .WithMany()
-                      .HasForeignKey(cx => cx.LoTrinhId);
-
-                entity.HasOne(cx => cx.Xe)
-                      .WithMany()
-                      .HasForeignKey(cx => cx.XeId);
-
-                entity.HasIndex(cx => cx.NgayDi);
+                // Nếu xóa Ghế, KHÔNG xóa Vé. Hệ thống sẽ báo lỗi nếu bạn cố xóa Ghế đã có người đặt.
+            
+                entity.HasOne(v => v.Ghe)
+                    .WithMany() // Một Ghế có thể thuộc về nhiều Vé (ở các chuyến khác nhau)
+                    .HasForeignKey(v => v.GheID)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
-            //   Ghe  
-            modelBuilder.Entity<Ghe>()
-                .HasKey(g => g.GheID);
-
-            modelBuilder.Entity<Ghe>()
-                .HasOne<Xe>()
-                .WithMany()
-                .HasForeignKey(g => g.XeId);
-
-            modelBuilder.Entity<Ghe>()
-                .HasIndex(g => new { g.XeId, g.SoGhe }).IsUnique();
-
-            //   DonHang  
-            modelBuilder.Entity<DonHang>()
-                .HasKey(dh => dh.DonHangId);
-
-            modelBuilder.Entity<DonHang>()
-                .HasOne<KhachHang>()
-                .WithMany()
-                .HasForeignKey(dh => dh.IDKhachHang);
-
-            modelBuilder.Entity<DonHang>()
-                .HasOne<ChuyenXe>()
-                .WithMany()
-                .HasForeignKey(dh => dh.ChuyenId);
-
-            modelBuilder.Entity<DonHang>()
-                .HasIndex(dh => dh.IDKhachHang);
-
-            //   Ve  
-            modelBuilder.Entity<Ve>()
-                .HasKey(v => v.VeId);
-
-            modelBuilder.Entity<Ve>()
-                .HasOne<DonHang>()
-                .WithMany()
-                .HasForeignKey(v => v.DonHangId);
-
-            modelBuilder.Entity<Ve>()
-                .HasOne<Ghe>()
-                .WithMany()
-                .HasForeignKey(v => v.GheID);
-
-            modelBuilder.Entity<Ve>()
-                .HasIndex(v => new { v.DonHangId, v.GheID }).IsUnique();
-
-            modelBuilder.Entity<Ve>()
-                .HasIndex(v => v.GheID);
-
-            //   BaiViet  
-            modelBuilder.Entity<BaiViet>()
-                .HasKey(bv => bv.Id);
-
-            modelBuilder.Entity<BaiViet>()
-                .HasOne<NguoiDung>()
-                .WithMany()
-                .HasForeignKey(bv => bv.AdminId);
-
-            //   Menu  
-            modelBuilder.Entity<Menu>()
-                .HasKey(m => m.Id);
-
-            base.OnModelCreating(modelBuilder);
-
-            // cập nhật thêm nha mấy em iu
-
-
-            modelBuilder.Entity<Xe>(entity =>
+            // 2. Cấu hình bảng DonHang (Đơn Hàng)
+            modelBuilder.Entity<DonHang>(entity =>
             {
-                entity.HasKey(e => e.XeId);
-                entity.Property(e => e.XeId).HasMaxLength(10);
-                entity.Property(e => e.BienSoXe).HasMaxLength(20).IsRequired();
-                entity.Property(e => e.LoaiXeId).HasMaxLength(10).IsRequired();
+                // Quan hệ Đơn Hàng -> Người Dùng (Khách hàng)
+                // Nếu xóa Người Dùng, xóa luôn các Đơn Hàng của họ.
+                entity.HasOne(dh => dh.nguoiDung)
+                    .WithMany()
+                    .HasForeignKey(dh => dh.IDKhachHang)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-                // Quan hệ với LoaiXe
-                entity.HasOne(x => x.LoaiXe)
-                      .WithMany()
-                      .HasForeignKey(x => x.LoaiXeId)
-                      .OnDelete(DeleteBehavior.Restrict);
-
-                // Quan hệ với Ghe
-                entity.HasMany(x => x.DanhSachGhe)
-                      .WithOne(g => g.Xe)
-                      .HasForeignKey(g => g.XeId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                // Quan hệ Đơn Hàng -> Chuyến Xe
+                // Nếu xóa Chuyến Xe, KHÔNG cho xóa nếu vẫn còn Đơn Hàng.
+           
+                entity.HasOne(dh => dh.ChuyenXe)
+                    .WithMany()
+                    .HasForeignKey(dh => dh.ChuyenId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // Cấu hình cho entity Ghe
-            modelBuilder.Entity<Ghe>(entity =>
-            {
-                entity.HasKey(e => e.GheID);
-                entity.Property(e => e.GheID).HasMaxLength(10);
-                entity.Property(e => e.XeId).HasMaxLength(10).IsRequired();
-                entity.Property(e => e.SoGhe).HasMaxLength(6).IsRequired();
-                entity.Property(e => e.TrangThai).HasMaxLength(50).IsRequired();
-            });
 
-            // Cấu hình cho entity LoaiXe (nếu có)
-            modelBuilder.Entity<LoaiXe>(entity =>
-            {
-                entity.HasKey(e => e.LoaiXeId);
-                entity.Property(e => e.LoaiXeId).HasMaxLength(10);
-                // Thêm các cấu hình khác nếu cần
-            });
 
-            base.OnModelCreating(modelBuilder);
         }
+
     }
+
+    
 }

@@ -1,4 +1,5 @@
 ﻿using AdminDashboard.Models;
+using AdminDashboard.Models.TrangThai;
 using AdminDashboard.TransportDBContext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -24,6 +25,7 @@ namespace AdminDashboard.Controllers
          .Include(c => c.LoTrinh)
              .ThenInclude(lt => lt.TramToiNavigation)
          .Include(c => c.Xe)
+          .Include(c => c.TaiXe)
          .ToListAsync();
 
             return View(chuyenXes);
@@ -54,7 +56,7 @@ namespace AdminDashboard.Controllers
 		// POST: ChuyenXe/Create
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create([Bind("LoTrinhId,XeId,NgayDi,GioDi,GioDenDuKien,TrangThai")] ChuyenXe chuyenXe)
+		public async Task<IActionResult> Create([Bind("LoTrinhId,XeId,NgayDi,GioDi,GioDenDuKien")] ChuyenXe chuyenXe)
 		{
 			// Bỏ qua validation cho các thuộc tính không được binding từ form
 			ModelState.Remove("ChuyenId");
@@ -64,6 +66,7 @@ namespace AdminDashboard.Controllers
             if (ModelState.IsValid)
             {
                 chuyenXe.ChuyenId = Guid.NewGuid().ToString("N").Substring(0, 8);
+               // chuyenXe.TrangThai = TrangThaiChuyenXe.DaLenLich;
                 _context.Add(chuyenXe);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Đã tạo chuyến xe thành công.";
@@ -167,5 +170,93 @@ namespace AdminDashboard.Controllers
             ViewBag.XeId = new SelectList(_context.Xe.ToList(), "XeId", "BienSoXe", selectedXe);
         }
 
-    }
+
+		public async Task<IActionResult> AssignDriver(string id)
+		{
+			if (id == null) return NotFound();
+
+			var chuyenXeCanPhanCong = await _context.ChuyenXe
+                .Include(c => c.Xe)
+        .Include(c => c.LoTrinh) // Tải Lộ Trình
+            .ThenInclude(lt => lt.TramDiNavigation) // Tải Trạm Đi BÊN TRONG Lộ Trình
+        .Include(c => c.LoTrinh) // Phải Include lại để ThenInclude tiếp cho thuộc tính khác
+            .ThenInclude(lt => lt.TramToiNavigation) // Tải Trạm Tới BÊN TRONG Lộ Trình
+        .FirstOrDefaultAsync(c => c.ChuyenId == id);
+            if (chuyenXeCanPhanCong == null) return NotFound();
+
+            // --- LOGIC TÌM TÀI XẾ RẢNH ---
+            // 1. Lấy danh sách ID của TẤT CẢ các tài xế (logic này vẫn đúng)
+            var taiXeRoleId = await _context.VaiTro.Where(r => r.TenVaiTro == "TaiXe").Select(r => r.RoleId).FirstOrDefaultAsync();
+            if (string.IsNullOrEmpty(taiXeRoleId))
+            {
+                // Xử lý trường hợp không có vai trò tài xế
+                ViewBag.ErrorMessage = "Không tìm thấy vai trò 'TaiXe' trong hệ thống.";
+                ViewBag.AvailableDrivers = new SelectList(new List<NguoiDung>());
+                return View(chuyenXeCanPhanCong);
+            }
+            var allDriverIds = await _context.UserRole.Where(ur => ur.RoleId == taiXeRoleId).Select(ur => ur.UserId).ToListAsync();
+
+            // 2. Tính toán trước thời gian bắt đầu và kết thúc của chuyến xe cần phân công
+            var thoiGianBatDau = chuyenXeCanPhanCong.NgayDi.Add(chuyenXeCanPhanCong.GioDi);
+            var thoiGianKetThuc = chuyenXeCanPhanCong.NgayDi.Add(chuyenXeCanPhanCong.GioDenDuKien);
+
+            // 3. Lọc trước các chuyến xe có khả năng bị trùng lặp trên DATABASE
+            // Chỉ lấy các chuyến xe có tài xế và diễn ra trong cùng một ngày
+            var potentialConflicts = await _context.ChuyenXe
+                .Where(cx => cx.ChuyenId != id &&
+                             cx.TaiXeId != null &&
+                             cx.NgayDi.Date == chuyenXeCanPhanCong.NgayDi.Date)
+                .ToListAsync(); // Tải danh sách nhỏ này về client
+
+            // 4. Lọc chi tiết các tài xế bị trùng lịch bằng C# (CLIENT-SIDE)
+            // Bây giờ, phép toán .Add() sẽ chạy trên C# và không còn lỗi
+            var conflictingDriverIds = potentialConflicts
+                .Where(cx => cx.NgayDi.Add(cx.GioDi) < thoiGianKetThuc &&
+                             cx.NgayDi.Add(cx.GioDenDuKien) > thoiGianBatDau)
+                .Select(cx => cx.TaiXeId)
+                .Distinct()
+                .ToList();
+
+            // 5. Lấy ra danh sách các tài xế KHÔNG BỊ TRÙNG LỊCH 
+            var availableDriverIds = allDriverIds.Except(conflictingDriverIds).ToList();
+
+            var availableDrivers = await _context.NguoiDung
+                .Where(u => availableDriverIds.Contains(u.UserId))
+                .ToListAsync();
+
+
+            ViewBag.AvailableDrivers = new SelectList(availableDrivers, "UserId", "HoTen");
+			return View(chuyenXeCanPhanCong);
+		}
+
+		// POST: ChuyenXe/AssignDriver/chuyen-xe-id-123
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> AssignDriver(string ChuyenId, string TaiXeId)
+		{
+			if (ChuyenId == null || TaiXeId == null) return BadRequest("Thông tin không hợp lệ.");
+
+			var chuyenXe = await _context.ChuyenXe.FindAsync(ChuyenId);
+			if (chuyenXe == null) return NotFound();
+
+			// Gán tài xế vào chuyến
+			chuyenXe.TaiXeId = TaiXeId;
+
+			// Cập nhật trạng thái chuyến xe (nếu cần)
+			// Ví dụ: Sau khi có tài xế, chuyển sang "Chờ Khởi Hành"
+			if (chuyenXe.TrangThai == TrangThaiChuyenXe.DaLenLich)
+			{
+				chuyenXe.TrangThai = TrangThaiChuyenXe.ChoKhoiHanh;
+			}
+
+			_context.Update(chuyenXe);
+			await _context.SaveChangesAsync();
+
+			TempData["SuccessMessage"] = "Đã phân công tài xế thành công!";
+			return RedirectToAction(nameof(Index));
+		}
+
+
+
+	}
 }

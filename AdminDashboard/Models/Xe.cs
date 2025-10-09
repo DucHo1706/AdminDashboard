@@ -6,7 +6,7 @@ namespace AdminDashboard.Models
     public class Xe
     {
         [Key]
-        [StringLength(10)]
+        [StringLength(255)]
         public string XeId { get; set; }
 
         [Required]
@@ -14,7 +14,7 @@ namespace AdminDashboard.Models
         public string BienSoXe { get; set; }
 
         [Required]
-        [StringLength(10)]
+        [StringLength(255)]
         public string LoaiXeId { get; set; }
 
         [ForeignKey("LoaiXeId")]
