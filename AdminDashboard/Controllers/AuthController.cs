@@ -7,7 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Linq;
-using System; // Thêm thư viện để dùng Guid
+using System; // Guid
+using System.Collections.Generic;
 
 namespace AdminDashboard.Controllers
 {
@@ -20,14 +21,7 @@ namespace AdminDashboard.Controllers
             _context = context;
         }
 
-        // ... (Các action Login, Logout, ForgotPass giữ nguyên)
-
-        #region Giữ nguyên các action khác
-        public IActionResult ForgotPass()
-        {
-            return View();
-        }
-
+        // ====== Login / Logout / Register (giữ nguyên phần logic bạn đã có) ======
         [HttpGet]
         public IActionResult Login()
         {
@@ -37,10 +31,7 @@ namespace AdminDashboard.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(DangNhap model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
+            if (!ModelState.IsValid) return View(model);
 
             var input = model.EmailOrPhone?.Trim().ToLowerInvariant() ?? string.Empty;
             var password = model.MatKhau ?? string.Empty;
@@ -84,18 +75,11 @@ namespace AdminDashboard.Controllers
             await HttpContext.SignInAsync("CookieAuth", claimsPrincipal);
 
             if (roleName == "Admin")
-            {
-                return RedirectToAction("Index", "Home"); // Hoặc trang Dashboard của Admin
-            }
+                return RedirectToAction("Index", "Home");
             else if (roleName == "TaiXe")
-            {
-                return RedirectToAction("LichLamViec", "TaiXe"); // Chuyển đến trang lịch làm việc
-            }
-            else // Mặc định là KhachHang
-            {
-                return RedirectToAction("Index", "Home"); // Trang chủ cho khách
-            }
-         
+                return RedirectToAction("LichLamViec", "TaiXe");
+            else
+                return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
@@ -110,16 +94,11 @@ namespace AdminDashboard.Controllers
         {
             return View();
         }
-        #endregion
 
-        // === PHẦN SỬA LỖI NẰM Ở ĐÂY ===
         [HttpPost]
         public async Task<IActionResult> Register(DangKy model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
+            if (!ModelState.IsValid) return View(model);
 
             if (await _context.NguoiDung.AnyAsync(u => u.Email == model.Email))
             {
@@ -127,7 +106,6 @@ namespace AdminDashboard.Controllers
                 return View(model);
             }
 
-            // Dùng Guid để tạo UserId chắc chắn không trùng lặp
             var newUserId = Guid.NewGuid().ToString();
 
             var user = new NguoiDung
@@ -142,11 +120,9 @@ namespace AdminDashboard.Controllers
             };
             _context.NguoiDung.Add(user);
 
-         
             const string defaultRoleName = "KhachHang";
             var role = await _context.VaiTro.FirstOrDefaultAsync(r => r.TenVaiTro == defaultRoleName);
 
-            // Nếu vai trò "KhachHang" không tồn tại, thì tạo mới
             if (role == null)
             {
                 role = new VaiTro
@@ -156,9 +132,9 @@ namespace AdminDashboard.Controllers
                 };
                 _context.VaiTro.Add(role);
             }
-            
+
             _context.UserRole.Add(new UserRole { UserId = newUserId, RoleId = role.RoleId });
-           
+
             await _context.SaveChangesAsync();
 
             // Tự động đăng nhập
@@ -175,12 +151,140 @@ namespace AdminDashboard.Controllers
             return RedirectToAction("Account", "Auth");
         }
 
+        // ====== Account view ======
         [HttpGet]
         public async Task<IActionResult> Account()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Auth");
+
             var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == userId);
             return View(user);
+        }
+
+        // ====== EDIT ACCOUNT: GET (truy cập trang chỉnh sửa nếu cần) ======
+        [HttpGet]
+        public async Task<IActionResult> EditAccount()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Auth");
+
+            var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null) return NotFound();
+
+            return View(user); // view EditAccount.cshtml dùng model NguoiDung (như bạn đã có)
+        }
+
+        // ====== EDIT ACCOUNT: POST (cập nhật) ======
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditAccount(NguoiDung model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Json(new { success = false, message = "Dữ liệu không hợp lệ." });
+            }
+
+            var user = await _context.NguoiDung.FindAsync(model.UserId);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy tài khoản." });
+            }
+
+            user.HoTen = model.HoTen;
+            user.Email = model.Email;
+            user.SoDienThoai = model.SoDienThoai;
+            user.NgaySinh = model.NgaySinh;
+
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Cập nhật thành công." });
+        }
+
+        // Helper: kiểm tra AJAX
+        private bool IsAjaxRequest()
+        {
+            return Request.Headers != null && Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+        }
+
+        // ====== RESET PASSWORD ======
+        [HttpGet]
+        public async Task<IActionResult> ResetPassword()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            ViewBag.Phone = user.SoDienThoai ?? "Không có số điện thoại";
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(string oldPassword, string newPassword, string confirmPassword)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            ViewBag.Phone = user.SoDienThoai ?? "Không có số điện thoại";
+
+            // Kiểm tra mật khẩu cũ có đúng không
+            if (user.MatKhau != oldPassword)
+            {
+                ViewBag.Error = "Mật khẩu cũ không chính xác.";
+                return View();
+            }
+
+            // Kiểm tra mật khẩu mới có khớp xác nhận không
+            if (newPassword != confirmPassword)
+            {
+                ViewBag.Error = "Mật khẩu xác nhận không khớp.";
+                return View();
+            }
+
+            // Kiểm tra độ dài hoặc độ mạnh của mật khẩu (tuỳ chọn)
+            if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
+            {
+                ViewBag.Error = "Mật khẩu mới phải có ít nhất 6 ký tự.";
+                return View();
+            }
+
+            // ✅ Cập nhật mật khẩu mới
+            user.MatKhau = newPassword;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                ViewBag.Success = "Đặt lại mật khẩu thành công!";
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Đã xảy ra lỗi khi lưu: " + ex.Message;
+            }
+
+            return View();
+        }
+        // ====== FORGOT PASSWORD ======
+        public IActionResult ForgotPass()
+        {
+            return View();
         }
     }
 }

@@ -1,8 +1,10 @@
 ﻿@model AdminDashboard.Models.NguoiDung
 
+
 @{
     ViewData["Title"] = "Chỉnh sửa thông tin tài khoản";
 }
+
 
 <div class="container mt-5">
     <h2 class="text-center mb-4">Chỉnh sửa thông tin tài khoản</h2>
@@ -11,6 +13,7 @@
             <form asp-action="EditAccount" method="post">
                 <div class="row">
                     <div class="col-md-6 mx-auto">
+                        <input type="hidden" asp-for="UserId" />
                         <div class="mb-3">
                             <label asp-for="HoTen" class="form-label">Họ tên</label>
                             <input asp-for="HoTen" class="form-control" />
@@ -33,7 +36,7 @@
                         </div>
                         <div class="text-center mt-4">
                             <button type="submit" class="btn btn-success me-2">Lưu</button>
-                            <a asp-controller="Home_User" asp-action="Account" class="btn btn-secondary">Hủy</a>
+                            <a asp-controller="Auth" asp-action="Account" class="btn btn-secondary">Hủy</a>
                         </div>
                     </div>
                 </div>
@@ -41,6 +44,7 @@
         </div>
     </div>
 </div>
+
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

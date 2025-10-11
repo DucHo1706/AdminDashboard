@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="~/AdminDashboard.styles.css" asp-append-version="true" />
     <style>
         body {
+            padding-top: 80px;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -89,7 +90,7 @@
 </head>
 <body>
     <header> 
-        <nav class="navbar navbar-expand-lg navbar-light shadow-sm" style="background-color:orange">
+        <nav class="navbar navbar-expand-lg navbar-light shadow-sm fixed-top" style="background-color:orange">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
                     <img src="~/css/images/logo_web.png" class="img-fluid" style="max-height:30px; padding-left:20px;" alt="Bus" />
