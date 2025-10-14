@@ -1,0 +1,97 @@
+﻿@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+
+@{
+    ViewData["Title"] = "Kết quả tìm kiếm";
+}
+
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h1 class="display-6 fw-bold">Kết quả tìm kiếm</h1>
+        @if (ViewBag.DiemDi != null)
+        {
+            <p class="lead text-muted">
+                Hành trình từ <strong>@ViewBag.DiemDi</strong> đến <strong>@ViewBag.DiemDen</strong> vào ngày <strong>@ViewBag.NgayDi</strong>
+            </p>
+        }
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var chuyen in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0 ticket-card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-pin-map-fill"></i>
+                                @chuyen.LoTrinh.TramDiNavigation.TenTram
+                                <i class="bi bi-arrow-right-short"></i>
+                                @chuyen.LoTrinh.TramToiNavigation.TenTram
+                            </h5>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <span class="fw-bold fs-4">@chuyen.GioDi.ToString(@"hh\:mm")</span>
+                                    <small class="d-block text-muted">Giờ đi</small>
+                                </div>
+                                <div class="text-center">
+                                    <i class="bi bi-bus-front-fill fs-1 text-primary"></i>
+                                    <small class="d-block text-muted">@chuyen.Xe.LoaiXe.TenLoaiXe</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="fw-bold fs-4">@chuyen.GioDenDuKien.ToString(@"hh\:mm")</span>
+                                    <small class="d-block text-muted">Dự kiến đến</small>
+                                </div>
+                            </div>
+
+                            <ul class="list-group list-group-flush mb-3">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Biển số xe:</span>
+                                    <strong>@chuyen.Xe.BienSoXe</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Ngày đi:</span>
+                                    <strong>@chuyen.NgayDi.ToString("dd/MM/yyyy")</strong>
+                                </li>
+                            </ul>
+
+                            <div class="mt-auto d-flex justify-content-between align-items-center">
+                                <p class="h4 text-danger fw-bold mb-0">
+                                    @chuyen.LoTrinh.GiaVeCoDinh?.ToString("N0") VNĐ
+                                </p>
+                                <a asp-action="ChonGhe" asp-controller="Booking" asp-route-chuyenId="@chuyen.ChuyenId" class="btn btn-success fw-bold">
+                                    Chọn chuyến <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center p-5 border rounded bg-light">
+
+            <h3 class="mt-3">Không tìm thấy chuyến xe phù hợp</h3>
+            <p class="text-muted">Rất tiếc, chúng tôi không tìm thấy hành trình nào theo yêu cầu của bạn. <br>Vui lòng thử lại với điểm đi, điểm đến hoặc ngày khác.</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-3">
+                <i class="bi bi-arrow-left"></i> Quay lại trang tìm kiếm
+            </a>
+        </div>
+    }
+</div>
+
+@section Styles {
+    <style>
+        .ticket-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .ticket-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        }
+    </style>
+}

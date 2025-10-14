@@ -1,0 +1,55 @@
+﻿@model AdminDashboard.Models.DonHang
+
+@{
+    ViewData["Title"] = "Đặt vé thành công";
+    var danhSachVe = ViewBag.DanhSachVe as List<Ve>;
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-success">
+                <div class="card-header bg-success text-white text-center">
+                    <h2 class="mb-0"><i class="bi bi-check-circle-fill"></i> Chúc mừng! Đặt vé thành công</h2>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-center">Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi. Dưới đây là thông tin chi tiết về vé của bạn:</p>
+                    <hr />
+                    <h5 class="mt-4">Thông tin đơn hàng</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>Mã đơn hàng:</strong> @Model.DonHangId</li>
+                        <li class="list-group-item"><strong>Khách hàng:</strong> @Model.nguoiDung.HoTen</li>
+                        <li class="list-group-item"><strong>Ngày đặt:</strong> @Model.NgayDat.ToString("dd/MM/yyyy HH:mm")</li>
+                    </ul>
+
+                    <h5 class="mt-4">Thông tin hành trình</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>Tuyến đường:</strong> @Model.ChuyenXe.LoTrinh.TramDiNavigation.TenTram → @Model.ChuyenXe.LoTrinh.TramToiNavigation.TenTram</li>
+                        <li class="list-group-item"><strong>Ngày đi:</strong> @Model.ChuyenXe.NgayDi.ToString("dd/MM/yyyy")</li>
+                        <li class="list-group-item"><strong>Giờ khởi hành:</strong> @Model.ChuyenXe.GioDi.ToString(@"hh\:mm")</li>
+                    </ul>
+
+                    <h5 class="mt-4">Chi tiết vé</h5>
+                    <ul class="list-group list-group-flush">
+                        @if (danhSachVe != null)
+                        {
+                            <li class="list-group-item">
+                                <strong>Số ghế đã đặt:</strong>
+                                @foreach (var ve in danhSachVe)
+                                {
+                                    <span class="badge bg-primary fs-6 me-1">@ve.Ghe.SoGhe</span>
+                                }
+                            </li>
+                        }
+                        <li class="list-group-item"><strong>Tổng tiền:</strong> <span class="fw-bold fs-4 text-danger">@Model.TongTien.ToString("N0") VNĐ</span></li>
+                        <li class="list-group-item"><strong>Trạng thái:</strong> <span class="badge bg-warning text-dark">@Model.TrangThaiThanhToan</span></li>
+                    </ul>
+                </div>
+                <div class="card-footer text-center">
+                    <a asp-action="Index" asp-controller="Home" class="btn btn-primary">Về trang chủ</a>
+                    <a asp-action="Account" asp-controller="Home_User" class="btn btn-secondary">Xem lịch sử đặt vé</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
