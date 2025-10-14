@@ -1,21 +1,69 @@
 ﻿@model AdminDashboard.Models.Xe
 
-<h2>Thêm Xe</h2>
+@{
+    ViewData["Title"] = "Thêm Xe Mới";
+}
 
-<form asp-action="Create">
-    <div class="form-group">
-        <label asp-for="BienSoXe" class="control-label"></label>
-        <input asp-for="BienSoXe" class="form-control" />
-        <span asp-validation-for="BienSoXe" class="text-danger"></span>
+<h1>Thêm Xe Mới</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="BienSoXe" class="control-label">Biển số xe</label>
+                <input asp-for="BienSoXe" class="form-control" placeholder="Nhập biển số xe..." />
+                <span asp-validation-for="BienSoXe" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="LoaiXeId" class="control-label">Loại xe</label>
+                <select asp-for="LoaiXeId" class="form-control" asp-items="ViewBag.LoaiXeId">
+                    <option value="">-- Chọn loại xe --</option>
+                </select>
+                <span asp-validation-for="LoaiXeId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="SoLuongGhe" class="control-label">Số lượng ghế</label>
+                <input asp-for="SoLuongGhe" class="form-control" min="1" max="100" value="40" />
+                <span asp-validation-for="SoLuongGhe" class="text-danger"></span>
+                <small class="form-text text-muted">Số ghế sẽ được tạo tự động khi thêm xe (mặc định: 40 ghế)</small>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Thêm xe và tạo ghế
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                </a>
+            </div>
+        </form>
     </div>
-
-    <div class="form-group">
-        <label asp-for="LoaiXe" class="control-label"></label>
-        <input asp-for="LoaiXe" class="form-control" />
-        <span asp-validation-for="LoaiXe" class="text-danger"></span>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Thông tin bổ sung</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Khi thêm xe mới, hệ thống sẽ tự động tạo số ghế theo số lượng bạn chọn.
+                </p>
+                <ul>
+                    <li>Mỗi ghế sẽ có trạng thái mặc định là "Trống"</li>
+                    <li>Bạn có thể xem danh sách ghế sau khi tạo xe thành công</li>
+                    <li>Số ghế sẽ được đánh số thứ tự từ 01 đến số lượng ghế</li>
+                </ul>
+            </div>
+        </div>
     </div>
+</div>
 
-
-    <button type="submit" class="btn btn-primary">Lưu</button> |
-    <a asp-action="Index">Quay lại</a>
-</form>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

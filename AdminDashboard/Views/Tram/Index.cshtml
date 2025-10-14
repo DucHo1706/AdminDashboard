@@ -2,15 +2,17 @@
 
 <h2>Danh sách Trạm</h2>
 <p>
-    <a asp-action="Create">Thêm Trạm</a>
+    <a asp-action="Create" class="btn btn-primary">Thêm Trạm</a>
 </p>
-<table class="table">
-    <thead>
+<table class="table table-striped">
+    <thead class="thead-dark">
         <tr>
             <th>Mã Trạm</th>
             <th>Tên Trạm</th>
             <th>Địa Chỉ</th>
-            <th></th>
+            <th>Tỉnh/Thành</th>
+            <th>Quận/Huyện</th>
+            <th>Thao tác</th>
         </tr>
     </thead>
     <tbody>
@@ -20,10 +22,12 @@
                 <td>@item.IdTram</td>
                 <td>@item.TenTram</td>
                 <td>@item.DiaChiTram</td>
+                <td>@item.Tinh</td>
+                <td>@item.Huyen</td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.IdTram">Sửa</a> |
-                    <a asp-action="Details" asp-route-id="@item.IdTram">Chi tiết</a> |
-                    <a asp-action="Delete" asp-route-id="@item.IdTram">Xóa</a>
+                    <a asp-action="Edit" asp-route-id="@item.IdTram" class="btn btn-warning btn-sm">Sửa</a>
+                    <a asp-action="Details" asp-route-id="@item.IdTram" class="btn btn-info btn-sm">Chi tiết</a>
+                    <a asp-action="Delete" asp-route-id="@item.IdTram" class="btn btn-danger btn-sm">Xóa</a>
                 </td>
             </tr>
         }

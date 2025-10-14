@@ -6,10 +6,10 @@ namespace AdminDashboard.Models
     public class Ghe
     {
         [Key]
-        [StringLength(10)]
+        [StringLength(255)]
         public string GheID { get; set; }
 
-        [Required, StringLength(10)]
+        [Required, StringLength(255)]
         public string XeId { get; set; }
 
         [Required, StringLength(6)]
@@ -18,9 +18,7 @@ namespace AdminDashboard.Models
         [Required, StringLength(50)]
         public string TrangThai { get; set; }
 
-        [ForeignKey(nameof(XeId))]
-        public Xe Xe { get; set; }
-
-
+        [ForeignKey("XeId")]
+        public virtual Xe Xe { get; set; }
     }
 }

@@ -6,13 +6,13 @@ namespace AdminDashboard.Models
     public class Ve
     {
         [Key]
-        [StringLength(10)]
+        [StringLength(255)]
         public string VeId { get; set; }
 
-        [Required, StringLength(10)]
+        [Required, StringLength(255)]
         public string DonHangId { get; set; }
 
-        [Required, StringLength(10)]
+        [Required, StringLength(255)]
         public string GheID { get; set; }
 
         [Required, Column(TypeName = "numeric(10,2)")]

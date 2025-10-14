@@ -1,33 +1,42 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AdminDashboard.Models
 {
+    public enum TrangThaiNguoiDung
+    {
+        HoatDong,
+        BiKhoa
+       
+    }
     public class NguoiDung
     {
         [Key]
-        [StringLength(10)]
+        [StringLength(255)]
         public string UserId { get; set; }
 
-        [Required, StringLength(50)]
-        public string TenDangNhap { get; set; }
-
-        [Required, StringLength(255)]
-        public string MatKhau { get; set; }
-
-        [Required, StringLength(100)]
-        public string Email { get; set; }
-
-        [Required, StringLength(100)]
+        [Required(ErrorMessage = "Họ tên không được để trống")]
+        [StringLength(100)]
         public string HoTen { get; set; }
 
-        [StringLength(20)]
+        [Required(ErrorMessage = "Email không được để trống")]
+        [StringLength(100)]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        public string Email { get; set; }
+
+        [Required]
+        [StringLength(255)] 
+        public string MatKhau { get; set; }
+
+        [StringLength(10)] 
         public string? SoDienThoai { get; set; }
 
         public DateTime? NgaySinh { get; set; }
 
-        [Required, StringLength(20)]
-        public string TrangThai { get; set; } = "Hoạt động";
+        [Required]
+        public TrangThaiNguoiDung TrangThai { get; set; } = TrangThaiNguoiDung.HoatDong; // Sử dụng Enum
 
-        public ICollection<UserRole> UserRoles { get; set; }
+        // Mối quan hệ nhiều-nhiều với VaiTro thông qua bảng UserRole
+        public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     }
 }

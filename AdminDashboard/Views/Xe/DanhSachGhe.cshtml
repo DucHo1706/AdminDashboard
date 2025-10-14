@@ -1,0 +1,57 @@
+﻿@model IEnumerable<AdminDashboard.Models.Ghe>
+
+@{
+    ViewData["Title"] = "Danh Sách Ghế";
+}
+
+<h1>Danh Sách Ghế</h1>
+<h4 class="text-muted">Xe: <strong>@ViewBag.BienSoXe</strong></h4>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <span class="badge badge-success">Trống: @Model.Count(g => g.TrangThai == "Trống")</span>
+        <span class="badge badge-danger ml-2">Đã đặt: @Model.Count(g => g.TrangThai == "Đã đặt")</span>
+        <span class="badge badge-secondary ml-2">Tổng: @Model.Count() ghế</span>
+    </div>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Quay lại danh sách xe
+    </a>
+</div>
+
+<div class="row">
+    @foreach (var ghe in Model.OrderBy(g => g.SoGhe))
+    {
+        <div class="col-md-2 mb-3">
+            <div class="card @GetCardClass(ghe.TrangThai)">
+                <div class="card-body text-center p-2">
+                    <h6 class="card-title mb-1">Ghế @ghe.SoGhe</h6>
+                    <span class="badge @GetBadgeClass(ghe.TrangThai)">
+                        @ghe.TrangThai
+                    </span>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@functions {
+    string GetCardClass(string trangThai)
+    {
+        return trangThai switch
+        {
+            "Trống" => "border-success",
+            "Đã đặt" => "border-danger",
+            _ => "border-secondary"
+        };
+    }
+
+    string GetBadgeClass(string trangThai)
+    {
+        return trangThai switch
+        {
+            "Trống" => "badge-success",
+            "Đã đặt" => "badge-danger",
+            _ => "badge-secondary"
+        };
+    }
+}

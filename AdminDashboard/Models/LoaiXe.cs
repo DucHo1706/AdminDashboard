@@ -5,7 +5,7 @@ namespace AdminDashboard.Models
     public class LoaiXe
     {
         [Key]
-        [StringLength(10)]
+        [StringLength(255)]
         public string LoaiXeId { get; set; }
 
         [Required, StringLength(50)]

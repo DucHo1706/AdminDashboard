@@ -6,16 +6,24 @@ namespace AdminDashboard.Models
     public class Xe
     {
         [Key]
-        [StringLength(10)]
+        [StringLength(255)]
         public string XeId { get; set; }
 
-        [Required, StringLength(9)]
+        [Required]
+        [StringLength(20)]
         public string BienSoXe { get; set; }
 
-        [Required, StringLength(10)]
+        [Required]
+        [StringLength(255)]
         public string LoaiXeId { get; set; }
 
-        [ForeignKey(nameof(LoaiXeId))]
-        public LoaiXe LoaiXe { get; set; }
+        [ForeignKey("LoaiXeId")]
+        public virtual LoaiXe? LoaiXe { get; set; }
+
+        // Navigation property - sửa lại
+        public virtual ICollection<Ghe>? DanhSachGhe { get; set; }
+
+        [NotMapped]
+        public int SoLuongGhe { get; set; } = 40;
     }
 }

@@ -1,0 +1,54 @@
+﻿@model IEnumerable<AdminDashboard.Models.LoTrinh>
+
+@{
+    ViewData["Title"] = "Danh sách Lộ Trình";
+}
+
+<h2>Danh sách Lộ Trình</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Thêm Lộ Trình</a>
+</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.LoTrinhId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TramDiNavigation)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TramToiNavigation)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GiaVeCoDinh)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LoTrinhId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TramDiNavigation.TenTram)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TramToiNavigation.TenTram)
+                </td>
+                <td>
+                    @String.Format("{0:N0}", item.GiaVeCoDinh) VNĐ
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.LoTrinhId" class="btn btn-warning btn-sm">Sửa</a>
+                    <a asp-action="Details" asp-route-id="@item.LoTrinhId" class="btn btn-info btn-sm">Chi tiết</a>
+                    <a asp-action="Delete" asp-route-id="@item.LoTrinhId" class="btn btn-danger btn-sm">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
