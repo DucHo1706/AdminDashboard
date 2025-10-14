@@ -7,8 +7,8 @@ namespace AdminDashboard.Models
     {
         HoatDong,
         BiKhoa
-       
     }
+
     public class NguoiDung
     {
         [Key]
@@ -25,18 +25,17 @@ namespace AdminDashboard.Models
         public string Email { get; set; }
 
         [Required]
-        [StringLength(255)] 
+        [StringLength(255)]
         public string MatKhau { get; set; }
 
-        [StringLength(10)] 
+        [StringLength(10)]
         public string? SoDienThoai { get; set; }
 
         public DateTime? NgaySinh { get; set; }
 
         [Required]
-        public TrangThaiNguoiDung TrangThai { get; set; } = TrangThaiNguoiDung.HoatDong; // Sử dụng Enum
+        public TrangThaiNguoiDung TrangThai { get; set; } = TrangThaiNguoiDung.HoatDong;
 
-        // Mối quan hệ nhiều-nhiều với VaiTro thông qua bảng UserRole
-        public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     }
 }
