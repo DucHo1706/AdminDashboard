@@ -53,6 +53,7 @@ namespace AdminDashboard.Controllers
             return View();
 		}
 
+
         // POST: ChuyenXe/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -63,6 +64,7 @@ namespace AdminDashboard.Controllers
             ModelState.Remove("LoTrinh");
             ModelState.Remove("Xe");
             ModelState.Remove("TaiXe");
+
 
             if (ModelState.IsValid)
             {
@@ -266,7 +268,34 @@ namespace AdminDashboard.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
+        public IActionResult TimKiem(string diemDiId, string diemDenId, DateTime ngayDi)
+        {// Truy vấn CSDL để lấy các chuyến xe phù hợp
+            var ketQua = _context.ChuyenXe
+                .Include(c => c.LoTrinh)
+                    .ThenInclude(lt => lt.TramDiNavigation) // Lấy thông tin trạm đi
+                .Include(c => c.LoTrinh)
+                    .ThenInclude(lt => lt.TramToiNavigation) // Lấy thông tin trạm tới
+                .Include(c => c.Xe)
+                    .ThenInclude(x => x.LoaiXe) // Lấy thông tin loại xe
+                .Where(c => c.LoTrinh.TramDi == diemDiId &&
+                            c.LoTrinh.TramToi == diemDenId &&
+                            c.NgayDi.Date == ngayDi.Date)
+                .OrderBy(c => c.GioDi) // Sắp xếp theo giờ đi sớm nhất
+                .ToList();
+
+            // Lấy tên trạm đi, trạm đến và ngày đi để hiển thị lại cho người dùng trên trang kết quả
+            var tramDi = _context.Tram.Find(diemDiId);
+            var tramDen = _context.Tram.Find(diemDenId);
+
+            if (tramDi != null) ViewBag.DiemDi = tramDi.TenTram;
+            if (tramDen != null) ViewBag.DiemDen = tramDen.TenTram;
+            ViewBag.NgayDi = ngayDi.ToString("dd/MM/yyyy");
+
+            // Trả về View "TimKiem" và truyền danh sách kết quả tìm được
+            return View(ketQua);
+        }
+
+    }
 
 
-	}
 }
