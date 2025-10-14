@@ -53,34 +53,42 @@ namespace AdminDashboard.Controllers
             return View();
 		}
 
-		// POST: ChuyenXe/Create
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create([Bind("LoTrinhId,XeId,NgayDi,GioDi,GioDenDuKien")] ChuyenXe chuyenXe)
-		{
-			// Bỏ qua validation cho các thuộc tính không được binding từ form
-			ModelState.Remove("ChuyenId");
-			ModelState.Remove("LoTrinh");
-			ModelState.Remove("Xe");
+        // POST: ChuyenXe/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("LoTrinhId,XeId,NgayDi,GioDi,GioDenDuKien,TrangThai")] ChuyenXe chuyenXe)
+        {
+            // Loại bỏ validation các navigation property
+            ModelState.Remove("ChuyenId");
+            ModelState.Remove("LoTrinh");
+            ModelState.Remove("Xe");
+            ModelState.Remove("TaiXe");
 
             if (ModelState.IsValid)
             {
                 chuyenXe.ChuyenId = Guid.NewGuid().ToString("N").Substring(0, 8);
-               // chuyenXe.TrangThai = TrangThaiChuyenXe.DaLenLich;
+
+                if (chuyenXe.TrangThai == 0)
+                    chuyenXe.TrangThai = TrangThaiChuyenXe.DaLenLich;
+
                 _context.Add(chuyenXe);
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Đã tạo chuyến xe thành công.";
+
+                TempData["SuccessMessage"] = "✅ Đã tạo chuyến xe thành công!";
                 return RedirectToAction(nameof(Index));
             }
 
-            // Khi ModelState không hợp lệ, cần nạp lại dropdowns
-            PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
+            foreach (var err in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                Console.WriteLine("❌ ModelState Error: " + err.ErrorMessage);
+            }
 
+            PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
             return View(chuyenXe);
         }
 
-		// GET: ChuyenXe/Edit/5
-		public async Task<IActionResult> Edit(string id)
+        // GET: ChuyenXe/Edit/5
+        public async Task<IActionResult> Edit(string id)
 		{
 			if (id == null) return NotFound();
 
@@ -122,34 +130,36 @@ namespace AdminDashboard.Controllers
 			return View(chuyenXe);
 		}
 
-		// GET: ChuyenXe/Delete/5
-		public async Task<IActionResult> Delete(string id)
-		{
-			if (id == null) return NotFound();
+        // GET: ChuyenXe/Delete/5
+        public async Task<IActionResult> Delete(string id)
+        {
+            if (id == null) return NotFound();
 
-			var chuyenXe = await _context.ChuyenXe
-				.Include(c => c.LoTrinh)
-				.Include(c => c.Xe)
-				.FirstOrDefaultAsync(m => m.ChuyenId == id);
+            var chuyenXe = await _context.ChuyenXe
+                .Include(c => c.LoTrinh)
+                .Include(c => c.Xe)
+                .FirstOrDefaultAsync(m => m.ChuyenId == id);
 
-			if (chuyenXe == null) return NotFound();
+            if (chuyenXe == null) return NotFound();
 
-			return View(chuyenXe);
-		}
+            return View(chuyenXe);
+        }
 
-		// POST: ChuyenXe/Delete/5
-		[HttpPost, ActionName("Delete")]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> DeleteConfirmed(string id)
-		{
-			var chuyenXe = await _context.ChuyenXe.FindAsync(id);
-			if (chuyenXe != null)
-			{
-				_context.ChuyenXe.Remove(chuyenXe);
-				await _context.SaveChangesAsync();
-			}
-			return RedirectToAction(nameof(Index));
-		}
+        // ✅ POST: ChuyenXe/Delete/5 (ĐÃ SỬA)
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(string ChuyenId)
+        {
+            var chuyen = await _context.ChuyenXe.FindAsync(ChuyenId);
+            if (chuyen == null)
+                return NotFound();
+
+            _context.ChuyenXe.Remove(chuyen);
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Xóa chuyến xe thành công!";
+            return RedirectToAction(nameof(Index));
+        }
+
 
         // Hàm hỗ trợ để lấy dữ liệu cho dropdown, tránh lặp code
         private void PopulateDropdownLists(object selectedLoTrinh = null, object selectedXe = null)
