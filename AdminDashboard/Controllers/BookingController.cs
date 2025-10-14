@@ -142,57 +142,27 @@ namespace AdminDashboard.Controllers
                 return RedirectToAction("ChonGhe", new { chuyenId = chuyenId });
             }
         }
-        public async Task<IActionResult> VnpayReturn()
+        // Sửa lại Action VnpayReturn hiện tại của bạn
+
+        public IActionResult VnpayReturn()
         {
-            // Lấy các tham số trả về từ VNPay
-            var vnpayData = new VnpayLibrary();
-            foreach (string s in Request.Query.Keys)
-            {
-                vnpayData.AddResponseData(s, Request.Query[s]);
-            }
+            // Chỉ cần lấy mã phản hồi để biết nên chuyển hướng đến đâu
+            var vnp_ResponseCode = Request.Query["vnp_ResponseCode"];
+            var vnp_TxnRef = Request.Query["vnp_TxnRef"]; // Mã đơn hàng
 
-            var vnp_TxnRef = vnpayData.GetResponseData("vnp_TxnRef"); // Mã đơn hàng
-            var vnp_ResponseCode = vnpayData.GetResponseData("vnp_ResponseCode");
-            var vnp_SecureHash = vnpayData.GetResponseData("vnp_SecureHash");
-            var hashSecret = _config["Vnpay:HashSecret"]; // Lấy hash secret từ config
-
-            // Xác thực chữ ký
-            bool checkSignature = vnpayData.ValidateSignature(vnp_SecureHash, hashSecret);
-            if (!checkSignature)
-            {
-                TempData["ErrorMessage"] = "Giao dịch không hợp lệ: Chữ ký không đúng.";
-                // Có thể chuyển về trang lỗi hoặc trang chủ
-                return RedirectToAction("Index", "Home");
-            }
-
-            var donHang = await _context.DonHang.FindAsync(vnp_TxnRef);
-            if (donHang == null)
-            {
-                TempData["ErrorMessage"] = "Không tìm thấy đơn hàng.";
-                return RedirectToAction("Index", "Home");
-            }
-
-            // Nếu thanh toán thành công (mã 00)
             if (vnp_ResponseCode == "00")
             {
-                // Cập nhật trạng thái đơn hàng
-                donHang.TrangThaiThanhToan = "Đã thanh toán";
-                await _context.SaveChangesAsync();
-
-                // Chuyển hướng đến trang thành công
-                return RedirectToAction("BookingSuccess", new { id = donHang.DonHangId });
+                // Thanh toán thành công, chuyển đến trang Success
+                // Server IPN sẽ cập nhật database sau
+                return RedirectToAction("BookingSuccess", new { id = vnp_TxnRef });
             }
-            else // Thanh toán thất bại
+            else
             {
-                // Xóa đơn hàng và vé đã tạo để giải phóng ghế
-                var veCanXoa = await _context.Ve.Where(v => v.DonHangId == donHang.DonHangId).ToListAsync();
-                _context.Ve.RemoveRange(veCanXoa);
-                _context.DonHang.Remove(donHang);
-                await _context.SaveChangesAsync();
-
-                TempData["ErrorMessage"] = $"Thanh toán VNPay không thành công. Mã lỗi: {vnp_ResponseCode}";
-                // Trả người dùng về trang chọn ghế để thử lại
-                return RedirectToAction("ChonGhe", new { chuyenId = donHang.ChuyenId });
+                // Thanh toán không thành công
+                TempData["ErrorMessage"] = $"Thanh toán không thành công. Mã lỗi VNPay: {vnp_ResponseCode}";
+                // Lấy lại ChuyenId từ DonHang để trả về đúng trang chọn ghế
+                var donHang = _context.DonHang.Find(vnp_TxnRef);
+                return RedirectToAction("ChonGhe", new { chuyenId = donHang?.ChuyenId });
             }
         }
         [Authorize]
@@ -219,21 +189,64 @@ namespace AdminDashboard.Controllers
 
         // Thêm Action này vào BookingController.cs
 
-        [AllowAnonymous] // Cho phép truy cập mà không cần đăng nhập để test
-        public IActionResult TestVnpayHash()
+        [AllowAnonymous] // IPN không yêu cầu đăng nhập
+        [HttpPost] // Hoặc [HttpGet] tùy theo cấu hình của bạn trên VNPay
+        public async Task<IActionResult> PaymentIPN()
         {
-            // LẤY CHUỖI signData BẠN ĐÃ GỬI TÔI
-            string signData = "vnp_Amount=500000&vnp_Command=pay&vnp_CreateDate=20251014222549&vnp_CurrCode=VND&vnp_IpAddr=26.233.138.208&vnp_Locale=vn&vnp_OrderInfo=Thanh+toan+don+hang+beb9b3bf302c499881b852ece918b127&vnp_OrderType=other&vnp_ReturnUrl=https%3A%2F%2Flocalhost%3A7063%2FBooking%2FVnpayReturn&vnp_TmnCode=W03JIUK4&vnp_TxnRef=beb9b3bf302c499881b852ece918b127&vnp_Version=2.1.0";
+            var vnpayData = new VnpayLibrary();
+            // Dùng Request.Query vì VNPay thường gửi IPN qua GET
+            foreach (var (key, value) in Request.Query)
+            {
+                vnpayData.AddResponseData(key, value);
+            }
 
-            // LẤY HASHSECRET TỪ APPSETTINGS.JSON
+            var vnp_TxnRef = vnpayData.GetResponseData("vnp_TxnRef");
+            var vnp_ResponseCode = vnpayData.GetResponseData("vnp_ResponseCode");
+            var vnp_SecureHash = vnpayData.GetResponseData("vnp_SecureHash");
             var hashSecret = _config["Vnpay:HashSecret"];
 
-            // TẠO CHỮ KÝ TỪ DỮ LIỆU TRÊN
-            var vnpayLibrary = new VnpayLibrary();
-            var secureHash = vnpayLibrary.HmacSha512(hashSecret, signData);
+            bool checkSignature = vnpayData.ValidateSignature(vnp_SecureHash, hashSecret);
 
-            // TRẢ VỀ KẾT QUẢ ĐỂ XEM
-            return Content($"SignData: {signData}\nHashSecret: {hashSecret}\nGenerated Hash: {secureHash}");
+            // Tạo đối tượng để trả về cho VNPay
+            var response = new { RspCode = "", Message = "" };
+
+            if (!checkSignature)
+            {
+                response = new { RspCode = "97", Message = "Invalid Signature" };
+                return Json(response);
+            }
+
+            var donHang = await _context.DonHang.FindAsync(vnp_TxnRef);
+            if (donHang == null)
+            {
+                response = new { RspCode = "01", Message = "Order not found" };
+                return Json(response);
+            }
+
+            if (donHang.TrangThaiThanhToan != "DangChoThanhToan")
+            {
+                response = new { RspCode = "02", Message = "Order already confirmed" };
+                return Json(response);
+            }
+
+            if (vnp_ResponseCode == "00")
+            {
+                donHang.TrangThaiThanhToan = "Đã thanh toán";
+                await _context.SaveChangesAsync();
+                response = new { RspCode = "00", Message = "Confirm Success" };
+            }
+            else
+            {
+                // Xóa đơn hàng thất bại
+                var veCanXoa = await _context.Ve.Where(v => v.DonHangId == donHang.DonHangId).ToListAsync();
+                _context.Ve.RemoveRange(veCanXoa);
+                _context.DonHang.Remove(donHang);
+                await _context.SaveChangesAsync();
+                response = new { RspCode = "99", Message = "Transaction Failed" };
+            }
+
+            // Trả về JSON cho VNPay biết đã nhận được kết quả
+            return Json(response);
         }
     }
 }

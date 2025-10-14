@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using Microsoft.AspNetCore.Http;
+using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
@@ -29,106 +30,111 @@ namespace AdminDashboard.Helpers
 
         public string GetResponseData(string key)
         {
-            return _responseData.TryGetValue(key, out var retValue) ? retValue : string.Empty;
+            string retValue;
+            if (_responseData.TryGetValue(key, out retValue))
+            {
+                return retValue;
+            }
+            else
+            {
+                return string.Empty;
+            }
         }
 
         public string CreateRequestUrl(string baseUrl, string vnp_HashSecret)
         {
-            var queryStringBuilder = new StringBuilder();
-            var signDataBuilder = new StringBuilder();
-
-            foreach (var (key, value) in _requestData)
+            StringBuilder data = new StringBuilder();
+            foreach (KeyValuePair<string, string> kv in _requestData)
             {
-                // Tạo chuỗi signData (dữ liệu gốc, chưa mã hóa)
-                signDataBuilder.Append(key + "=" + value + "&");
-                // Tạo chuỗi query (dữ liệu đã mã hóa URL)
-                queryStringBuilder.Append(WebUtility.UrlEncode(key) + "=" + WebUtility.UrlEncode(value) + "&");
+                if (!String.IsNullOrEmpty(kv.Value))
+                {
+                    data.Append(WebUtility.UrlEncode(kv.Key) + "=" + WebUtility.UrlEncode(kv.Value) + "&");
+                }
             }
+            string queryString = data.ToString();
 
-            if (signDataBuilder.Length > 0)
+            baseUrl += "?" + queryString;
+            String signData = queryString;
+            if (signData.Length > 0)
             {
-                signDataBuilder.Remove(signDataBuilder.Length - 1, 1);
+
+                signData = signData.Remove(data.Length - 1, 1);
             }
-            if (queryStringBuilder.Length > 0)
-            {
-                queryStringBuilder.Remove(queryStringBuilder.Length - 1, 1);
-            }
+            string vnp_SecureHash = HmacSha512(vnp_HashSecret, signData);
+            baseUrl += "vnp_SecureHash=" + vnp_SecureHash;
 
-            var rawSignData = signDataBuilder.ToString();
-            var vnp_SecureHash = HmacSha512(vnp_HashSecret, rawSignData); // Dùng HmacSha512
-
-            queryStringBuilder.Append("&vnp_SecureHash=" + vnp_SecureHash);
-
-            return baseUrl + "?" + queryStringBuilder.ToString();
+            return baseUrl;
         }
 
         public bool ValidateSignature(string inputHash, string secretKey)
         {
-            var dataToHash = new SortedList<string, string>(new VnpayCompare());
-            foreach (var (key, value) in _responseData)
-            {
-                if (key != "vnp_SecureHashType" && key != "vnp_SecureHash")
-                {
-                    dataToHash.Add(key, value);
-                }
-            }
-
-            var signDataBuilder = new StringBuilder();
-            foreach (var (key, value) in dataToHash)
-            {
-                signDataBuilder.Append(key + "=" + value + "&");
-            }
-            if (signDataBuilder.Length > 0)
-            {
-                signDataBuilder.Remove(signDataBuilder.Length - 1, 1);
-            }
-
-            var rspRaw = signDataBuilder.ToString();
-            var myChecksum = HmacSha512(secretKey, rspRaw); // Dùng HmacSha512
-
+            string rspRaw = GetResponseData();
+            string myChecksum = HmacSha512(secretKey, rspRaw);
             return myChecksum.Equals(inputHash, StringComparison.InvariantCultureIgnoreCase);
         }
+        private string GetResponseData()
+        {
 
+            StringBuilder data = new StringBuilder();
+            if (_responseData.ContainsKey("vnp_SecureHashType"))
+            {
+                _responseData.Remove("vnp_SecureHashType");
+            }
+            if (_responseData.ContainsKey("vnp_SecureHash"))
+            {
+                _responseData.Remove("vnp_SecureHash");
+            }
+            foreach (KeyValuePair<string, string> kv in _responseData)
+            {
+                if (!String.IsNullOrEmpty(kv.Value))
+                {
+                    data.Append(WebUtility.UrlEncode(kv.Key) + "=" + WebUtility.UrlEncode(kv.Value) + "&");
+                }
+            }
+            //remove last '&'
+            if (data.Length > 0)
+            {
+                data.Remove(data.Length - 1, 1);
+            }
+            return data.ToString();
+        }
         // Đổi hàm thành non-static và sửa lại AppendFormat
         public string HmacSha512(string key, string inputData)
         {
             var hash = new StringBuilder();
-            var keyBytes = Encoding.UTF8.GetBytes(key);
-            var messageBytes = Encoding.UTF8.GetBytes(inputData);
-            using (var hmacsha512 = new HMACSHA512(keyBytes))
+            byte[] keyBytes = Encoding.UTF8.GetBytes(key);
+            byte[] inputBytes = Encoding.UTF8.GetBytes(inputData);
+            using (var hmac = new HMACSHA512(keyBytes))
             {
-                var hashmessage = hmacsha512.ComputeHash(messageBytes);
-                foreach (var b in hashmessage)
+                byte[] hashValue = hmac.ComputeHash(inputBytes);
+                foreach (var theByte in hashValue)
                 {
-                    hash.AppendFormat("{0:x2}", b);
+                    hash.Append(theByte.ToString("x2"));
                 }
             }
+
             return hash.ToString();
         }
 
         public string GetIpAddress(HttpContext context)
         {
-            var ipAddress = string.Empty;
+            string ipAddress = string.Empty;
             try
             {
-                var remoteIpAddress = context.Connection.RemoteIpAddress;
-                if (remoteIpAddress != null)
-                {
-                    if (remoteIpAddress.AddressFamily == AddressFamily.InterNetworkV6)
-                    {
-                        remoteIpAddress = Dns.GetHostEntry(remoteIpAddress).AddressList
-                            .FirstOrDefault(x => x.AddressFamily == AddressFamily.InterNetwork);
-                    }
-                    if (remoteIpAddress != null) ipAddress = remoteIpAddress.ToString();
-                }
+                ipAddress = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+
+                if (string.IsNullOrEmpty(ipAddress) || (ipAddress.ToLower() == "unknown") || ipAddress.Length > 45)
+                    ipAddress = context.Connection.RemoteIpAddress?.ToString();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                ipAddress = "127.0.0.1";
+                ipAddress = "Invalid IP:" + ex.Message;
             }
+
             return ipAddress;
         }
     }
+
 
     public class VnpayCompare : IComparer<string>
     {
