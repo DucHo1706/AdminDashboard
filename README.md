@@ -61,7 +61,17 @@ Tạo tài khoản
 Tìm kiếm
 
 Xem bài viết
+=====================================================
+Tích Hợp Thanh Toán bằng VNPAY trên môi trường SanBox
+https://sandbox.vnpayment.vn/apis/docs/thanh-toan-pay/pay.html
 
+=====================================================
+CÓ THỂ THANH TOÁN BẰNG THẺ GIẢ ĐƯỢC CUNG CẤP BỞI VNPAY 
+https://sandbox.vnpayment.vn/apis/vnpay-demo/
+
+HƯỚNG DẪN THỰC HIỆN CÀI ĐẶT VNPAY 
+CRE : https://github.com/dangnam1904yk/webbanxe_netCore
+https://www.youtube.com/watch?v=GMbp9n0wQyQ&t=134s
 =====================================================
 
 "Chức Năng Đã có "
