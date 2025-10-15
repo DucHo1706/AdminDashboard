@@ -61,6 +61,9 @@ Tạo tài khoản
 Tìm kiếm
 
 Xem bài viết
+
+ =========CHỨC NĂNG NÂNG CAO =======================
+
 =====================================================
 
 <img width="2046" height="2046" alt="image" src="https://github.com/user-attachments/assets/64db908e-597f-440b-bcf1-61566c05e2db" />
