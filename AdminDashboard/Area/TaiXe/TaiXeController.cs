@@ -1,21 +1,4 @@
-<<<<<<< HEAD
-﻿using AdminDashboard.TransportDBContext;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using Microsoft.EntityFrameworkCore;
-
-namespace AdminDashboard.Area.TaiXe
-{
-    public class TaiXeController : Controller
-    {
-        private readonly Db27524Context _context;
-        public TaiXeController(Db27524Context context)
-        {
-            _context = context;
-
-        }
-=======
-﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using AdminDashboard.Models;
@@ -37,12 +20,12 @@ namespace AdminDashboard.Controllers
             _logger = logger;
         }
 
-         public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             var adminUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-             var admin = await _context.NguoiDung
-                .FirstOrDefaultAsync(u => u.UserId == adminUserId);
+            var admin = await _context.NguoiDung
+               .FirstOrDefaultAsync(u => u.UserId == adminUserId);
 
             if (admin == null)
             {
@@ -60,7 +43,7 @@ namespace AdminDashboard.Controllers
             return View(taiXes);
         }
 
-         public IActionResult Create()
+        public IActionResult Create()
         {
             return View();
         }
@@ -82,13 +65,13 @@ namespace AdminDashboard.Controllers
                     return View(model);
                 }
 
-                 if (await _context.NguoiDung.AnyAsync(u => u.Email == model.Email))
+                if (await _context.NguoiDung.AnyAsync(u => u.Email == model.Email))
                 {
                     ModelState.AddModelError("Email", "Email đã tồn tại.");
                     return View(model);
                 }
 
-                 var userId = await GenerateUserId();
+                var userId = await GenerateUserId();
                 var nguoiDung = new NguoiDung
                 {
                     UserId = userId,
@@ -107,7 +90,7 @@ namespace AdminDashboard.Controllers
 
                 _logger.LogInformation("Đã tạo người dùng thành công");
 
-                 var roleId = "R3";
+                var roleId = "R3";
                 var taiXeRole = await _context.VaiTro.FirstOrDefaultAsync(r => r.RoleId == roleId);
                 if (taiXeRole == null)
                 {
@@ -121,7 +104,7 @@ namespace AdminDashboard.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                 var userRole = new UserRole
+                var userRole = new UserRole
                 {
                     UserId = userId,
                     RoleId = roleId
@@ -130,7 +113,7 @@ namespace AdminDashboard.Controllers
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Đã gán vai trò tài xế");
-                  
+
                 var taiXe = new TaiXe
                 {
                     UserId = userId,
@@ -158,13 +141,13 @@ namespace AdminDashboard.Controllers
             {
                 _logger.LogError(dbEx, "Lỗi DbUpdateException khi đăng ký tài xế");
 
-                 if (dbEx.InnerException != null)
+                if (dbEx.InnerException != null)
                 {
                     _logger.LogError(dbEx.InnerException, "Inner Exception chi tiết:");
                     ViewBag.ErrorDetail = dbEx.InnerException.Message;
                 }
 
-                 if (dbEx.InnerException != null)
+                if (dbEx.InnerException != null)
                 {
                     var innerMessage = dbEx.InnerException.Message;
 
@@ -216,7 +199,6 @@ namespace AdminDashboard.Controllers
             return "U1001";
         }
 
->>>>>>> origin/ThanhToanMuaVe
         // GET: /TaiXe/LichLamViec
         public async Task<IActionResult> LichLamViec()
         {

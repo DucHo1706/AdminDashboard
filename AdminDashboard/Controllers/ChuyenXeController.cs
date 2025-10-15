@@ -7,18 +7,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AdminDashboard.Controllers
 {
-	public class ChuyenXeController : Controller
-	{
-		private readonly Db27524Context _context; // Thay Db27524Context bằng tên DbContext của bạn nếu khác
+    public class ChuyenXeController : Controller
+    {
+        private readonly Db27524Context _context; // Thay Db27524Context bằng tên DbContext của bạn nếu khác
 
-		public ChuyenXeController(Db27524Context context)
-		{
-			_context = context;
-		}
+        public ChuyenXeController(Db27524Context context)
+        {
+            _context = context;
+        }
 
-		// GET: ChuyenXe
-		public async Task<IActionResult> Index()
-		{
+        // GET: ChuyenXe
+        public async Task<IActionResult> Index()
+        {
             var chuyenXes = await _context.ChuyenXe
          .Include(c => c.LoTrinh)
              .ThenInclude(lt => lt.TramDiNavigation)
@@ -33,30 +33,27 @@ namespace AdminDashboard.Controllers
 
         // GET: ChuyenXe/Details/5
         public async Task<IActionResult> Details(string id)
-		{
-			if (id == null) return NotFound();
+        {
+            if (id == null) return NotFound();
 
-			var chuyenXe = await _context.ChuyenXe
-				.Include(c => c.LoTrinh)
-				.Include(c => c.Xe)
-				.FirstOrDefaultAsync(m => m.ChuyenId == id);
+            var chuyenXe = await _context.ChuyenXe
+                .Include(c => c.LoTrinh)
+                .Include(c => c.Xe)
+                .FirstOrDefaultAsync(m => m.ChuyenId == id);
 
-			if (chuyenXe == null) return NotFound();
+            if (chuyenXe == null) return NotFound();
 
-			return View(chuyenXe);
-		}
+            return View(chuyenXe);
+        }
 
-		// GET: ChuyenXe/Create
-		public IActionResult Create()
-		{
-			PopulateDropdownLists();
+        // GET: ChuyenXe/Create
+        public IActionResult Create()
+        {
+            PopulateDropdownLists();
             return View();
-		}
+        }
 
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/ThanhToanMuaVe
         // POST: ChuyenXe/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -68,10 +65,7 @@ namespace AdminDashboard.Controllers
             ModelState.Remove("Xe");
             ModelState.Remove("TaiXe");
 
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/ThanhToanMuaVe
             if (ModelState.IsValid)
             {
                 chuyenXe.ChuyenId = Guid.NewGuid().ToString("N").Substring(0, 8);
@@ -97,30 +91,28 @@ namespace AdminDashboard.Controllers
 
         // GET: ChuyenXe/Edit/5
         public async Task<IActionResult> Edit(string id)
-		{
-			if (id == null) return NotFound();
+        {
+            if (id == null) return NotFound();
 
-			var chuyenXe = await _context.ChuyenXe.FindAsync(id);
-			if (chuyenXe == null) return NotFound();
+            var chuyenXe = await _context.ChuyenXe.FindAsync(id);
+            if (chuyenXe == null) return NotFound();
 
-			PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
-			return View(chuyenXe);
-		}
+            PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
+            return View(chuyenXe);
+        }
 
-<<<<<<< HEAD
-        // POST: ChuyenXe/Edit/5
-        // POST: ChuyenXe/Edit
+
+       
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit([Bind("ChuyenId,LoTrinhId,XeId,NgayDi,GioDi,GioDenDuKien,TrangThai")] ChuyenXe chuyenXe)
+        public async Task<IActionResult> Edit(string id, [Bind("ChuyenId,LoTrinhId,XeId,NgayDi,GioDi,GioDenDuKien,TrangThai")] ChuyenXe chuyenXe)
         {
-            if (chuyenXe == null || string.IsNullOrEmpty(chuyenXe.ChuyenId))
-                return NotFound();
+            if (id != chuyenXe.ChuyenId) return NotFound();
 
-            // Loại bỏ validation cho các navigation property nếu cần
             ModelState.Remove("LoTrinh");
             ModelState.Remove("Xe");
-            // Nếu có TaiXe lỗi binding (nếu không bind), bỏ tương tự: ModelState.Remove("TaiXe");
+            ModelState.Remove("TaiXe");
 
             if (ModelState.IsValid)
             {
@@ -128,8 +120,6 @@ namespace AdminDashboard.Controllers
                 {
                     _context.Update(chuyenXe);
                     await _context.SaveChangesAsync();
-                    TempData["SuccessMessage"] = "Cập nhật chuyến xe thành công!";
-                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -138,48 +128,13 @@ namespace AdminDashboard.Controllers
                     else
                         throw;
                 }
+                return RedirectToAction(nameof(Index));
             }
 
-            // Nếu model không hợp lệ, nạp lại dropdown và trả view để hiển thị lỗi
             PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
             return View(chuyenXe);
         }
 
-=======
-		// POST: ChuyenXe/Edit/5
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(string id, [Bind("ChuyenId,LoTrinhId,XeId,NgayDi,GioDi,GioDenDuKien,TrangThai")] ChuyenXe chuyenXe)
-		{
-			if (id != chuyenXe.ChuyenId) return NotFound();
-
-			ModelState.Remove("LoTrinh");
-			ModelState.Remove("Xe");
-			ModelState.Remove("TaiXe");
-
-			if (ModelState.IsValid)
-			{
-				try
-				{
-					_context.Update(chuyenXe);
-					await _context.SaveChangesAsync();
-				}
-				catch (DbUpdateConcurrencyException)
-				{
-					if (!_context.ChuyenXe.Any(e => e.ChuyenId == chuyenXe.ChuyenId))
-						return NotFound();
-					else
-						throw;
-				}
-				return RedirectToAction(nameof(Index));
-			}
-
-			PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
-			return View(chuyenXe);
-		}
->>>>>>> origin/ThanhToanMuaVe
-
-        // GET: ChuyenXe/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null) return NotFound();
@@ -230,11 +185,11 @@ namespace AdminDashboard.Controllers
         }
 
 
-		public async Task<IActionResult> AssignDriver(string id)
-		{
-			if (id == null) return NotFound();
+        public async Task<IActionResult> AssignDriver(string id)
+        {
+            if (id == null) return NotFound();
 
-			var chuyenXeCanPhanCong = await _context.ChuyenXe
+            var chuyenXeCanPhanCong = await _context.ChuyenXe
                 .Include(c => c.Xe)
         .Include(c => c.LoTrinh) // Tải Lộ Trình
             .ThenInclude(lt => lt.TramDiNavigation) // Tải Trạm Đi BÊN TRONG Lộ Trình
@@ -285,41 +240,41 @@ namespace AdminDashboard.Controllers
 
 
             ViewBag.AvailableDrivers = new SelectList(availableDrivers, "UserId", "HoTen");
-			return View(chuyenXeCanPhanCong);
-		}
+            return View(chuyenXeCanPhanCong);
+        }
 
-		// POST: ChuyenXe/AssignDriver/chuyen-xe-id-123
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> AssignDriver(string ChuyenId, string TaiXeId)
-		{
-			if (ChuyenId == null || TaiXeId == null) return BadRequest("Thông tin không hợp lệ.");
+        // POST: ChuyenXe/AssignDriver/chuyen-xe-id-123
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignDriver(string ChuyenId, string TaiXeId)
+        {
+            if (ChuyenId == null || TaiXeId == null) return BadRequest("Thông tin không hợp lệ.");
 
-			var chuyenXe = await _context.ChuyenXe.FindAsync(ChuyenId);
-			if (chuyenXe == null) return NotFound();
+            var chuyenXe = await _context.ChuyenXe.FindAsync(ChuyenId);
+            if (chuyenXe == null) return NotFound();
 
-			// Gán tài xế vào chuyến
-			chuyenXe.TaiXeId = TaiXeId;
+            // Gán tài xế vào chuyến
+            chuyenXe.TaiXeId = TaiXeId;
 
-			// Cập nhật trạng thái chuyến xe (nếu cần)
-			// Ví dụ: Sau khi có tài xế, chuyển sang "Chờ Khởi Hành"
-			if (chuyenXe.TrangThai == TrangThaiChuyenXe.DaLenLich)
-			{
-				chuyenXe.TrangThai = TrangThaiChuyenXe.ChoKhoiHanh;
-			}
+            // Cập nhật trạng thái chuyến xe (nếu cần)
+            // Ví dụ: Sau khi có tài xế, chuyển sang "Chờ Khởi Hành"
+            if (chuyenXe.TrangThai == TrangThaiChuyenXe.DaLenLich)
+            {
+                chuyenXe.TrangThai = TrangThaiChuyenXe.ChoKhoiHanh;
+            }
 
-			_context.Update(chuyenXe);
-			await _context.SaveChangesAsync();
+            _context.Update(chuyenXe);
+            await _context.SaveChangesAsync();
 
-			TempData["SuccessMessage"] = "Đã phân công tài xế thành công!";
-			return RedirectToAction(nameof(Index));
-		}
-
-<<<<<<< HEAD
+            TempData["SuccessMessage"] = "Đã phân công tài xế thành công!";
+            return RedirectToAction(nameof(Index));
+        }
 
 
-	}
-=======
+
+
+
+
         public IActionResult TimKiem(string diemDiId, string diemDenId, DateTime ngayDi)
         {// Truy vấn CSDL để lấy các chuyến xe phù hợp
             var ketQua = _context.ChuyenXe
@@ -350,5 +305,4 @@ namespace AdminDashboard.Controllers
     }
 
 
->>>>>>> origin/ThanhToanMuaVe
 }

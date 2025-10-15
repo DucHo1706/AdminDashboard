@@ -1,10 +1,7 @@
 ﻿using AdminDashboard.Models;
 using AdminDashboard.TransportDBContext;
 using Microsoft.AspNetCore.Mvc;
-<<<<<<< HEAD
-=======
 using Microsoft.AspNetCore.Mvc.Rendering;
->>>>>>> origin/ThanhToanMuaVe
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -21,11 +18,9 @@ namespace AdminDashboard.Controllers
 
         public IActionResult Home_User()
         {
-<<<<<<< HEAD
-            return View();
-        }
 
-=======
+
+
             // Lấy tất cả các trạm để hiển thị trong dropdown
             var danhSachTram = _context.Tram.ToList();
 
@@ -34,7 +29,6 @@ namespace AdminDashboard.Controllers
             return View();
         }
       
->>>>>>> origin/ThanhToanMuaVe
         public async Task<IActionResult> Account()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -123,8 +117,8 @@ namespace AdminDashboard.Controllers
                 return View(model);
             }
         }
-<<<<<<< HEAD
-=======
+
+
 
         public async Task<IActionResult> PurchaseHistory()
         {
@@ -146,6 +140,6 @@ namespace AdminDashboard.Controllers
 
             return View(donHangs);
         }
->>>>>>> origin/ThanhToanMuaVe
+
     }
 }

@@ -6,14 +6,9 @@ namespace AdminDashboard.Models
     public enum TrangThaiNguoiDung
     {
         HoatDong,
-        BiKhoa
-<<<<<<< HEAD
-       
-    }
-=======
+        BiKhoa  
     }
 
->>>>>>> origin/ThanhToanMuaVe
     public class NguoiDung
     {
         [Key]
@@ -30,33 +25,23 @@ namespace AdminDashboard.Models
         public string Email { get; set; }
 
         [Required]
-<<<<<<< HEAD
+
         [StringLength(255)] 
         public string MatKhau { get; set; }
 
         [StringLength(10)] 
-=======
-        [StringLength(255)]
-        public string MatKhau { get; set; }
 
-        [StringLength(10)]
->>>>>>> origin/ThanhToanMuaVe
         public string? SoDienThoai { get; set; }
 
         public DateTime? NgaySinh { get; set; }
 
         [Required]
-<<<<<<< HEAD
+
         public TrangThaiNguoiDung TrangThai { get; set; } = TrangThaiNguoiDung.HoatDong; // Sử dụng Enum
 
         // Mối quan hệ nhiều-nhiều với VaiTro thông qua bảng UserRole
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     }
 }
-=======
-        public TrangThaiNguoiDung TrangThai { get; set; } = TrangThaiNguoiDung.HoatDong;
 
-         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
-    }
-}
->>>>>>> origin/ThanhToanMuaVe
+
