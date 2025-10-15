@@ -23,9 +23,53 @@
         }
 
         footer {
+            background-color: #212529 !important;
+            color: #adb5bd; 
+            padding: 30px 0;
             flex-shrink: 0;
+            font-size: 14px;
+            border-top: none; 
         }
 
+        .footer-section h5 {
+            color: white;
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+            .footer-section ul li {
+                margin-bottom: 8px;
+            }
+
+                .footer-section ul li a {
+                    color: #adb5bd;
+                    text-decoration: none;
+                    transition: color 0.2s;
+                }
+
+                    .footer-section ul li a:hover {
+                        color: white;
+                    }
+
+
+        .dangky-logo {
+            max-width: 120px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+
+        .footer-bottom {
+            border-top: 1px solid #495057;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
         .hover-text {
             color: black;
         }
@@ -149,9 +193,59 @@
         </main>
     </div>
 
-    <footer class="bg-dark text-white py-4 mt-auto">
-        <div class="container text-center">
-            &copy; 2025 - GoSix - <a class="text-light text-decoration-underline" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="bg-dark text-white pt-4 pb-4">
+        <div class="container">
+            <div class="row pb-4">
+
+                <div class="col-6 col-md-3 footer-section">
+                    <h5>GOSIX - Đi nhanh, Sống trọn</h5>
+                    <img src="~/css/images/logo_web.png" alt="Đăng ký Logo" class="dangky-logo" />
+                </div>
+
+                <div class="col-6 col-md-3 footer-section">
+                    <h5>Thông tin</h5>
+                    <ul>
+                        <li><a href="#" class="text-decoration-none">Điều khoản & Điều kiện</a></li>
+                        <li><a href="#" class="text-decoration-none">Chính sách bảo mật</a></li>
+                        <li><a href="#" class="text-decoration-none">Quy chế</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-6 col-md-3 footer-section mt-3 mt-md-0">
+                    <h5>Về GoSix</h5>
+                    <ul>
+                        <li><a href="#" class="text-decoration-none">Về chúng tôi</a></li>
+                        <li><a href="#" class="text-decoration-none">Liên hệ</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-6 col-md-3 footer-section mt-3 mt-md-0">
+                    <h5>Đặt</h5>
+                    <ul>
+                        <li><a href="#" class="text-decoration-none">Nhà Xe Limousine</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="row align-items-end">
+                    <div class="col-12 col-lg-9 text-start">
+                        <p class="mb-1">
+                            Công ty TNHH GoSix Việt Nam<br />
+                            Email: <a href="mailto:contact@gosix.vn" class="text-decoration-none text-white-50">contact@gosix.vn</a> | Liên hệ: **1900999999**
+                        </p>
+                        <p class="mb-1">
+                            Địa chỉ văn phòng: Tầng 6 và 7, Tòa nhà Mê Linh Point, Số 2 Ngô Đức Kế, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh
+                        </p>
+                        <p class="mb-2">
+                            Số Giấy chứng nhận đăng ký kinh doanh: 0317772069 được cấp bởi Sở Kế hoạch đầu tư Thành phố Hồ Chí Minh lần đầu ngày 4/6/2023.
+                        </p>
+                        <p class="mb-0 text-white-50">
+                            &copy; 2025 GoSix Vietnam All Rights Reserved
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     </footer>
 

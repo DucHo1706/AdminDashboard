@@ -70,10 +70,20 @@
                 background: rgba(255, 255, 255, 0.9);
                 color: #333;
                 }
+        hr {
+            max-width: 900px;
+            height: 3px;
+            background-color: aqua;
+            border: none;
+            border-radius: 3px;
+            margin: 0 auto 80px;
+        }
+
     </style>
 </head>
 <body>
     <h1>@ViewData["Title"]</h1>
+    <hr />
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show d-flex align-items-center justify-content-between mx-auto"
@@ -205,8 +215,16 @@
                 deleteModal.querySelector('#deleteXe').textContent = xe;
                 deleteModal.querySelector('#deleteNgayDi').textContent = ngaydi;
             });
+             setTimeout(() => {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 1500);
         </script>
     }
+
 
     <p>
         <a asp-action="Create" class="btn_add">

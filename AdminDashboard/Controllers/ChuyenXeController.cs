@@ -99,36 +99,43 @@ namespace AdminDashboard.Controllers
 			return View(chuyenXe);
 		}
 
-		// POST: ChuyenXe/Edit/5
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(string id, [Bind("ChuyenId,LoTrinhId,XeId,NgayDi,GioDi,GioDenDuKien,TrangThai")] ChuyenXe chuyenXe)
-		{
-			if (id != chuyenXe.ChuyenId) return NotFound();
+        // POST: ChuyenXe/Edit/5
+        // POST: ChuyenXe/Edit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit([Bind("ChuyenId,LoTrinhId,XeId,NgayDi,GioDi,GioDenDuKien,TrangThai")] ChuyenXe chuyenXe)
+        {
+            if (chuyenXe == null || string.IsNullOrEmpty(chuyenXe.ChuyenId))
+                return NotFound();
 
-			ModelState.Remove("LoTrinh");
-			ModelState.Remove("Xe");
+            // Loại bỏ validation cho các navigation property nếu cần
+            ModelState.Remove("LoTrinh");
+            ModelState.Remove("Xe");
+            // Nếu có TaiXe lỗi binding (nếu không bind), bỏ tương tự: ModelState.Remove("TaiXe");
 
-			if (ModelState.IsValid)
-			{
-				try
-				{
-					_context.Update(chuyenXe);
-					await _context.SaveChangesAsync();
-				}
-				catch (DbUpdateConcurrencyException)
-				{
-					if (!_context.ChuyenXe.Any(e => e.ChuyenId == chuyenXe.ChuyenId))
-						return NotFound();
-					else
-						throw;
-				}
-				return RedirectToAction(nameof(Index));
-			}
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(chuyenXe);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Cập nhật chuyến xe thành công!";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!_context.ChuyenXe.Any(e => e.ChuyenId == chuyenXe.ChuyenId))
+                        return NotFound();
+                    else
+                        throw;
+                }
+            }
 
-			PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
-			return View(chuyenXe);
-		}
+            // Nếu model không hợp lệ, nạp lại dropdown và trả view để hiển thị lỗi
+            PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
+            return View(chuyenXe);
+        }
+
 
         // GET: ChuyenXe/Delete/5
         public async Task<IActionResult> Delete(string id)

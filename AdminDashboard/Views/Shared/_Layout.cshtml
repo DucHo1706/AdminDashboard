@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en" class="h-100">
+<html lang="vi" class="h-100">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,175 +8,309 @@
     <link rel="shortcut icon" href="~/css/images/icon_logo.png" type="image/x-icon" />
     <link rel="icon" href="~/css/images/icon_logo.png" type="image/png" />
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/AdminDashboard.styles.css" asp-append-version="true" />
+
     <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+            background-color: #f8f9fa;
+        }
+
         body {
-            padding-top: 80px;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
 
-        main {
-            flex: 1 0 auto;
+        /* Wrapper */
+        .wrapper {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
         }
 
+        /* Sidebar */
+        .sidebar {
+            background-color: orange;
+            color: black;
+            width: 230px;
+            min-height: 100vh;
+            transition: width 0.3s ease;
+            padding-top: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-x: hidden;
+            z-index: 1030;
+        }
+
+            .sidebar.collapsed {
+                width: 70px;
+            }
+
+            .sidebar .logo {
+                text-align: center;
+                margin-bottom: 30px;
+                transition: all 0.3s ease;
+            }
+
+                .sidebar .logo img {
+                    max-height: 40px;
+                    transition: all 0.3s ease;
+                }
+
+            .sidebar.collapsed .logo img {
+                max-height: 18px;
+            }
+
+            .sidebar .nav-link {
+                color: black;
+                font-size: 17px;
+                padding: 10px 15px;
+                border-radius: 8px;
+                margin: 5px 10px;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                white-space: nowrap;
+            }
+
+                .sidebar .nav-link:hover {
+                    background-color: #ff8c00;
+                    color: white;
+                    text-decoration: none;
+                    transform: translateX(3px);
+                }
+
+                .sidebar .nav-link i {
+                    font-size: 20px;
+                }
+
+            .sidebar.collapsed .nav-link span {
+                display: none;
+            }
+
+        /* User section */
+        .user-section {
+            padding: 0 15px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.collapsed .user-section .dropdown,
+        .sidebar.collapsed .user-section select {
+            display: none;
+        }
+
+        .sidebar.collapsed .user-section .user-icon {
+            display: flex !important;
+            justify-content: center;
+            font-size: 22px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .user-icon {
+            display: none;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1 0 auto;
+            margin-left: 230px;
+            transition: margin-left 0.3s ease;
+            padding: 20px;
+        }
+
+            .main-content.collapsed {
+                margin-left: 70px;
+            }
+
+        .toggle-btn {
+            position: fixed;
+            top: 10px;
+            left: 240px;
+            background-color: orange;
+            border: none;
+            color: white;
+            font-size: 22px;
+            border-radius: 5px;
+            padding: 5px 10px;
+            transition: left 0.3s ease;
+            z-index: 1050;
+        }
+
+        .sidebar.collapsed ~ .toggle-btn {
+            left: 80px;
+        }
+
+        /* Footer */
         footer {
+            width: 100%;
+            background: #343a40;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
             flex-shrink: 0;
         }
 
-        .hover-text {
-            color: black;
-        }
-
-            .hover-text:hover {
-                display: flex;
-                align-items: center;
-                font-weight: bold;
-                flex-wrap: nowrap;
-                height: 40px;
-                padding: 10px 20px;
-                border-radius: 5px;
-                color: white;
-                text-decoration: underline;
-                font-size: 18px;
-            }
-
-        .nav-item {
-            justify-content: center;
-            align-items: center;
-            padding-left: 25px;
-            padding-right: 10px;
-            font-size: 18px;
-        }
-
-        select {
-            padding: 8px;
-            width: 120px;
-            font-size: 18px;
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            border: none;
-            background-color: orange;
-        }
-
-            select:hover {
-                cursor: pointer;
-                text-decoration: underline;
-                color: white;
-                font-weight: bold;
-            }
-
-            select:focus {
-                outline: none;
-                border: none;
-            }
-
         .username-text {
+            font-weight: bold;
             color: black;
-            font-size: 18px;
-            padding: 8px;
         }
 
             .username-text:hover {
                 color: white;
-                font-weight: bold;
-                text-decoration: underline;
             }
-     </style>
+
+        select {
+            background: white;
+            border: none;
+            border-radius: 5px;
+            padding: 6px;
+        }
+
+            select:hover {
+                cursor: pointer;
+            }
+        /* FOOTER */
+        footer {
+            background-color: #212529 !important; 
+            color: #adb5bd; 
+            padding: 30px 0;
+            flex-shrink: 0;
+            font-size: 14px;
+            border-top: none; 
+        }
+        .footer-bottom {
+            border-top: 1px solid #495057;
+            padding-top: 20px;
+            margin-top: 20px;
+            padding-left: 150px;
+            margin-left: 150px;
+        }
+    </style>
 </head>
+
 <body>
-    <header> 
-        <nav class="navbar navbar-expand-lg navbar-light shadow-sm fixed-top" style="background-color:orange">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="~/css/images/logo_web.png" class="img-fluid" style="max-height:30px; padding-left:20px;" alt="Bus" />
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="sidebar">
+            <div class="logo">
+                <a asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/css/images/logo_web.png" alt="Logo" />
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarContent" style="padding-right:20px">
-                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link hover-text" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link hover-text" asp-area="" asp-controller="Home_User" asp-action="Home_User">Privacy</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link hover-text" asp-area="" asp-controller="Tram" asp-action="Index">Tram</a>
-                        </li>
-
-                          <li class="nav-item">
-                            <a class="nav-link hover-text" asp-area="" asp-controller="ChuyenXe" asp-action="Index">Chuyen Xe</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link hover-text" asp-area="Admin" asp-controller="LoaiXe" asp-action="Index">Loại Xe</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link hover-text" asp-area="Admin" asp-controller="Xe" asp-action="Index"> Xe</a>
-                            </li>
-                        <li class="nav-item">
-                            @if (User.Identity.IsAuthenticated)
-                            {
-                                <div class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle username-text" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        @User.Identity.Name
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="userDropdown">
-                                        <li><a class="dropdown-item" asp-controller="Auth" asp-action="Account">Thông tin tài khoản</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Auth" asp-action="Logout">Đăng xuất</a></li>
-                                    </ul>
-                                </div>
-                            }
-                            else
-                            {
-                                <select id="viewSelector">
-                                    <option value="" disabled selected>Tài khoản</option>
-                                    <option value="/Auth/Login">Đăng nhập</option>
-                                    <option value="/Auth/Register">Đăng kí</option>
-                                </select>
-                                <script>
-                                    document.getElementById("viewSelector").addEventListener("change", function () {
-                                        const selectedValue = this.value;
-                                        if (selectedValue) {
-                                            window.location.href = selectedValue;
-                                        }
-                                    });
-                                </script>
-                            }
-                        </li>
-
-
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="LoTrinh" asp-action="Index">Lộ Trình</a>
-                        </li>
-
-                    </ul>
-                </div>
             </div>
-            
+
+            <ul class="nav flex-column">
+                <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index"><i class="bi bi-house"></i><span>Trang chủ</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Home_User" asp-action="Home_User"><i class="bi bi-lock"></i><span>Bảo mật</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Tram" asp-action="Index"><i class="bi bi-geo-alt"></i><span>Trạm</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="ChuyenXe" asp-action="Index"><i class="bi bi-bus-front"></i><span>Chuyến Xe</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="LoaiXe" asp-action="Index"><i class="bi bi-car-front"></i><span>Loại Xe</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Xe" asp-action="Index"><i class="bi bi-truck"></i><span>Xe</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="LoTrinh" asp-action="Index"><i class="bi bi-map"></i><span>Lộ Trình</span></a></li>
+            </ul>
+
+            <hr class="mx-3">
+
+            <div class="user-section">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <div class="dropdown">
+                        <a class="dropdown-toggle username-text" href="#" id="userDropdown" data-bs-toggle="dropdown">
+                            @User.Identity.Name
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-controller="Auth" asp-action="Account">Thông tin tài khoản</a></li>
+                            <li><a class="dropdown-item" asp-controller="Auth" asp-action="Logout">Đăng xuất</a></li>
+                        </ul>
+                    </div>
+                    <div class="user-icon">
+                        <i class="bi bi-person-circle" id="userIconCollapsed"></i>
+                    </div>
+                }
+                else
+                {
+                    <select id="viewSelector" class="form-select form-select-sm mt-2">
+                        <option value="" disabled selected>Tài khoản</option>
+                        <option value="/Auth/Login">Đăng nhập</option>
+                        <option value="/Auth/Register">Đăng ký</option>
+                    </select>
+                    <div class="user-icon">
+                        <i class="bi bi-person-circle" id="userIconCollapsed"></i>
+                    </div>
+                }
+            </div>
         </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+        <button id="toggleBtn" class="toggle-btn">☰</button>
+
+        <!-- Main content -->
+        <div id="mainContent" class="main-content">
+            <main role="main">
+                @RenderBody()
+            </main>
+        </div>
     </div>
 
-    <footer class="bg-dark text-white py-4 mt-auto">
-        <div class="container text-center">
-            &copy; 2025 - GoSix - <a class="text-light text-decoration-underline" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <!-- Footer -->
+    <footer class="bg-dark text-white pt-4 pb-4">
+        <div class="footer-bottom">
+                <div class="align-items-end">
+                    <div class=" text-start">
+                        <p class="mb-1">
+                            Công ty TNHH GoSix Việt Nam<br />
+                            Email: <a href="mailto:contact@gosix.vn" class="text-decoration-none text-white-50">contact@gosix.vn</a> | Liên hệ: **1900999999**
+                        </p>
+                        <p class="mb-1">
+                            Địa chỉ văn phòng: Tầng 6 và 7, Tòa nhà Mê Linh Point, Số 2 Ngô Đức Kế, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh
+                        </p>
+                        <p class="mb-2">
+                            Số Giấy chứng nhận đăng ký kinh doanh: 0317772069 được cấp bởi Sở Kế hoạch đầu tư Thành phố Hồ Chí Minh lần đầu ngày 4/6/2023.
+                        </p>
+                        <p class="mb-0 text-white-50">
+                            &copy; 2025 GoSix Vietnam All Rights Reserved
+                        </p>
+                    </div>
+                </div>
         </div>
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const sidebar = document.getElementById("sidebar");
+        const mainContent = document.getElementById("mainContent");
+        const toggleBtn = document.getElementById("toggleBtn");
+
+        toggleBtn.addEventListener("click", function () {
+            sidebar.classList.toggle("collapsed");
+            mainContent.classList.toggle("collapsed");
+        });
+
+        const selector = document.getElementById("viewSelector");
+        if (selector) {
+            selector.addEventListener("change", function () {
+                const selectedValue = this.value;
+                if (selectedValue) window.location.href = selectedValue;
+            });
+        }
+
+        const userIconCollapsed = document.getElementById("userIconCollapsed");
+        if (userIconCollapsed) {
+            userIconCollapsed.addEventListener("click", function () {
+                sidebar.classList.remove("collapsed");
+                mainContent.classList.remove("collapsed");
+            });
+        }
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

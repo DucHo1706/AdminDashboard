@@ -200,7 +200,10 @@
             img:hover {
                 transform: scale(1.05);
             }
-
+        .out:hover{
+            transform: scale(1.2);
+            transition: transform 0.2s ease;
+        }
     </style>
 </head>
 
@@ -212,7 +215,7 @@
         <form asp-action="Create" class="form-submit-once">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <div class="d-flex justify-content-between align-items-center">
-                    <a asp-action="Index" class="text-decoration-none text-danger">
+                    <a asp-action="Index" class="text-decoration-none text-danger out">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                              class="bi bi-box-arrow-left" viewBox="0 0 16 16">
                             <path fill-rule="evenodd"
