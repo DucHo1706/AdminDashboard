@@ -1,0 +1,15 @@
+﻿@model AdminDashboard.Models.LoaiXe
+
+<h2>Sửa Trạm</h2>
+
+<form asp-action="Edit">
+    <input type="hidden" asp-for="LoaiXeId" />
+    <div class="form-group">
+        <label asp-for="TenLoaiXe" class="control-label"></label>
+        <input asp-for="TenLoaiXe" class="form-control" />
+        <span asp-validation-for="TenLoaiXe" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Cập nhật</button> |
+    <a asp-action="Index">Quay lại</a>
+</form>

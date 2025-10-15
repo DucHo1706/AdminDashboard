@@ -1,0 +1,65 @@
+﻿@using AdminDashboard.Models.TrangThai
+@model AdminDashboard.Models.ChuyenXe
+
+@{
+    ViewData["Title"] = "Chỉnh sửa Chuyến xe";
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Edit" asp-route-id="@Model.ChuyenId">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ChuyenId" />
+
+            <div class="form-group mb-3">
+                <label asp-for="LoTrinhId" class="control-label">Lộ Trình</label>
+                <select asp-for="LoTrinhId" class="form-control" asp-items="ViewBag.LoTrinhId"></select>
+                <span asp-validation-for="LoTrinhId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="XeId" class="control-label">Xe</label>
+                <select asp-for="XeId" class="form-control" asp-items="ViewBag.XeId"></select>
+                <span asp-validation-for="XeId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="NgayDi" class="control-label">Ngày Đi</label>
+                <input asp-for="NgayDi" class="form-control" type="date" />
+                <span asp-validation-for="NgayDi" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="GioDi" class="control-label">Giờ Đi</label>
+                <input asp-for="GioDi" class="form-control" type="time" />
+                <span asp-validation-for="GioDi" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="GioDenDuKien" class="control-label">Giờ Đến Dự Kiến</label>
+                <input asp-for="GioDenDuKien" class="form-control" type="time" />
+                <span asp-validation-for="GioDenDuKien" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="TrangThai" class="control-label"></label>
+            
+                <select asp-for="TrangThai" asp-items="Html.GetEnumSelectList<TrangThaiChuyenXe>()" class="form-control"></select>
+                <span asp-validation-for="TrangThai" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Lưu thay đổi" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}   

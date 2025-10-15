@@ -1,0 +1,292 @@
+﻿@using AdminDashboard.Models.TrangThai
+@model AdminDashboard.Models.ChuyenXe
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        body {
+            background: url('https://images.unsplash.com/photo-1583417319070-4a69db38a482?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1740') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 40px;
+            font-weight: 700;
+            color: #111827;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .form{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+        }
+        .form-container {
+            background: rgba(255, 255, 255, 0.8); /* nền trắng mờ */
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 500px;
+            padding-bottom: 20px;
+            padding-top: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            display: inline-block;  
+            flex-direction: column;
+            justify-content:center;
+            align-items:center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #111827;
+            font-size: 16px;
+        }
+
+        input.form-control,
+        select.form-control {
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            input.form-control:focus,
+            select.form-control:focus {
+                border-color: #3b82f6;
+                box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+                outline: none;
+            }
+
+        button.btn,
+        a.btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        button.btn-primary {
+            background-color: #3b82f6;
+            border: none;
+            color: #fff;
+            transition: background 0.3s ease;
+        }
+
+            button.btn-primary:hover {
+                background-color: #2563eb;
+            }
+
+        a.btn-secondary {
+            background-color: #e5e7eb;
+            border: none;
+            color: #111827;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+            a.btn-secondary:hover {
+                background-color: #d1d5db;
+            }
+
+        .text-danger {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        hr {
+            border: none;
+            height: 1px;
+            background-color: #ccc;
+            margin-bottom: 20px;
+        }
+            button {
+          position: relative;
+          padding: 10px 20px;
+          border-radius: 7px;
+          border: 1px solid #FF6633;
+          font-size: 14px;
+          text-transform: uppercase;
+          font-weight: 600;
+          letter-spacing: 2px;
+          background: transparent;
+          color: black;
+          overflow: hidden;
+          box-shadow: 0 0 0 0 transparent;
+          -webkit-transition: all 0.2s ease-in;
+          -moz-transition: all 0.2s ease-in;
+          transition: all 0.2s ease-in;
+        }
+
+        button:hover {
+          background: #FF6633;
+          box-shadow: 0 0 30px 5px #FF9933;
+          color: white;
+          -webkit-transition: all 0.2s ease-out;
+          -moz-transition: all 0.2s ease-out;
+          transition: all 0.2s ease-out;
+        }
+
+        button:hover::before {
+          -webkit-animation: sh02 0.5s 0s linear;
+          -moz-animation: sh02 0.5s 0s linear;
+          animation: sh02 0.5s 0s linear;
+        }
+
+        button::before {
+          content: '';
+          display: block;
+          width: 0px;
+          height: 86%;
+          position: absolute;
+          top: 7%;
+          left: 0%;
+          opacity: 0;
+          background: #fff;
+          box-shadow: 0 0 50px 30px #fff;
+          -webkit-transform: skewX(-20deg);
+          -moz-transform: skewX(-20deg);
+          -ms-transform: skewX(-20deg);
+          -o-transform: skewX(-20deg);
+          transform: skewX(-20deg);
+        }
+
+        @@keyframes sh02 {
+          from {
+            opacity: 0;
+            left: 0%;
+          }
+
+          50% {
+            opacity: 1;
+          }
+
+          to {
+            opacity: 0;
+            left: 100%;
+          }
+        }
+
+        button:active {
+          box-shadow: 0 0 0 0 transparent;
+          -webkit-transition: box-shadow 0.2s ease-in;
+          -moz-transition: box-shadow 0.2s ease-in;
+          transition: box-shadow 0.2s ease-in;
+        }
+
+        img {
+            transition: transform 0.2s ease;
+        }
+
+            img:hover {
+                transform: scale(1.05);
+            }
+
+    </style>
+</head>
+
+<body>
+    <h2>Tạo Chuyến Xe Mới</h2>
+    <hr />
+    <div class="form">
+        <div class="form-container">
+        <form asp-action="Create" class="form-submit-once">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <a asp-action="Index" class="text-decoration-none text-danger">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                             class="bi bi-box-arrow-left" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd"
+                                  d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0z" />
+                            <path fill-rule="evenodd"
+                                  d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708z" />
+                        </svg>
+                    </a>
+
+                    <img src="~/css/Images/logo_web.png" alt="Bus Icon" style="width:125px; height:35px; display:block; margin:auto;" />
+                </div>
+                <hr  class="bg-black"/>
+                <div class="form-group">
+                    <label asp-for="LoTrinhId" class="control-label">Lộ Trình</label>
+                    <select asp-for="LoTrinhId" class="form-control" asp-items="ViewBag.LoTrinhId">
+                        <option value="">-- Chọn Lộ Trình --</option>
+                    </select>
+                    <span asp-validation-for="LoTrinhId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="XeId" class="control-label">Xe</label>
+                    <select asp-for="XeId" class="form-control" asp-items="ViewBag.XeId">
+                        <option value="">-- Chọn Xe --</option>
+                    </select>
+                    <span asp-validation-for="XeId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="NgayDi" class="control-label">Ngày Đi</label>
+                    <input asp-for="NgayDi" class="form-control" type="date" />
+                    <span asp-validation-for="NgayDi" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="GioDi" class="control-label">Giờ Đi</label>
+                    <input asp-for="GioDi" class="form-control" type="time" />
+                    <span asp-validation-for="GioDi" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="GioDenDuKien" class="control-label">Giờ Đến Dự Kiến</label>
+                    <input asp-for="GioDenDuKien" class="form-control" type="time" />
+                    <span asp-validation-for="GioDenDuKien" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="TrangThai" class="control-label">Trạng Thái</label>
+                    <select asp-for="TrangThai" asp-items="Html.GetEnumSelectList<TrangThaiChuyenXe>()" class="form-control">
+                        <option value="">-- Chọn trạng thái ban đầu --</option>
+                    </select>
+                    <span asp-validation-for="TrangThai" class="text-danger"></span>
+                </div>
+
+                <div class="text-center mt-3">
+                    <button type="submit">Tạo mới</button>
+                </div>
+            </form>
+        </div>
+
+        @section Scripts {
+            @{
+                await Html.RenderPartialAsync("_ValidationScriptsPartial");
+            }
+        }
+    </div>
+    <script>
+        setTimeout(() => {
+            const alert = document.querySelector('.alert');
+            if (alert) {
+                alert.classList.remove('show');
+                setTimeout(() => alert.remove(), 500);
+            }
+        }, 3000);
+    </script>
+
+</body>
