@@ -53,6 +53,10 @@ namespace AdminDashboard.Controllers
             return View();
 		}
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/ThanhToanMuaVe
         // POST: ChuyenXe/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -64,6 +68,10 @@ namespace AdminDashboard.Controllers
             ModelState.Remove("Xe");
             ModelState.Remove("TaiXe");
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/ThanhToanMuaVe
             if (ModelState.IsValid)
             {
                 chuyenXe.ChuyenId = Guid.NewGuid().ToString("N").Substring(0, 8);
@@ -99,6 +107,7 @@ namespace AdminDashboard.Controllers
 			return View(chuyenXe);
 		}
 
+<<<<<<< HEAD
         // POST: ChuyenXe/Edit/5
         // POST: ChuyenXe/Edit
         [HttpPost]
@@ -136,6 +145,39 @@ namespace AdminDashboard.Controllers
             return View(chuyenXe);
         }
 
+=======
+		// POST: ChuyenXe/Edit/5
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Edit(string id, [Bind("ChuyenId,LoTrinhId,XeId,NgayDi,GioDi,GioDenDuKien,TrangThai")] ChuyenXe chuyenXe)
+		{
+			if (id != chuyenXe.ChuyenId) return NotFound();
+
+			ModelState.Remove("LoTrinh");
+			ModelState.Remove("Xe");
+			ModelState.Remove("TaiXe");
+
+			if (ModelState.IsValid)
+			{
+				try
+				{
+					_context.Update(chuyenXe);
+					await _context.SaveChangesAsync();
+				}
+				catch (DbUpdateConcurrencyException)
+				{
+					if (!_context.ChuyenXe.Any(e => e.ChuyenId == chuyenXe.ChuyenId))
+						return NotFound();
+					else
+						throw;
+				}
+				return RedirectToAction(nameof(Index));
+			}
+
+			PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
+			return View(chuyenXe);
+		}
+>>>>>>> origin/ThanhToanMuaVe
 
         // GET: ChuyenXe/Delete/5
         public async Task<IActionResult> Delete(string id)
@@ -273,7 +315,40 @@ namespace AdminDashboard.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
+<<<<<<< HEAD
 
 
 	}
+=======
+        public IActionResult TimKiem(string diemDiId, string diemDenId, DateTime ngayDi)
+        {// Truy vấn CSDL để lấy các chuyến xe phù hợp
+            var ketQua = _context.ChuyenXe
+                .Include(c => c.LoTrinh)
+                    .ThenInclude(lt => lt.TramDiNavigation) // Lấy thông tin trạm đi
+                .Include(c => c.LoTrinh)
+                    .ThenInclude(lt => lt.TramToiNavigation) // Lấy thông tin trạm tới
+                .Include(c => c.Xe)
+                    .ThenInclude(x => x.LoaiXe) // Lấy thông tin loại xe
+                .Where(c => c.LoTrinh.TramDi == diemDiId &&
+                            c.LoTrinh.TramToi == diemDenId &&
+                            c.NgayDi.Date == ngayDi.Date)
+                .OrderBy(c => c.GioDi) // Sắp xếp theo giờ đi sớm nhất
+                .ToList();
+
+            // Lấy tên trạm đi, trạm đến và ngày đi để hiển thị lại cho người dùng trên trang kết quả
+            var tramDi = _context.Tram.Find(diemDiId);
+            var tramDen = _context.Tram.Find(diemDenId);
+
+            if (tramDi != null) ViewBag.DiemDi = tramDi.TenTram;
+            if (tramDen != null) ViewBag.DiemDen = tramDen.TenTram;
+            ViewBag.NgayDi = ngayDi.ToString("dd/MM/yyyy");
+
+            // Trả về View "TimKiem" và truyền danh sách kết quả tìm được
+            return View(ketQua);
+        }
+
+    }
+
+
+>>>>>>> origin/ThanhToanMuaVe
 }

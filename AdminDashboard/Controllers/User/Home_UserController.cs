@@ -1,6 +1,10 @@
 ﻿using AdminDashboard.Models;
 using AdminDashboard.TransportDBContext;
 using Microsoft.AspNetCore.Mvc;
+<<<<<<< HEAD
+=======
+using Microsoft.AspNetCore.Mvc.Rendering;
+>>>>>>> origin/ThanhToanMuaVe
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -17,9 +21,20 @@ namespace AdminDashboard.Controllers
 
         public IActionResult Home_User()
         {
+<<<<<<< HEAD
             return View();
         }
 
+=======
+            // Lấy tất cả các trạm để hiển thị trong dropdown
+            var danhSachTram = _context.Tram.ToList();
+
+            // Dùng ViewBag hoặc ViewModel để truyền danh sách này ra View
+            ViewBag.DanhSachTram = new SelectList(danhSachTram, "IdTram", "TenTram");
+            return View();
+        }
+      
+>>>>>>> origin/ThanhToanMuaVe
         public async Task<IActionResult> Account()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -108,5 +123,29 @@ namespace AdminDashboard.Controllers
                 return View(model);
             }
         }
+<<<<<<< HEAD
+=======
+
+        public async Task<IActionResult> PurchaseHistory()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            // Giữ nguyên các đơn hết hạn ở trạng thái Chờ thanh toán để hiển thị bên "Hiện tại".
+            // Không auto-cancel và không giải phóng ghế tại đây; việc hủy sẽ do người dùng hoặc tác vụ khác xử lý.
+
+            var donHangs = await _context.DonHang
+                .Where(d => d.IDKhachHang == userId)
+                .Include(d => d.ChuyenXe).ThenInclude(cx => cx.LoTrinh).ThenInclude(lt => lt.TramDiNavigation)
+                .Include(d => d.ChuyenXe).ThenInclude(cx => cx.LoTrinh).ThenInclude(lt => lt.TramToiNavigation)
+                .OrderByDescending(d => d.NgayDat)
+                .ToListAsync();
+
+            return View(donHangs);
+        }
+>>>>>>> origin/ThanhToanMuaVe
     }
 }

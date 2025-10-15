@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 ﻿using AdminDashboard.TransportDBContext;
+=======
+﻿using AdminDashboard.Services;
+using AdminDashboard.TransportDBContext;
+>>>>>>> origin/ThanhToanMuaVe
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,8 +19,14 @@ builder.Services.AddDbContext<Db27524Context>(options =>
 
 // Add services to the container
 builder.Services.AddControllersWithViews();
+<<<<<<< HEAD
 
 // 🔑 Thêm Authentication & Cookie
+=======
+builder.Services.AddRazorPages();
+
+//  Thêm Authentication & Cookie
+>>>>>>> origin/ThanhToanMuaVe
 builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", options =>
     {
@@ -24,7 +35,11 @@ builder.Services.AddAuthentication("CookieAuth")
         options.AccessDeniedPath = "/Auth/AccessDenied"; // Khi bị từ chối
         options.ExpireTimeSpan = TimeSpan.FromHours(2);  // Cookie sống 2h
     });
+<<<<<<< HEAD
 
+=======
+builder.Services.AddScoped<IVnpayService, VnpayService>();
+>>>>>>> origin/ThanhToanMuaVe
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -42,7 +57,11 @@ app.UseRouting();
 //  Bắt buộc: Authentication phải trước Authorization
 app.UseAuthentication();
 app.UseAuthorization();
+<<<<<<< HEAD
 
+=======
+app.MapRazorPages();
+>>>>>>> origin/ThanhToanMuaVe
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

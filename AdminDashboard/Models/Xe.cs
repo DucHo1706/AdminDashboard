@@ -24,6 +24,10 @@ namespace AdminDashboard.Models
         public virtual ICollection<Ghe>? DanhSachGhe { get; set; }
 
         [NotMapped]
+<<<<<<< HEAD
         public int SoLuongGhe { get; set; } = 40;
+=======
+        public int SoLuongGhe { get; set; } = 0;
+>>>>>>> origin/ThanhToanMuaVe
     }
 }

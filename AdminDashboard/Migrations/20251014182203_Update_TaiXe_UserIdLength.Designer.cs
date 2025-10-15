@@ -4,6 +4,7 @@ using AdminDashboard.TransportDBContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AdminDashboard.Migrations
 {
     [DbContext(typeof(Db27524Context))]
-    partial class Db27524ContextModelSnapshot : ModelSnapshot
+    [Migration("20251014182203_Update_TaiXe_UserIdLength")]
+    partial class Update_TaiXe_UserIdLength
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -92,11 +95,8 @@ namespace AdminDashboard.Migrations
 
                     b.HasIndex("LoTrinhId");
 
-<<<<<<< HEAD
-=======
                     b.HasIndex("TaiXeId");
 
->>>>>>> origin/ThanhToanMuaVe
                     b.HasIndex("XeId");
 
                     b.ToTable("ChuyenXe");
@@ -121,12 +121,6 @@ namespace AdminDashboard.Migrations
                     b.Property<DateTime>("NgayDat")
                         .HasColumnType("datetime2");
 
-<<<<<<< HEAD
-=======
-                    b.Property<DateTime>("ThoiGianHetHan")
-                        .HasColumnType("datetime2");
-
->>>>>>> origin/ThanhToanMuaVe
                     b.Property<decimal>("TongTien")
                         .HasColumnType("numeric(10,2)");
 
@@ -252,8 +246,6 @@ namespace AdminDashboard.Migrations
                     b.ToTable("NguoiDung");
                 });
 
-<<<<<<< HEAD
-=======
             modelBuilder.Entity("AdminDashboard.Models.TaiXe", b =>
                 {
                     b.Property<int>("TaiXeId")
@@ -294,7 +286,6 @@ namespace AdminDashboard.Migrations
                     b.ToTable("TaiXe", (string)null);
                 });
 
->>>>>>> origin/ThanhToanMuaVe
             modelBuilder.Entity("AdminDashboard.Models.Tram", b =>
                 {
                     b.Property<string>("IdTram")
@@ -427,13 +418,10 @@ namespace AdminDashboard.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-<<<<<<< HEAD
-=======
                     b.HasOne("AdminDashboard.Models.NguoiDung", "TaiXe")
                         .WithMany()
                         .HasForeignKey("TaiXeId");
 
->>>>>>> origin/ThanhToanMuaVe
                     b.HasOne("AdminDashboard.Models.Xe", "Xe")
                         .WithMany()
                         .HasForeignKey("XeId")
@@ -442,11 +430,8 @@ namespace AdminDashboard.Migrations
 
                     b.Navigation("LoTrinh");
 
-<<<<<<< HEAD
-=======
                     b.Navigation("TaiXe");
 
->>>>>>> origin/ThanhToanMuaVe
                     b.Navigation("Xe");
                 });
 
@@ -499,8 +484,6 @@ namespace AdminDashboard.Migrations
                     b.Navigation("TramToiNavigation");
                 });
 
-<<<<<<< HEAD
-=======
             modelBuilder.Entity("AdminDashboard.Models.TaiXe", b =>
                 {
                     b.HasOne("AdminDashboard.Models.NguoiDung", "Admin")
@@ -520,7 +503,6 @@ namespace AdminDashboard.Migrations
                     b.Navigation("NguoiDung");
                 });
 
->>>>>>> origin/ThanhToanMuaVe
             modelBuilder.Entity("AdminDashboard.Models.UserRole", b =>
                 {
                     b.HasOne("AdminDashboard.Models.VaiTro", "VaiTro")

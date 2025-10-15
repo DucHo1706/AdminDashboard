@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ﻿﻿@{
+=======
+﻿@{
+>>>>>>> origin/ThanhToanMuaVe
     Layout = "~/Views/Shared/_Layout_User.cshtml";
     ViewData["Title"] = "Home_User";
 }
@@ -239,31 +243,61 @@
     <!-- Tìm kiếm xe khách -->
     <div class="container my-5">
         <h2 class="text-center mb-4">Đặt Vé Xe Khách</h2>
+<<<<<<< HEAD
         <form asp-action="Search" asp-controller="Home_User" method="get"
               class="search-box d-flex align-items-center justify-content-between p-3 shadow-sm rounded-pill bg-white">
+=======
+        <form asp-action="TimKiem" asp-controller="ChuyenXe" method="get" class="search-box d-flex align-items-center justify-content-between p-3 shadow-sm rounded-pill bg-white">
+
+>>>>>>> origin/ThanhToanMuaVe
             <div class="d-flex align-items-center flex-grow-1 px-3 border-end">
                 <i class="bi bi-bus-front fs-4 me-2"></i>
                 <div class="flex-grow-1">
                     <label class="form-label fw-semibold mb-0">Nơi đi</label>
+<<<<<<< HEAD
                     <input type="text" name="diemDi" class="form-control border-0 shadow-none p-0"
                            placeholder="Nhập nơi đi..." />
                 </div>
             </div>
+=======
+                    <select name="diemDiId" class="form-select border-0 shadow-none p-0" asp-items="ViewBag.DanhSachTram">
+                        <option value="" disabled selected>Chọn nơi đi...</option>
+                    </select>
+                </div>
+            </div>
+
+>>>>>>> origin/ThanhToanMuaVe
             <div class="d-flex align-items-center flex-grow-1 px-3 border-end">
                 <i class="bi bi-bus-front fs-4 me-2"></i>
                 <div class="flex-grow-1">
                     <label class="form-label fw-semibold mb-0">Nơi đến</label>
+<<<<<<< HEAD
                     <input type="text" name="diemDen" class="form-control border-0 shadow-none p-0"
                            placeholder="Nhập nơi đến..." />
                 </div>
             </div>
+=======
+                    <select name="diemDenId" class="form-select border-0 shadow-none p-0" asp-items="ViewBag.DanhSachTram">
+                        <option value="" disabled selected>Chọn nơi đến...</option>
+                    </select>
+                </div>
+            </div>
+
+>>>>>>> origin/ThanhToanMuaVe
             <div class="d-flex align-items-center flex-grow-1 px-3 border-end">
                 <i class="bi bi-calendar3 fs-4 me-2"></i>
                 <div class="flex-grow-1">
                     <label class="form-label fw-semibold mb-0">Ngày đi</label>
+<<<<<<< HEAD
                     <input type="date" name="ngayDi" class="form-control border-0 shadow-none p-0" />
                 </div>
             </div>
+=======
+                    <input type="date" name="ngayDi" id="ngayDiInput" class="form-control border-0 shadow-none p-0" />
+                </div>
+            </div>
+
+>>>>>>> origin/ThanhToanMuaVe
             <div class="px-3">
                 <button type="submit" class="btn btn-search px-4 py-3 rounded-pill fw-bold text-white">
                     Tìm kiếm xe khách
@@ -271,6 +305,29 @@
             </div>
         </form>
 
+<<<<<<< HEAD
+=======
+        <script>
+            (function() {
+                const input = document.getElementById('ngayDiInput');
+                if (!input) return;
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                // Cho phép đặt tối đa 60 ngày tới
+                const maxDate = new Date();
+                maxDate.setDate(maxDate.getDate() + 60);
+                const maxyyyy = maxDate.getFullYear();
+                const maxmm = String(maxDate.getMonth() + 1).padStart(2, '0');
+                const maxdd = String(maxDate.getDate()).padStart(2, '0');
+
+                input.min = `${yyyy}-${mm}-${dd}`;
+                input.max = `${maxyyyy}-${maxmm}-${maxdd}`;
+            })();
+        </script>
+
+>>>>>>> origin/ThanhToanMuaVe
         <!-- DS -->
         <div class="mt-5">
             @if (Model != null && Model.Any())
