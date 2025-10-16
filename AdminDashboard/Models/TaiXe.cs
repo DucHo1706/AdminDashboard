@@ -9,9 +9,8 @@ namespace AdminDashboard.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int TaiXeId { get; set; }
-
-        [Required]
-        [StringLength(450)]
+        //[Key]
+        [StringLength(255)]
         public string UserId { get; set; }
 
         [Required]

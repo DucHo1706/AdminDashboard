@@ -46,7 +46,7 @@
                         @foreach (var item in Model)
                         {
                             <tr>
-                                <td>@item.TaiXeId</td>
+                                <td>@item.UserId</td>
                                 <td>@item.NguoiDung?.HoTen</td>
                                 <td>@item.NguoiDung?.Email</td>
                                 <td>@item.BangLaiXe</td>
@@ -62,13 +62,13 @@
                                     }
                                 </td>
                                 <td class="text-center">
-                                    <a asp-action="Details" asp-route-id="@item.TaiXeId" class="btn btn-info btn-sm me-1">
+                                    <a asp-action="Details" asp-route-id="@item.UserId" class="btn btn-info btn-sm me-1">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a asp-action="Edit" asp-route-id="@item.TaiXeId" class="btn btn-warning btn-sm me-1">
+                                    <a asp-action="Edit" asp-route-id="@item.UserId" class="btn btn-warning btn-sm me-1">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a asp-action="Delete" asp-route-id="@item.TaiXeId" class="btn btn-danger btn-sm"
+                                    <a asp-action="Delete" asp-route-id="@item.UserId" class="btn btn-danger btn-sm"
                                        onclick="return confirm('Bạn có chắc muốn xóa tài xế này không?')">
                                         <i class="fas fa-trash"></i>
                                     </a>
