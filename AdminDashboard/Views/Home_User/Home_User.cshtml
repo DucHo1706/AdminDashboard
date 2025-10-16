@@ -1,0 +1,456 @@
+@* //BAOLONG// *@
+@{
+    Layout = "_Layout_User";
+    ViewData["Title"] = "Trang Chủ";
+}
+
+<div class="page-content-wrapper">
+    <div class="hero-section" style="background-image: url('https://img1.kienthucvui.vn/uploads/2021/01/13/phong-canh-thun-lung-bac-son-viet-nam-dep-nhu-tranh-ve_030119832.jpg');">
+        <form asp-action="TimKiem" asp-controller="ChuyenXe" method="get" class="bus-search-panel">
+            <div class="panel-main-inputs">
+                <div class="input-group-custom">
+                    <label>Điểm đi</label>
+                    <select name="diemDiId" class="form-select" asp-items="ViewBag.DanhSachTram">
+                        <option value="" disabled selected>Chọn điểm đi</option>
+                    </select>
+                </div>
+
+                <div class="input-group-custom">
+                    <label>Điểm đến</label>
+                    <select name="diemDenId" class="form-select" asp-items="ViewBag.DanhSachTram">
+                        <option value="" disabled selected>Chọn điểm đến</option>
+                    </select>
+                </div>
+
+                <div class="input-group-custom">
+                    <label>Ngày đi</label>
+                    <input type="date" name="ngayDi" id="ngayDiInput" class="form-control" />
+                </div>
+            </div>
+
+            <div class="panel-footer">
+                <button type="submit" class="btn-search-final">Tìm chuyến xe</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="container mt-5">
+        @if (Model != null && Model.Any())
+        {
+            <h2 class="section-title text-center mb-4">Kết Quả Tìm Kiếm</h2>
+            <div class="row">
+                @foreach (var chuyen in Model)
+                {
+                    <div class="col-lg-12 mb-4">
+                        <div class="result-card">
+                            <div class="card-main-info">
+                                <div class="time-location">
+                                    <span class="time">@chuyen.GioDi.ToString(@"hh\:mm")</span>
+                                    <span class="location">@chuyen.LoTrinh.TramDiNavigation.TenTram</span>
+                                </div>
+                                <div class="duration-arrow">
+                                    <span class="duration">@((chuyen.GioDenDuKien - chuyen.GioDi).TotalHours.ToString("0.0")) giờ</span>
+                                    <div class="arrow-line"></div>
+                                    <span class="bus-type">@chuyen.Xe.LoaiXe.TenLoaiXe</span>
+                                </div>
+                                <div class="time-location text-end">
+                                    <span class="time">@chuyen.GioDenDuKien.ToString(@"hh\:mm")</span>
+                                    <span class="location">@chuyen.LoTrinh.TramToiNavigation.TenTram</span>
+                                </div>
+                            </div>
+                            <div class="card-booking-info">
+                                <div class="price">
+                                    <span>Giá vé chỉ từ</span>
+                                    <strong>@String.Format("{0:N0}", chuyen.LoTrinh.GiaVeCoDinh) VNĐ</strong>
+                                </div>
+                                <a asp-action="Book" asp-controller="Home_User" asp-route-id="@chuyen.ChuyenId" class="btn btn-booking">
+                                    Chọn Chuyến <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else if (ViewBag.SearchAttempted == true)
+        {
+            <div class="alert alert-info text-center mt-4">
+                <i class="bi bi-info-circle-fill"></i> Không tìm thấy chuyến xe nào phù hợp với yêu cầu của bạn.
+            </div>
+        }
+    </div>
+
+    <div class="container mt-5">
+        <h2 class="section-title text-center mb-4">Điểm Nổi Bật Của GoSix</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="highlight-card">
+                    <img src="https://st.redbus.in/Images/rdc/36million.svg" alt="Khách hàng">
+                    <h5>100+ Triệu</h5>
+                    <p>Khách hàng hài lòng trên toàn cầu</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="highlight-card">
+                    <img src="https://st.redbus.in/Images/rdc/3500worldwide.svg" alt="Nhà xe">
+                    <h5>9.000+</h5>
+                    <p>Đối tác nhà xe tin cậy</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="highlight-card">
+                    <img src="https://st.redbus.in/Images/rdc/100000-booked-perday.svg" alt="Đặt vé">
+                    <h5>2.000.000+</h5>
+                    <p>Vé được đặt mỗi ngày</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container my-5">
+        <div class="why-us-panel">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h2 class="section-title mb-4">GoSix – Đi Nhanh, Sống Trọn</h2>
+                    <div class="info-item">
+                        <div class="info-icon"><img src="https://cdn.futabus.vn/futa-busline-cms-dev/Group_662c4422ba/Group_662c4422ba.svg" alt="Icon"></div>
+                        <div class="info-text">
+                            <h4>Hơn 40 Triệu Lượt Khách</h4>
+                            <p>Phục vụ hàng triệu lượt khách mỗi năm trên toàn quốc.</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><img src="https://cdn.futabus.vn/futa-busline-cms-dev/Store_55c0da8bd7/Store_55c0da8bd7.svg" alt="Icon"></div>
+                        <div class="info-text">
+                            <h4>Hơn 350 Phòng Vé</h4>
+                            <p>Hệ thống phòng vé, trạm trung chuyển rộng khắp.</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><img src="https://cdn.futabus.vn/futa-busline-cms-dev/Group_2_75b5ed1dfd/Group_2_75b5ed1dfd.svg" alt="Icon"></div>
+                        <div class="info-text">
+                            <h4>Hơn 6,500 Chuyến/Ngày</h4>
+                            <p>Phục vụ hàng ngàn chuyến xe đường dài và liên tỉnh mỗi ngày.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 text-center">
+                    <img src="https://cdn.futabus.vn/futa-busline-cms-dev/image_f922bef1bb/image_f922bef1bb.svg" alt="Minh họa" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<button id="scrollTopBtn" title="Lên đầu trang"><i class="bi bi-arrow-up"></i></button>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dateInput = document.getElementById('ngayDiInput');
+
+            const today = new Date();
+            dateInput.min = today.toISOString().split('T')[0];
+            dateInput.value = dateInput.min;
+
+            window.onscroll = function () {
+                const scrollBtn = document.getElementById("scrollTopBtn");
+                scrollBtn.style.display = (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) ? "block" : "none";
+            };
+            document.getElementById("scrollTopBtn").addEventListener("click", () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        });
+    </script>
+}
+
+<style>
+    body {
+        background-color: #f4f6f9;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .section-title {
+        font-weight: 700;
+        color: #3f4c6b;
+    }
+
+    .hero-section {
+        position: relative;
+        padding: 60px 15px;
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 50vh;
+    }
+
+    .bus-search-panel {
+        width: 100%;
+        max-width: 900px;
+        background: #fff;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border: 1px solid #feebe3;
+        background-color: #fff9f7;
+    }
+
+    .panel-main-inputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+        align-items: stretch;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 10px;
+        position: relative;
+    }
+
+    .input-group-custom {
+        padding: 8px 15px;
+        position: relative;
+    }
+
+        .input-group-custom label {
+            display: block;
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 2px;
+        }
+
+        .input-group-custom .form-select,
+        .input-group-custom .form-control {
+            border: none;
+            outline: none;
+            box-shadow: none;
+            padding: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            background: transparent;
+        }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        background: transparent;
+        bottom: 0;
+        color: transparent;
+        cursor: pointer;
+        height: auto;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: auto;
+    }
+
+    .panel-footer {
+        text-align: center;
+        position: relative;
+        padding-top: 30px;
+    }
+
+        .panel-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 5%;
+            right: 5%;
+            height: 1px;
+            background-color: #fddad0;
+        }
+
+    .btn-search-final {
+        background: #EA7A66;
+        color: #fff;
+        font-weight: 600;
+        font-size: 16px;
+        border: none;
+        border-radius: 999px;
+        padding: 15px 60px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(234, 122, 102, 0.4);
+        position: relative;
+        margin-top: -25px;
+    }
+
+        .btn-search-final:hover {
+            background: #E56A54;
+            transform: translateY(-2px);
+        }
+
+    /* Các style khác giữ nguyên */
+    .result-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+    .card-main-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 25px;
+    }
+
+    .time-location .time {
+        font-size: 22px;
+        font-weight: 700;
+        color: #333;
+        display: block;
+    }
+
+    .time-location .location {
+        font-size: 14px;
+        color: #6c757d;
+    }
+
+    .duration-arrow {
+        text-align: center;
+        flex-grow: 1;
+    }
+
+    .arrow-line {
+        height: 1px;
+        background: #ddd;
+        margin: 5px 0;
+    }
+
+    .duration-arrow .duration, .duration-arrow .bus-type {
+        font-size: 13px;
+        color: #888;
+        display: block;
+    }
+
+    .card-booking-info {
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px 25px;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .price span {
+        display: block;
+        font-size: 13px;
+        color: #6c757d;
+    }
+
+    .price strong {
+        font-size: 20px;
+        color: #ff6600;
+    }
+
+    .btn-booking {
+        background: #ff6600;
+        color: #fff;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 10px 20px;
+    }
+
+        .btn-booking:hover {
+            background: #e65c00;
+            color: #fff;
+        }
+
+    .highlight-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+        .highlight-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .highlight-card img {
+            height: 80px;
+            margin-bottom: 20px;
+        }
+
+        .highlight-card h5 {
+            font-weight: 700;
+            font-size: 24px;
+            color: #ff6600;
+        }
+
+        .highlight-card p {
+            color: #6c757d;
+        }
+
+    .why-us-panel {
+        background: #fff;
+        border-radius: 16px;
+        padding: 40px;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .info-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #fff0e6;
+        margin-right: 20px;
+        flex-shrink: 0;
+    }
+
+        .info-icon img {
+            width: 35px;
+        }
+
+    .info-text h4 {
+        font-weight: 600;
+        font-size: 18px;
+        margin-bottom: 4px;
+    }
+
+    .info-text p {
+        margin: 0;
+        color: #555;
+    }
+
+    #scrollTopBtn {
+        display: none;
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 99;
+        font-size: 20px;
+        border: none;
+        background-color: #ffc107;
+        color: #333;
+        cursor: pointer;
+        padding: 10px 15px;
+        border-radius: 50%;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+    }
+
+        #scrollTopBtn:hover {
+            background-color: #ffb300;
+            transform: scale(1.1);
+        }
+</style>

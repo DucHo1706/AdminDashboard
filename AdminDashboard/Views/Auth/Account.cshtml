@@ -1,0 +1,360 @@
+﻿
+@model AdminDashboard.Models.NguoiDung
+
+@{
+
+    Layout = "_Layout_User";
+    ViewData["Title"] = "Thông tin tài khoản";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+    body {
+        background: url('https://phongnhaexplorer.com/wp-content/uploads/2021/08/cay-thot-not-tinh-yeu-tay-ninh.jpg') no-repeat center center fixed;
+        background-size: cover;
+        height: 100vh;
+        font-family: 'Segoe UI', Roboto, sans-serif;
+    }
+    .container {
+        margin-top: 40px;
+    }
+    .sidebar {
+        background-color: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-radius: 16px;
+        padding: 25px;
+        position: sticky;
+        top: 100px;
+        transition: 0.3s ease;
+    }
+
+    .sidebar h5 {
+        font-weight: 700;
+        color: #ff6600;
+        letter-spacing: 0.5px;
+        margin-bottom: 25px;
+    }
+
+    .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 15px;
+        color: #333;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .menu-item:hover {
+        background-color: #fff3e0;
+        color: #ff6600;
+        transform: translateX(4px);
+    }
+
+    .menu-item.active {
+        background-color: #ff6600;
+        color: white;
+    }
+
+    .menu-item.active i {
+        color: white !important;
+    }
+
+    .menu-item i {
+        font-size: 18px;
+        transition: color 0.3s ease;
+    }
+
+    /* thông tin tài khoản */
+    .account-info-card {
+        border-radius: 20px;
+        padding: 40px 50px;
+        transition: 0.3s ease;
+        background-color: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-top: 40px;
+    }
+
+    .account-info-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .account-info-card h3 {
+        justify-content: center;
+        text-align: center;
+        font-weight: 700;
+        margin-bottom: 5px;
+            color: #ff6600;
+    }
+
+    .account-info-card small {
+        display: flex;
+        justify-content: center;
+        text-align: center;
+        color: #888;
+        font-size: 15px;
+    }
+
+    hr {
+        border-top: 1px solid #eee;
+    }
+
+    /* Thông tin cá nhân */
+    .info-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #fafafa;
+        padding: 12px 18px;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        transition: 0.3s ease;
+    }
+
+    .info-item:hover {
+        background: #fff8f3;
+    }
+
+    .info-item label {
+        font-weight: 600;
+        color: #555;
+        margin-right: 15px;
+        min-width: 160px;
+    }
+
+    .info-item span {
+        color: #222;
+        font-weight: 500;
+        word-break: break-word;
+        text-align: right;
+    }
+    .btn-update {
+        background-color: #ff6600;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        padding: 12px 40px;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-update:hover {
+        background-color: #e65c00;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(255, 102, 0, 0.3);
+    }
+    .edit-form {
+        display: none;
+        margin-top: 25px;
+        background: #fffdf9;
+        border: 1px solid #ffe2cc;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .edit-form label {
+        font-weight: 600;
+        color: #444;
+    }
+
+    .edit-form input {
+        border-radius: 10px;
+    }
+
+    .btn-save {
+        background: #28a745;
+        color: white;
+        font-weight: 600;
+        border-radius: 25px;
+        padding: 10px 30px;
+        border: none;
+        transition: 0.3s ease;
+    }
+
+    .btn-save:hover {
+        background: #218838;
+        transform: translateY(-2px);
+    }
+
+    .btn-cancel {
+        background: #ddd;
+        border-radius: 25px;
+        padding: 10px 30px;
+        font-weight: 600;
+        margin-left: 10px;
+        transition: 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        background: #ccc;
+    }
+
+    @@media (max-width: 992px) {
+        .sidebar {
+            margin-bottom: 30px;
+        }
+
+        .account-info-card {
+            padding: 25px 30px;
+        }
+
+        .info-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .info-item span {
+            text-align: left;
+            margin-top: 5px;
+        }
+    }
+</style>
+
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-3">
+            <div class="sidebar">
+                <h5 class="fw-bold mb-4 ms-2">TÀI KHOẢN CÁ NHÂN</h5>
+
+                <h5 class="fw-bold mb-4 ms-2">LÀM LẠI DỰA VÀO TRANHOAIDUC_FE MÀ DÁN LẠI DO TRANHOAIDUC_FE MẤT HẾT</h5>
+                <a asp-controller="Auth" asp-action="Account" class="menu-item active"><i class="bi bi-person-circle text-warning"></i>Thông tin tài khoản</a>
+                <a asp-controller="Home_User" asp-action="PurchaseHistory" class="menu-item"><i class="bi bi-clock-history text-info"></i>Lịch sử mua vé</a>
+
+                <a asp-controller="Auth" asp-action="ResetPassword" class="menu-item"><i class="bi bi-key-fill text-warning"></i>Đặt lại mật khẩu</a>
+                <a asp-controller="Auth" asp-action="Logout" class="menu-item"><i class="bi bi-box-arrow-right text-danger"></i>Đăng xuất</a>
+            </div>
+        </div>
+
+        <div class="col-md-8 ">
+            <div class="account-info-card">
+                <h3>Thông tin tài khoản</h3>
+                <small>Quản lý thông tin hồ sơ để bảo mật tài khoản</small>
+                <hr class="my-4">
+
+                @if (Model == null)
+                {
+                    <div class="alert alert-danger">Không tìm thấy thông tin tài khoản.</div>
+                }
+                else
+                {
+                    <div id="account-info">
+                        <div class="info-item"><label>Họ và tên:</label><span>@Model.HoTen</span></div>
+                        <div class="info-item"><label>Email:</label><span>@Model.Email</span></div>
+                        <div class="info-item"><label>Số điện thoại:</label><span>@(Model.SoDienThoai ?? "Chưa cập nhật")</span></div>
+                        <div class="info-item"><label>Ngày sinh:</label><span>@(Model.NgaySinh?.ToString("yyyy-MM-dd") ?? "Chưa cập nhật")</span></div>
+                        <div class="info-item"><label>Trạng thái:</label><span>@Model.TrangThai</span></div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button id="btnShowForm" class="btn btn-update">Cập nhật</button>
+                    </div>
+
+                    <form id="editForm" class="edit-form mt-4">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="UserId" value="@Model.UserId" />
+                        <input type="hidden" name="MatKhau" value="@Model.MatKhau" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Họ và tên</label>
+                            <input type="text" name="HoTen" class="form-control" value="@Model.HoTen" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="Email" class="form-control" value="@Model.Email" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Số điện thoại</label>
+                            <input type="text" name="SoDienThoai" class="form-control" value="@Model.SoDienThoai" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ngày sinh</label>
+                            <input type="date" name="NgaySinh" class="form-control" value="@Model.NgaySinh?.ToString("yyyy-MM-dd")" />
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-update">Lưu thay đổi</button>
+                            <button type="button" id="btnCancel" class="btn btn-cancel">Hủy</button>
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(function () {
+        $("#btnShowForm").click(function () {
+            $("#editForm").slideDown();
+            $(this).hide();
+        });
+
+
+        $("#btnCancel").click(function () {
+            $("#editForm").slideUp();
+            $("#btnShowForm").show();
+        });
+
+
+        $("#editForm").submit(function (e) {
+            e.preventDefault();
+
+
+            $.ajax({
+                url: '@Url.Action("EditAccount", "Auth")',
+                type: 'POST',
+                data: $(this).serialize(),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                success: function (res) {
+                    if (res.success) {
+                        var hoTen = $("input[name='HoTen']").val();
+                        var email = $("input[name='Email']").val();
+                        var phone = $("input[name='SoDienThoai']").val() || "Chưa cập nhật";
+                        var ngsinh = $("input[name='NgaySinh']").val() || "Chưa cập nhật";
+
+
+                        var html = '';
+                        html += '<div class="info-item"><label>Họ và tên:</label><span>' + escapeHtml(hoTen) + '</span></div>';
+                        html += '<div class="info-item"><label>Email:</label><span>' + escapeHtml(email) + '</span></div>';
+                        html += '<div class="info-item"><label>Số điện thoại:</label><span>' + escapeHtml(phone) + '</span></div>';
+                        html += '<div class="info-item"><label>Ngày sinh:</label><span>' + escapeHtml(ngsinh) + '</span></div>';
+
+
+                        $("#account-info").html(html);
+
+
+                        $("#editForm").slideUp();
+                        $("#btnShowForm").show();
+                        showAlert(res.message);
+                    } else {
+                        showAlert('Cập nhật thất bại: ' + res.message);
+                    }
+                },
+                error: function (xhr) {
+                    showAlert('Lỗi cập nhật: ' + xhr.responseText);
+                }
+            });
+        });
+
+
+        function escapeHtml(text) {
+            return $('<div/>').text(text).html();
+        }
+
+
+        function showAlert(msg) {
+            alert(msg);
+        }
+    });
+</script>

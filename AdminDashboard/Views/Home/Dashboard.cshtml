@@ -1,0 +1,249 @@
+﻿@* //BAOLONG// *@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="elegant-dashboard-v2">
+
+    <div class="main-title-container mb-4">
+        <h2 class="dashboard-main-title"><i class="fas fa-chart-bar"></i>📊 Thống kê hệ thống</h2>
+        @if (User.Identity.IsAuthenticated)
+        {
+            <a asp-controller="Auth" asp-action="Logout" class="btn btn-logout-v2">
+                <i class="fas fa-sign-out-alt"></i> Đăng xuất
+            </a>
+        }
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="stat-card-solid bg-blue">
+                <div class="card-header-solid">Tổng Khách Hàng</div>
+                <div class="card-body-solid">@ViewBag.TongKhachHang</div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="stat-card-solid bg-green">
+                <div class="card-header-solid">Tổng Đơn Hàng</div>
+                <div class="card-body-solid">@ViewBag.TongDonHang</div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-12 mb-4">
+            <div class="stat-card-solid bg-yellow">
+                <div class="card-header-solid">Doanh Thu Hôm Nay</div>
+                <div class="card-body-solid">@string.Format("{0:N0} VNĐ", ViewBag.DoanhThuHomNay)</div>
+            </div>
+        </div>
+    </div>
+    <div class="data-card-v2">
+        <div class="data-card-header-v2">
+            <h4><i class="fas fa-user-friends"></i>👥 Danh sách khách hàng</h4>
+        </div>
+        <div class="data-card-body-v2">
+            <div class="table-responsive">
+                <table class="table modern-table-v2">
+                    <thead>
+                        <tr>
+                            <th>Mã KH</th>
+                            <th>Tên Khách Hàng</th>
+                            <th>Email</th>
+                            <th>Số Điện Thoại</th>
+                            <th>Ngày Sinh</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var kh in ViewBag.DanhSachKhachHang)
+                        {
+                            <tr>
+                                <td><span class="badge-kh-v2">@kh.UserId</span></td>
+                                <td>@kh.HoTen</td>
+                                <td>@kh.Email</td>
+                                <td>@kh.SoDienThoai</td>
+                                <td>@(kh.NgaySinh != null ? ((DateTime)kh.NgaySinh).ToString("dd/MM/yyyy") : "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Import Google Fonts - Poppins */
+    @@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+    body {
+        background-color: #f4f6f9;
+        font-family: 'Poppins', sans-serif; /* Áp dụng font Poppins */
+        color: #333;
+    }
+
+    .elegant-dashboard-v2 {
+        padding: 25px;
+    }
+
+    .main-title-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 15px;
+        margin-bottom: 30px;
+    }
+
+    .dashboard-main-title {
+        color: #3f4c6b;
+        font-weight: 700;
+        font-size: 28px;
+        margin: 0;
+    }
+
+        .dashboard-main-title i {
+            color: #ff9800; /* Icon màu cam */
+            margin-right: 10px;
+        }
+
+    .btn-logout-v2 {
+        background-color: #ff9800;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 15px;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-logout-v2:hover {
+            background-color: #f57c00;
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+    /* ===== CSS MỚI CHO 3 THẺ THỐNG KÊ ===== */
+    .stat-card-solid {
+        border-radius: 8px;
+        color: white;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .card-header-solid {
+        padding: 12px 20px;
+        font-size: 16px;
+        font-weight: 500;
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .card-body-solid {
+        padding: 25px 20px;
+        font-size: 36px;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .bg-blue {
+        background-color: #0d6efd;
+    }
+
+    .bg-green {
+        background-color: #198754;
+    }
+
+    .bg-yellow {
+        background-color: #ffc107;
+        color: #333; /* Chữ tối màu để dễ đọc trên nền vàng */
+        text-shadow: none;
+    }
+    /* ===== KẾT THÚC CSS MỚI ===== */
+
+
+    /* --- DATA TABLE (GIỮ NGUYÊN) --- */
+    .data-card-v2 {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .data-card-header-v2 {
+        padding: 20px 25px;
+        border-bottom: 1px solid #eee;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+    }
+
+        .data-card-header-v2 h4 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #3f4c6b;
+        }
+
+            .data-card-header-v2 h4 i {
+                color: #ff9800;
+                margin-right: 10px;
+            }
+
+    .data-card-body-v2 {
+        padding: 10px 0;
+    }
+
+    .modern-table-v2 {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+        margin: 0;
+    }
+
+        .modern-table-v2 thead th {
+            border: none;
+            padding: 15px 25px;
+            color: #8c96a5;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            background-color: transparent;
+        }
+
+        .modern-table-v2 tbody tr {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .modern-table-v2 tbody tr:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            }
+
+        .modern-table-v2 tbody td {
+            border: none;
+            padding: 15px 25px;
+            vertical-align: middle;
+            color: #5b6a82;
+        }
+
+        .modern-table-v2 tbody tr td:first-child {
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+        }
+
+        .modern-table-v2 tbody tr td:last-child {
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+    .badge-kh-v2 {
+        background-color: #fff0d9;
+        color: #ffa000;
+        font-weight: 600;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 12px;
+    }
+</style>

@@ -1,0 +1,180 @@
+﻿@* //BAOLONG// *@
+@model AdminDashboard.Models.ChuyenXe
+
+@{
+    ViewData["Title"] = "Xác Nhận Xóa Chuyến Xe";
+}
+
+<div class="delete-confirmation-container">
+    <div class="confirmation-panel">
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="ChuyenId" />
+
+            <div class="panel-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> @ViewData["Title"]</h3>
+            </div>
+
+            <div class="panel-body">
+                <p class="confirmation-text">
+                    Bạn có chắc chắn muốn xóa vĩnh viễn chuyến xe này không? Hành động này **không thể** được hoàn tác.
+                </p>
+
+                <div class="details-list">
+                    <div class="detail-item">
+                        <span class="detail-label">Lộ Trình:</span>
+                        <span class="detail-value">
+                            @Model.LoTrinh.TramDiNavigation.TenTram <i class="fas fa-long-arrow-alt-right mx-2"></i> @Model.LoTrinh.TramToiNavigation.TenTram
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Biển Số Xe:</span>
+                        <span class="detail-value">@Model.Xe.BienSoXe</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Ngày Đi:</span>
+                        <span class="detail-value">@Model.NgayDi.ToString("dd/MM/yyyy")</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-footer">
+                <a asp-action="Index" class="btn btn-secondary-custom">
+                    <i class="fas fa-times"></i> Hủy
+                </a>
+                <button type="submit" class="btn btn-danger-custom">
+                    <i class="fas fa-trash-alt"></i> Tôi chắc chắn, Xóa!
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    body {
+        background: url('https://images.unsplash.com/photo-1583417319070-4a69db38a482?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1740') no-repeat center center fixed;
+        background-size: cover;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .delete-confirmation-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 50px 15px;
+        min-height: 100vh;
+    }
+
+    .confirmation-panel {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        width: 100%;
+        max-width: 700px;
+        overflow: hidden;
+        border-top: 5px solid #dc3545; /* Red border for emphasis */
+    }
+
+    .panel-header {
+        padding: 20px 25px;
+        background-color: rgba(248, 249, 250, 0.8);
+        border-bottom: 1px solid #dee2e6;
+    }
+
+        .panel-header h3 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+            color: #dc3545; /* Red color for warning */
+        }
+
+            .panel-header h3 i {
+                margin-right: 10px;
+            }
+
+    .panel-body {
+        padding: 25px;
+    }
+
+    .confirmation-text {
+        font-size: 16px;
+        color: #495057;
+        margin-bottom: 25px;
+        line-height: 1.6;
+        text-align: center;
+    }
+
+    .details-list {
+        background-color: rgba(248, 249, 250, 0.9);
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+    .detail-label {
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .detail-value {
+        font-weight: 600;
+        color: #212529;
+    }
+
+    .panel-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 25px;
+        background-color: rgba(248, 249, 250, 0.8);
+        border-top: 1px solid #dee2e6;
+    }
+
+    .btn-danger-custom, .btn-secondary-custom {
+        padding: 12px 25px;
+        font-weight: 600;
+        font-size: 15px;
+        border-radius: 8px;
+        border: none;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-danger-custom {
+        background-color: #dc3545;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+
+        .btn-danger-custom:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+
+    .btn-secondary-custom {
+        background-color: #6c757d;
+        color: #fff;
+    }
+
+        .btn-secondary-custom:hover {
+            background-color: #5a6268;
+        }
+
+        .btn-danger-custom i, .btn-secondary-custom i {
+            margin-right: 8px;
+        }
+</style>
