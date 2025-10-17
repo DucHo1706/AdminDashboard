@@ -9,9 +9,8 @@ namespace AdminDashboard.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int TaiXeId { get; set; }
-
-        [Required]
-        [StringLength(450)]
+        //[Key]
+        [StringLength(255)]
         public string UserId { get; set; }
 
         [Required]
@@ -30,7 +29,7 @@ namespace AdminDashboard.Models
         [StringLength(50)]
         public string TrangThai { get; set; } = "Hoạt động";
 
-         [ForeignKey("UserId")]
+        [ForeignKey("UserId")]
         public virtual NguoiDung NguoiDung { get; set; }
 
         [ForeignKey("AdminId")]
