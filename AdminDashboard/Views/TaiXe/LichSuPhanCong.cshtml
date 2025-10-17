@@ -1,0 +1,121 @@
+﻿@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+@{
+    ViewData["Title"] = "Lịch Sử Phân Công";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
+    </div>
+
+    <!-- Hiển thị thông báo -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <!-- Danh sách chuyến xe đã phân công -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Chuyến Xe Đã Được Phân Công</h6>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="text-center">
+                    <p class="text-muted">Không có lịch sử phân công nào.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Mã Chuyến</th>
+                                <th>Lộ Trình</th>
+                                <th>Ngày Giờ Đi</th>
+                                <th>Xe</th>
+                                <th>Tài Xế</th>
+                                <th>Trạng Thái</th>
+                                <th>Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var chuyen in Model)
+                            {
+                                <tr>
+                                    <td>@chuyen.ChuyenId</td>
+                                    <td>@chuyen.LoTrinh?.TramDiNavigation?.TenTram → @chuyen.LoTrinh?.TramToiNavigation?.TenTram</td>
+                                    <td>@chuyen.NgayDi.ToString("dd/MM/yyyy") @chuyen.GioDi.ToString(@"hh\:mm")</td>
+                                    <td>@chuyen.Xe?.BienSoXe</td>
+                                    <td>
+                                        <span class="badge badge-success">@chuyen.TaiXe?.HoTen</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge
+                                                    @(chuyen.TrangThai == AdminDashboard.Models.TrangThai.TrangThaiChuyenXe.ChoKhoiHanh ? "badge-warning" :
+                                                                                            chuyen.TrangThai == AdminDashboard.Models.TrangThai.TrangThaiChuyenXe.DangDiChuyen ? "badge-primary" :
+                                                                                                                                          chuyen.TrangThai == AdminDashboard.Models.TrangThai.TrangThaiChuyenXe.DaHoanThanh ? "badge-success" :
+                                                                                            chuyen.TrangThai == AdminDashboard.Models.TrangThai.TrangThaiChuyenXe.DaHuy ? "badge-danger" : "badge-secondary")">
+                                    @chuyen.TrangThai
+                                </span>
+                            </td>
+                            <td>
+                                <a asp-action="ChinhSuaPhanCong" asp-route-chuyenId="@chuyen.ChuyenId" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i> Chỉnh sửa
+                                </a>
+                            </td>
+
+
+                            <td>
+                                @if (chuyen.TrangThai != AdminDashboard.Models.TrangThai.TrangThaiChuyenXe.DangDiChuyen &&
+                                                                chuyen.TrangThai != AdminDashboard.Models.TrangThai.TrangThaiChuyenXe.DaHoanThanh)
+                                        {
+                                            <form asp-action="HuyPhanCong" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="chuyenId" value="@chuyen.ChuyenId" />
+                                                <button type="submit" class="btn btn-danger btn-sm"
+                                                        onclick="return confirm('Bạn có chắc chắn muốn hủy phân công tài xế cho chuyến xe này?')">
+                                                    <i class="fas fa-user-times"></i> Hủy
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Không thể hủy</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>  
+            }
+        </div>
+    </div>
+
+    <div class="text-center">
+        <a asp-action="PhanCongLich" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Phân Công Mới
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại danh sách tài xế
+        </a>
+    </div>
+</div>

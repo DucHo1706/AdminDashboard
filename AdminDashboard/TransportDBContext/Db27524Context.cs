@@ -20,14 +20,14 @@ namespace AdminDashboard.TransportDBContext
         public DbSet<DonHang> DonHang { get; set; }
         public DbSet<Ve> Ve { get; set; }
         public DbSet<BaiViet> BaiViet { get; set; }
-      
+        public virtual DbSet<TaiXe> TaiXe { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             // Cấu hình khóa chính phức hợp cho bảng UserRole
             modelBuilder.Entity<UserRole>()
-                .HasKey(ur => new { ur.UserId, ur.RoleId });
+               .HasKey(ur => new { ur.UserId, ur.RoleId });
 
             // Cấu hình mối quan hệ nhiều-nhiều giữa NguoiDung và VaiTro
             modelBuilder.Entity<UserRole>()
@@ -93,9 +93,20 @@ namespace AdminDashboard.TransportDBContext
                     .HasForeignKey(dh => dh.ChuyenId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
+            modelBuilder.Entity<TaiXe>().ToTable("TaiXe");
+            modelBuilder.Entity<TaiXe>()
+            .HasOne(t => t.NguoiDung)
+            .WithMany()
+            .HasForeignKey(t => t.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<TaiXe>()
+                .HasOne(t => t.Admin)
+                .WithMany()
+                .HasForeignKey(t => t.AdminId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-
+            base.OnModelCreating(modelBuilder);
         }
 
     }

@@ -1,0 +1,149 @@
+﻿@model AdminDashboard.Models.ChuyenXe
+
+@{
+    ViewData["Title"] = "Chọn ghế";
+    // Lấy danh sách ghế đã đặt từ ViewBag
+    var danhSachGheDaDat = ViewBag.DanhSachGheDaDat as List<string> ?? new List<string>();
+}
+
+<div class="container my-5">
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4><i class="bi bi-info-circle-fill"></i> Thông tin hành trình của bạn</h4>
+        </div>
+        <div class="card-body">
+            <p><strong>Tuyến đường:</strong> @Model.LoTrinh.TramDiNavigation.TenTram → @Model.LoTrinh.TramToiNavigation.TenTram</p>
+            <p><strong>Ngày đi:</strong> @Model.NgayDi.ToString("dd/MM/yyyy") - <strong>Giờ khởi hành:</strong> @Model.GioDi.ToString(@"hh\:mm")</p>
+            <p><strong>Giá vé:</strong> <span id="giaVe" class="fw-bold">@Model.LoTrinh.GiaVeCoDinh?.ToString("N0")</span> VNĐ/ghế</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-center mb-4">Sơ đồ ghế trên xe</h5>
+                    <div class="seat-map-container">
+                        <div class="bus-layout">
+                            @foreach (var ghe in Model.Xe.DanhSachGhe.OrderBy(g => int.Parse(g.SoGhe)))
+                            {
+                                bool daDat = danhSachGheDaDat.Contains(ghe.GheID);
+                                if (daDat)
+                                {
+                                    <div class="seat booked" title="Ghế @ghe.SoGhe đã được đặt">@ghe.SoGhe</div>
+                                }
+                                else
+                                {
+                                    <div class="seat available" data-id="@ghe.GheID" data-name="@ghe.SoGhe">@ghe.SoGhe</div>
+                                }
+                            }
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center mt-4 border-top pt-3">
+                        <div class="me-4 d-flex align-items-center"><span class="seat-legend available"></span> &nbsp;Còn trống</div>
+                        <div class="me-4 d-flex align-items-center"><span class="seat-legend selected"></span> &nbsp;Đang chọn</div>
+                        <div class="d-flex align-items-center"><span class="seat-legend booked"></span> &nbsp;Đã đặt</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5 mt-4 mt-lg-0">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h4><i class="bi bi-cart-check-fill"></i> Chi tiết vé của bạn</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Ghế đã chọn:</label>
+                        <div id="selected-seats-text" class="fw-bold fs-5 text-success">Chưa chọn ghế</div>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fs-4">Tổng tiền:</span>
+                        <span id="total-price" class="fw-bold fs-2 text-danger">0 VNĐ</span>
+                    </div>
+                    <hr />
+
+                    <form asp-action="XacNhanBooking" asp-controller="Booking" method="post">
+                        <input type="hidden" name="chuyenId" value="@Model.ChuyenId" />
+                        <input type="hidden" name="danhSachGheId" id="selected-seats-input" />
+
+                        <button type="submit" class="btn btn-primary w-100 btn-lg" disabled id="btn-continue">
+                            Tiếp tục
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .bus-layout { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; max-width: 400px; margin: auto; }
+        .bus-layout > div:nth-child(5n+3) { grid-column-start: 4; } /* Tạo lối đi ở giữa */
+        .seat { aspect-ratio: 1 / 1; display: flex; justify-content: center; align-items: center; border-radius: 8px; font-weight: bold; }
+        .available { background-color: #e9f5ff; border: 1px solid #a3d1ff; color: #007bff; cursor: pointer; transition: background-color 0.2s; }
+        .available:hover { background-color: #cce5ff; }
+        .booked { background-color: #f8f9fa; color: #adb5bd; border: 1px solid #dee2e6; cursor: not-allowed; }
+        .selected { background-color: #28a745; color: white; border: 1px solid #1e7e34; }
+        .seat-legend { display: inline-block; width: 20px; height: 20px; border-radius: 4px; vertical-align: middle; }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Lấy các element cần thiết
+            const seats = document.querySelectorAll('.seat.available');
+            const selectedSeatsText = document.getElementById('selected-seats-text');
+            const selectedSeatsInput = document.getElementById('selected-seats-input');
+            const totalPriceText = document.getElementById('total-price');
+            const giaVe = parseFloat(document.getElementById('giaVe').innerText.replace(/\./g, ''));
+            const btnContinue = document.getElementById('btn-continue');
+
+            let selectedSeats = []; // Mảng lưu các ghế đã chọn
+
+            // Xử lý sự kiện click vào ghế
+            seats.forEach(seat => {
+                seat.addEventListener('click', function () {
+                    const seatId = this.dataset.id;
+                    const seatName = this.dataset.name;
+
+                    // Kiểm tra xem ghế đã được chọn chưa
+                    const seatIndex = selectedSeats.findIndex(s => s.id === seatId);
+
+                    if (seatIndex > -1) {
+                        // Bỏ chọn ghế
+                        selectedSeats.splice(seatIndex, 1);
+                        this.classList.remove('selected');
+                    } else {
+                        // Chọn ghế
+                        selectedSeats.push({ id: seatId, name: seatName });
+                        this.classList.add('selected');
+                    }
+                    updateBookingInfo();
+                });
+            });
+
+            // Hàm cập nhật thông tin vé
+            function updateBookingInfo() {   // Cập nhật text hiển thị các ghế đã chọn
+                if (selectedSeats.length === 0) {
+                    selectedSeatsText.textContent = 'Chưa chọn ghế';
+                    btnContinue.disabled = true;
+                } else {
+                    selectedSeatsText.textContent = selectedSeats.map(s => s.name).join(', ');
+                    btnContinue.disabled = false;
+                }
+
+                // Cập nhật input ẩn để gửi đi
+                selectedSeatsInput.value = selectedSeats.map(s => s.id).join(',');
+
+                // Cập nhật tổng tiền
+                const totalPrice = selectedSeats.length * giaVe;
+                totalPriceText.textContent = totalPrice.toLocaleString('vi-VN') + ' VNĐ';
+            }
+        });
+    </script>
+}

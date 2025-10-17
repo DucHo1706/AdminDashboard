@@ -1,6 +1,7 @@
 ﻿using AdminDashboard.Models;
 using AdminDashboard.TransportDBContext;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -17,9 +18,14 @@ namespace AdminDashboard.Controllers
 
         public IActionResult Home_User()
         {
+            // Lấy tất cả các trạm để hiển thị trong dropdown
+            var danhSachTram = _context.Tram.ToList();
+
+            // Dùng ViewBag hoặc ViewModel để truyền danh sách này ra View
+            ViewBag.DanhSachTram = new SelectList(danhSachTram, "IdTram", "TenTram");
             return View();
         }
-
+      
         public async Task<IActionResult> Account()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

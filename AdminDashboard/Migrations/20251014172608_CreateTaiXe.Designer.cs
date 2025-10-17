@@ -4,6 +4,7 @@ using AdminDashboard.TransportDBContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AdminDashboard.Migrations
 {
     [DbContext(typeof(Db27524Context))]
-    partial class Db27524ContextModelSnapshot : ModelSnapshot
+    [Migration("20251014172608_CreateTaiXe")]
+    partial class CreateTaiXe
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -116,9 +119,6 @@ namespace AdminDashboard.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<DateTime>("NgayDat")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ThoiGianHetHan")
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("TongTien")
@@ -248,34 +248,27 @@ namespace AdminDashboard.Migrations
 
             modelBuilder.Entity("AdminDashboard.Models.TaiXe", b =>
                 {
-                    b.Property<int>("TaiXeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TaiXeId"));
+                    b.Property<string>("TaiXeId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AdminId")
                         .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("BangLaiXe")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("NgayVaoLam")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("TrangThai")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(255)");
 
                     b.HasKey("TaiXeId");
 
@@ -489,13 +482,13 @@ namespace AdminDashboard.Migrations
                     b.HasOne("AdminDashboard.Models.NguoiDung", "Admin")
                         .WithMany()
                         .HasForeignKey("AdminId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("AdminDashboard.Models.NguoiDung", "NguoiDung")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Admin");

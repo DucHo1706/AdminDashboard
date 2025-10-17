@@ -20,7 +20,12 @@ namespace AdminDashboard.Controllers
         {
             _context = context;
         }
-
+        [Route("Shared/AccessDenied")]
+        public IActionResult AccessDenied(string? returnUrl = null)
+        {
+            ViewBag.ReturnUrl = returnUrl;
+            return View();
+        }
         // ====== Login / Logout / Register (giữ nguyên phần logic bạn đã có) ======
         [HttpGet]
         public IActionResult Login()
@@ -44,7 +49,8 @@ namespace AdminDashboard.Controllers
 
             var user = await _context.NguoiDung
                 .FirstOrDefaultAsync(u =>
-                    (u.Email.ToLower() == input || u.SoDienThoai == input) && u.MatKhau == password);
+                    u.TrangThai == TrangThaiNguoiDung.HoatDong &&
+                    (u.Email.ToLower() == input || u.SoDienThoai == input));
 
             if (user == null)
             {
@@ -52,23 +58,36 @@ namespace AdminDashboard.Controllers
                 return View(model);
             }
 
-            if (user.TrangThai != TrangThaiNguoiDung.HoatDong)
+            // ✅ Kiểm tra mật khẩu bằng BCrypt
+            bool passwordValid;
+            try
             {
-                ModelState.AddModelError("", "Tài khoản của bạn đã bị khóa.");
+                passwordValid = BCrypt.Net.BCrypt.Verify(password, user.MatKhau);
+            }
+            catch
+            {
+                // Trường hợp mật khẩu cũ không mã hóa (tài khoản cũ)
+                passwordValid = user.MatKhau == password;
+            }
+
+            if (!passwordValid)
+            {
+                ModelState.AddModelError("", "Tên đăng nhập hoặc mật khẩu không đúng.");
                 return View(model);
             }
 
+            // ✅ Nếu đúng → tạo Claims như cũ
             var roleName = await _context.UserRole
                 .Where(ur => ur.UserId == user.UserId)
                 .Join(_context.VaiTro, ur => ur.RoleId, r => r.RoleId, (ur, r) => r.TenVaiTro)
                 .FirstOrDefaultAsync() ?? "Khach";
 
             var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.UserId),
-                new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimTypes.Role, roleName)
-            };
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.UserId),
+        new Claim(ClaimTypes.Name, user.Email),
+        new Claim(ClaimTypes.Role, roleName)
+    };
 
             var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
@@ -81,6 +100,7 @@ namespace AdminDashboard.Controllers
             else
                 return RedirectToAction("Index", "Home");
         }
+
 
         [HttpGet]
         public async Task<IActionResult> Logout()

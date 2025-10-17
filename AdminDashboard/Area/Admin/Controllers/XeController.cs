@@ -21,14 +21,12 @@ namespace AdminDashboard.Area.Admin.Controllers
             {
                 var dsXe = _context.Xe
                     .Include(x => x.LoaiXe)
-                    .Include(x => x.DanhSachGhe) // Include danh sách ghế
-                    .AsNoTracking(); // Thêm AsNoTracking để tăng performance
-
+                    .Include(x => x.DanhSachGhe) 
+                    .AsNoTracking();
                 return View(await dsXe.ToListAsync());
             }
             catch (Exception ex)
             {
-                // Log lỗi và hiển thị thông báo thân thiện
                 Console.WriteLine($"Lỗi khi tải danh sách xe: {ex.Message}");
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách xe.";
                 return View(new List<Xe>());
