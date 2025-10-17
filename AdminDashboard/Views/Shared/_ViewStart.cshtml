@@ -1,16 +1,19 @@
-﻿```csharp
+﻿
 @{
     if (User.IsInRole("Admin"))
     {
-        Layout = "~/Views/Shared/_AdminLayout.cshtml";
+        Layout = "~/Views/Shared/_Layout.cshtml";
     }
     else if (User.IsInRole("KhachHang"))
     {
-        Layout = "~/Views/Shared/_UserLayout.cshtml";
+        Layout = "~/Views/Shared/_Layout_User.cshtml";
+    }
+    else if (User.IsInRole("TaiXe"))
+    {
+        Layout = "~/Views/Shared/_LayoutTaiXe.cshtml";
     }
     else
     {
-        Layout = "~/Views/Shared/_UserLayout.cshtml"; // Mặc định cho người chưa đăng nhập
+        Layout = "~/Views/Shared/_Layout_User.cshtml"; // Mặc định cho người chưa đăng nhập
     }
 }
-```

@@ -12,6 +12,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/AdminDashboard.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 
     <style>
         html, body {
@@ -118,6 +119,32 @@ transition: all 0.3s ease;
         .user-icon {
             display: none;
         }
+
+        select.form-control {
+            background-color: #ffb703;
+            color: #111;
+            border: 2px solid #fff;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-weight: 500;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658A.5.5 0 0 1 2.825 5h10.35a.5.5 0 0 1 .374.658l-4.796 5.482a.5.5 0 0 1-.706 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+            select.form-control:hover {
+                background-color: #fb8500;
+                color: white;
+            }
+
+        option {
+            background-color: #ffcc00;
+            color: black;
+        }
+
 
         /* Main content */
         .main-content {
@@ -237,7 +264,7 @@ transition: all 0.3s ease;
                 }
                 else
                 {
-                    <select id="viewSelector" class="form-select form-select-sm mt-2">
+                    <select id="viewSelector" class="form-select form-select-sm mt-2 form-control">
                         <option value="" disabled selected>Tài khoản</option>
                         <option value="/Auth/Login">Đăng nhập</option>
                         <option value="/Auth/Register">Đăng ký</option>

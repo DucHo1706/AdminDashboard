@@ -120,6 +120,7 @@ namespace AdminDashboard.Controllers
                 {
                     _context.Update(chuyenXe);
                     await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Cập nhật chuyến xe thành công!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {

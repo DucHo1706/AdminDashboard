@@ -160,6 +160,7 @@ namespace AdminDashboard.Controllers
 
             var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == userId);
             return View(user);
+
         }
 
         // ====== EDIT ACCOUNT: GET (truy cập trang chỉnh sửa nếu cần) ======
@@ -285,6 +286,26 @@ namespace AdminDashboard.Controllers
         public IActionResult ForgotPass()
         {
             return View();
+        }
+        public async Task<IActionResult> History()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            // Giữ nguyên các đơn hết hạn ở trạng thái Chờ thanh toán để hiển thị bên "Hiện tại".
+            // Không auto-cancel và không giải phóng ghế tại đây; việc hủy sẽ do người dùng hoặc tác vụ khác xử lý.
+
+            var donHangs = await _context.DonHang
+                .Where(d => d.IDKhachHang == userId)
+                .Include(d => d.ChuyenXe).ThenInclude(cx => cx.LoTrinh).ThenInclude(lt => lt.TramDiNavigation)
+                .Include(d => d.ChuyenXe).ThenInclude(cx => cx.LoTrinh).ThenInclude(lt => lt.TramToiNavigation)
+                .OrderByDescending(d => d.NgayDat)
+                .ToListAsync();
+
+            return View(donHangs);
         }
     }
 }

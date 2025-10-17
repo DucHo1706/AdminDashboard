@@ -173,6 +173,75 @@
             transform: scale(1.2);
             transition: transform 0.2s ease;
         }
+
+           /* Toast thông báo thành công */
+        .toast-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #00c21a;
+            color: white;
+            display: flex;
+            align-items: center;
+            border-radius: 8px;
+            padding: 14px 18px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1050;
+            min-width: 250px;
+            font-size: 15px;
+            font-weight: 500;
+            animation: slideIn 0.4s ease;
+        }
+
+        .toast-icon {
+            font-size: 20px;
+            margin-right: 10px;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            margin-left: auto;
+            cursor: pointer;
+        }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.7);
+            width: 100%;
+            animation: progress 3s linear forwards;
+            border-radius: 0 0 8px 8px;
+        }
+
+        @@keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @@keyframes slideOut {
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        @@keyframes progress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+
     </style>
 </head>
 
@@ -251,15 +320,36 @@
     </div>
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div id="success-toast" class="toast-message">
+            <div class="toast-icon">✔</div>
+            <div class="toast-text">@TempData["SuccessMessage"]</div>
+            <button class="toast-close" onclick="closeToast()">×</button>
+            <div class="toast-progress"></div>
         </div>
     }
+
     @section Scripts {
         @{
             await Html.RenderPartialAsync("_ValidationScriptsPartial");
         }
     }
+    <script>
+        function closeToast() {
+            const toast = document.getElementById("success-toast");
+            if (toast) {
+                toast.style.animation = "slideOut 0.5s forwards";
+                setTimeout(() => toast.remove(), 500);
+            }
+        }
+
+        // Tự động đóng sau 3 giây
+        window.addEventListener("DOMContentLoaded", () => {
+            const toast = document.getElementById("success-toast");
+            if (toast) {
+                setTimeout(() => closeToast(), 3000);
+            }
+        });
+    </script>
+
 </body>
 
