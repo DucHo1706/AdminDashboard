@@ -1,0 +1,355 @@
+﻿@* //BAOLONG// *@
+@* Vị trí: Views/ChuyenXe/Index.cshtml *@
+@using AdminDashboard.Models
+@using AdminDashboard.Models.TrangThai
+@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+
+@{
+    ViewData["Title"] = "Quản Lý Chuyến Xe";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title"><i class="fas fa-bus-alt"></i> @ViewData["Title"]</h1>
+        <a asp-action="Create" class="btn btn-add-new">
+            <i class="fas fa-plus-circle"></i> Thêm chuyến mới
+        </a>
+    </div>
+
+    <div class="content-panel">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success custom-alert">
+                <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger custom-alert">
+                <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <div class="table-responsive">
+            <table class="table modern-table">
+                <thead>
+                    <tr>
+                        <th>Lộ Trình</th>
+                        <th>Biển Số Xe</th>
+                        <th>Ngày Đi</th>
+                        <th>Giờ Đi</th>
+                        <th>Trạng Thái</th>
+                        <th class="text-center">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">
+                                @(item.LoTrinh?.TramDiNavigation?.TenTram)
+                                <i class="bi bi-arrow-right mx-1 text-muted"></i> @(item.LoTrinh?.TramToiNavigation?.TenTram)
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary-light">@item.Xe.BienSoXe</span>
+                            </td>
+                            <td>@item.NgayDi.ToString("dd/MM/yyyy")</td>
+                            <td>@item.GioDi.ToString(@"hh\:mm")</td>
+                            <td>
+                                @if (item.TrangThai == TrangThaiChuyenXe.DaHoanThanh)
+                                {
+                                    <span class="badge bg-success-light">Đã Hoàn Thành</span>
+                                }
+                                else if (item.TrangThai == TrangThaiChuyenXe.DangDiChuyen)
+                                {
+                                    <span class="badge bg-warning-light">Đang Di Chuyển</span>
+                                }
+                                else if (item.TrangThai == TrangThaiChuyenXe.DaHuy)
+                                {
+                                    <span class="badge bg-danger-light">Đã Hủy</span>
+                                }
+                                else if (item.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh)
+                                {
+                                    <span class="badge bg-info-light">Chờ Khởi Hành</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-primary-light">@item.TrangThai.ToString()</span>
+                                }
+                            </td>
+                            <td class="action-buttons">
+                                <a asp-action="Edit" asp-route-id="@item.ChuyenId" class="btn-action btn-edit" title="Chỉnh sửa">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+                                <a asp-action="Details" asp-route-id="@item.ChuyenId" class="btn-action btn-details" title="Xem chi tiết">
+                                    <i class="fas fa-info-circle"></i>
+                                </a>
+                                <button type="button" class="btn-action btn-delete" title="Xóa chuyến"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteModal"
+                                        data-id="@item.ChuyenId"
+                                        data-lotrinh="@(item.LoTrinh?.TramDiNavigation?.TenTram + " -> " + item.LoTrinh?.TramToiNavigation?.TenTram)"
+                                        data-xe="@item.Xe?.BienSoXe"
+                                        data-ngaydi="@item.NgayDi.ToString("dd/MM/yyyy")">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form asp-action="Delete" method="post">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel"><i class="fas fa-exclamation-triangle"></i> Xác nhận Xóa</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="deleteChuyenId" name="ChuyenId" />
+                    <p>Bạn có chắc chắn muốn xóa vĩnh viễn chuyến xe này không?</p>
+                    <dl class="row mt-3 bg-light p-2 rounded">
+                        <dt class="col-sm-4">Lộ Trình</dt>
+                        <dd class="col-sm-8" id="deleteLoTrinh"></dd>
+                        <dt class="col-sm-4">Xe</dt>
+                        <dd class="col-sm-8" id="deleteXe"></dd>
+                        <dt class="col-sm-4">Ngày Đi</dt>
+                        <dd class="col-sm-8" id="deleteNgayDi"></dd>
+                    </dl>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger"><i class="fas fa-trash-alt"></i> Xóa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const deleteModal = document.getElementById('deleteModal');
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-id');
+            const lotrinh = button.getAttribute('data-lotrinh');
+            const xe = button.getAttribute('data-xe');
+            const ngaydi = button.getAttribute('data-ngaydi');
+            deleteModal.querySelector('#deleteChuyenId').value = id;
+            deleteModal.querySelector('#deleteLoTrinh').textContent = lotrinh;
+            deleteModal.querySelector('#deleteXe').textContent = xe;
+            deleteModal.querySelector('#deleteNgayDi').textContent = ngaydi;
+        });
+
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                if (bsAlert) {
+                    bsAlert.close();
+                }
+            });
+        }, 3000);
+    </script>
+}
+
+<style>
+    body {
+        background: url('https://images.unsplash.com/photo-1583417319070-4a69db38a482?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1740') no-repeat center center fixed;
+        background-size: cover;
+        font-family: 'Poppins', sans-serif;
+        color: #333;
+    }
+
+    .page-container {
+        padding: 30px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .page-title {
+        font-size: 2.2em;
+        font-weight: 700;
+        color: #fff;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+        .page-title i {
+            margin-right: 15px;
+            color: #ffc107;
+        }
+
+    .btn-add-new {
+        background: #ffc107;
+        color: #333;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 25px;
+        font-weight: 700;
+        font-size: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+        .btn-add-new:hover {
+            background: #ffb300;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-add-new i {
+            margin-right: 8px;
+        }
+
+    .content-panel {
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        padding: 30px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .custom-alert {
+        display: flex;
+        align-items: center;
+        border: none;
+        color: #fff;
+        font-weight: 500;
+    }
+
+        .custom-alert.alert-success {
+            background-color: rgba(25, 135, 84, 0.9);
+        }
+
+        .custom-alert.alert-danger {
+            background-color: rgba(220, 53, 69, 0.9);
+        }
+
+        .custom-alert i {
+            margin-right: 10px;
+        }
+
+
+    .modern-table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        .modern-table thead th {
+            border: none;
+            padding: 15px;
+            color: #3f5171;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 13px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .modern-table tbody tr {
+            border-bottom: 1px solid #e0e0e0;
+            transition: background-color 0.2s ease;
+        }
+
+            .modern-table tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            .modern-table tbody tr:hover {
+                background-color: rgba(0, 0, 0, 0.04);
+            }
+
+        .modern-table tbody td {
+            border: none;
+            padding: 15px;
+            vertical-align: middle;
+            color: #555;
+        }
+
+    .badge {
+        font-size: 12px;
+        padding: 6px 10px;
+        font-weight: 600;
+    }
+
+    .bg-secondary-light {
+        background-color: #e2e3e5;
+        color: #41464b;
+    }
+
+    .bg-success-light {
+        background-color: #d1e7dd;
+        color: #0a3622;
+    }
+
+    .bg-warning-light {
+        background-color: #fff3cd;
+        color: #664d03;
+    }
+
+    .bg-info-light {
+        background-color: #cff4fc;
+        color: #055160;
+    }
+
+    .bg-danger-light {
+        background-color: #f8d7da;
+        color: #58151c;
+    }
+
+    .bg-primary-light {
+        background-color: #cfe2ff;
+        color: #0a2351;
+    }
+
+    .action-buttons {
+        text-align: center;
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .btn-action {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        border: none;
+        background: #f0f0f0;
+        color: #555;
+        transition: all 0.2s ease;
+    }
+
+        .btn-action:hover {
+            transform: scale(1.1);
+            color: #fff;
+        }
+
+    .btn-edit:hover {
+        background-color: #0d6efd;
+    }
+
+    .btn-details:hover {
+        background-color: #0dcaf0;
+    }
+
+    .btn-delete:hover {
+        background-color: #dc3545;
+    }
+</style>

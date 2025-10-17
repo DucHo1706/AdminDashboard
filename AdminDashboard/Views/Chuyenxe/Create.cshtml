@@ -1,0 +1,227 @@
+﻿@* //BAOLONG// *@
+@using AdminDashboard.Models.TrangThai
+@model AdminDashboard.Models.ChuyenXe
+
+@{
+    ViewData["Title"] = "Tạo Chuyến Xe Mới";
+}
+
+<div class="create-form-container">
+    <div class="form-panel">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="form-header">
+                <h2><i class="fas fa-plus-circle"></i> @ViewData["Title"]</h2>
+                <p>Điền thông tin chi tiết để tạo một chuyến xe mới.</p>
+            </div>
+
+            <div class="form-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label asp-for="LoTrinhId" class="control-label"><i class="fas fa-route"></i> Lộ Trình</label>
+                            <select asp-for="LoTrinhId" class="form-select" asp-items="ViewBag.LoTrinhId">
+                                <option value="">-- Chọn Lộ Trình --</option>
+                            </select>
+                            <span asp-validation-for="LoTrinhId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label asp-for="XeId" class="control-label"><i class="fas fa-bus"></i> Xe</label>
+                            <select asp-for="XeId" class="form-select" asp-items="ViewBag.XeId">
+                                <option value="">-- Chọn Xe --</option>
+                            </select>
+                            <span asp-validation-for="XeId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label asp-for="NgayDi" class="control-label"><i class="fas fa-calendar-alt"></i> Ngày Đi</label>
+                            <input asp-for="NgayDi" class="form-control" type="date" />
+                            <span asp-validation-for="NgayDi" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label asp-for="GioDi" class="control-label"><i class="fas fa-clock"></i> Giờ Đi</label>
+                            <input asp-for="GioDi" class="form-control" type="time" />
+                            <span asp-validation-for="GioDi" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label asp-for="GioDenDuKien" class="control-label"><i class="fas fa-hourglass-half"></i> Giờ Đến Dự Kiến</label>
+                            <input asp-for="GioDenDuKien" class="form-control" type="time" />
+                            <span asp-validation-for="GioDenDuKien" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label asp-for="TrangThai" class="control-label"><i class="fas fa-check-circle"></i> Trạng Thái</label>
+                            <select asp-for="TrangThai" asp-items="Html.GetEnumSelectList<TrangThaiChuyenXe>()" class="form-select">
+                                <option value="">-- Chọn trạng thái --</option>
+                            </select>
+                            <span asp-validation-for="TrangThai" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <a asp-action="Index" class="btn btn-secondary-custom">
+                    <i class="fas fa-arrow-left"></i> Quay Lại
+                </a>
+                <button type="submit" class="btn btn-primary-custom">
+                    <i class="fas fa-save"></i> Tạo Mới
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<style>
+    body {
+        background: url('https://images.unsplash.com/photo-1583417319070-4a69db38a482?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1740') no-repeat center center fixed;
+        background-size: cover;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .create-form-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px 15px;
+        min-height: 100vh;
+    }
+
+    .form-panel {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        width: 100%;
+        max-width: 900px;
+        overflow: hidden;
+    }
+
+    .form-header {
+        background-color: rgba(248, 249, 250, 0.8);
+        padding: 25px 30px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+        .form-header h2 {
+            font-weight: 700;
+            font-size: 24px;
+            color: #3f4c6b;
+            margin: 0;
+            text-align: left;
+            text-transform: none;
+        }
+
+            .form-header h2 i {
+                color: #ff9800;
+                margin-right: 12px;
+            }
+
+        .form-header p {
+            color: #8c96a5;
+            margin: 5px 0 0 0;
+        }
+
+    .form-body {
+        padding: 30px;
+    }
+
+    .form-group-custom {
+        margin-bottom: 25px;
+    }
+
+    .control-label {
+        font-weight: 600;
+        color: #5b6a82;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+        .control-label i {
+            margin-right: 8px;
+            color: #ff9800;
+            width: 20px;
+            text-align: center;
+        }
+
+    .form-control, .form-select {
+        height: 48px;
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        padding: 0 15px;
+        font-size: 15px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #ff9800;
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.2);
+            outline: none;
+        }
+
+    .form-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 20px 30px;
+        background-color: rgba(248, 249, 250, 0.8);
+        border-top: 1px solid #e9ecef;
+    }
+
+    .btn-primary-custom, .btn-secondary-custom {
+        padding: 10px 22px;
+        font-weight: 600;
+        font-size: 15px;
+        border-radius: 8px;
+        border: none;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary-custom {
+        background-color: #ff9800;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+    }
+
+        .btn-primary-custom:hover {
+            background-color: #f57c00;
+            transform: translateY(-2px);
+        }
+
+    .btn-secondary-custom {
+        background-color: #6c757d;
+        color: #fff;
+    }
+
+        .btn-secondary-custom:hover {
+            background-color: #5a6268;
+        }
+
+        .btn-primary-custom i, .btn-secondary-custom i {
+            margin-right: 8px;
+        }
+</style>

@@ -1,0 +1,66 @@
+﻿@model AdminDashboard.Models.ChuyenXe
+@{
+    ViewData["Title"] = "Phân công Tài xế";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">@ViewData["Title"]</h3>
+                </div>
+                <div class="card-body">
+                    <h4>Thông tin chuyến xe</h4>
+                    <hr />
+                    <dl class="row">
+                        <dt class="col-sm-4">Mã chuyến:</dt>
+                        <dd class="col-sm-8">@Model.ChuyenId</dd>
+
+                        <dt class="col-sm-4">Lộ trình:</dt>
+                        <dd class="col-sm-8">@Model.LoTrinh?.TramDiNavigation?.TenTram - @Model.LoTrinh?.TramToiNavigation?.TenTram</dd> 
+
+                        <dt class="col-sm-4">Xe thực hiện:</dt>
+                        <dd class="col-sm-8">@Model.Xe?.BienSoXe</dd>
+
+                        <dt class="col-sm-4">Ngày khởi hành:</dt>
+                        <dd class="col-sm-8">@Model.NgayDi.ToString("dd/MM/yyyy")</dd>
+
+                        <dt class="col-sm-4">Thời gian:</dt>
+                        <dd class="col-sm-8">@Model.GioDi.ToString(@"hh\:mm") - @Model.GioDenDuKien.ToString(@"hh\:mm")</dd>
+                    </dl>
+
+                    <hr />
+
+                    <form asp-action="AssignDriver" method="post">
+                        @* Dùng để gửi lại ChuyenId khi submit form *@
+                        <input type="hidden" name="ChuyenId" value="@Model.ChuyenId" />
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="form-group mb-4">
+                            <label for="TaiXeId" class="control-label fw-bold">Chọn tài xế khả dụng:</label>
+
+                            @* Dropdown này được nạp dữ liệu từ ViewBag.AvailableDrivers trong Controller *@
+                            <select name="TaiXeId" class="form-control" asp-items="ViewBag.AvailableDrivers">
+                                <option value="">-- Vui lòng chọn tài xế --</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Xác nhận phân công</button>
+                            <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
