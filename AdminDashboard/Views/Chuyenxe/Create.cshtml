@@ -8,7 +8,8 @@
 
 <div class="create-form-container">
     <div class="form-panel">
-        <form asp-action="Create" method="post">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="form-header">
@@ -71,6 +72,11 @@
                             </select>
                             <span asp-validation-for="TrangThai" class="text-danger"></span>
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Hình ảnh chuyến xe</label>
+                        <input type="file" class="form-control" name="images" multiple accept="image/*" />
+                        <small class="form-text text-muted">Có thể chọn nhiều ảnh. Định dạng: JPG, PNG, GIF. Tối đa 5MB/ảnh.</small>
                     </div>
                 </div>
             </div>

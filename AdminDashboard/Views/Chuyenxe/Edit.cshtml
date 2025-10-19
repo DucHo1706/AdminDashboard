@@ -1,5 +1,4 @@
-﻿@* //BAOLONG// *@
-@using AdminDashboard.Models.TrangThai
+﻿@using AdminDashboard.Models.TrangThai
 @model AdminDashboard.Models.ChuyenXe
 
 @{
@@ -8,8 +7,9 @@
 
 <div class="edit-form-container">
     <div class="form-panel">
-        <form asp-action="Edit" method="post">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
             <input type="hidden" asp-for="ChuyenId" />
+
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="form-header">
@@ -18,65 +18,89 @@
             </div>
 
             <div class="form-body">
+                <!-- Phần thông tin chung -->
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="form-group-custom">
-                            <label asp-for="LoTrinhId" class="control-label"><i class="fas fa-route"></i> Lộ Trình</label>
-                            <select asp-for="LoTrinhId" class="form-select" asp-items="ViewBag.LoTrinhId">
-                                <option value="">-- Chọn Lộ Trình --</option>
-                            </select>
-                            <span asp-validation-for="LoTrinhId" class="text-danger"></span>
-                        </div>
+                        <label asp-for="LoTrinhId" class="control-label"><i class="fas fa-route"></i> Lộ Trình</label>
+                        <select asp-for="LoTrinhId" class="form-select" asp-items="ViewBag.LoTrinhId">
+                            <option value="">-- Chọn Lộ Trình --</option>
+                        </select>
+                        <span asp-validation-for="LoTrinhId" class="text-danger"></span>
                     </div>
                     <div class="col-md-6">
-                        <div class="form-group-custom">
-                            <label asp-for="XeId" class="control-label"><i class="fas fa-bus"></i> Xe</label>
-                            <select asp-for="XeId" class="form-select" asp-items="ViewBag.XeId">
-                                <option value="">-- Chọn Xe --</option>
-                            </select>
-                            <span asp-validation-for="XeId" class="text-danger"></span>
-                        </div>
+                        <label asp-for="XeId" class="control-label"><i class="fas fa-bus"></i> Xe</label>
+                        <select asp-for="XeId" class="form-select" asp-items="ViewBag.XeId">
+                            <option value="">-- Chọn Xe --</option>
+                        </select>
+                        <span asp-validation-for="XeId" class="text-danger"></span>
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row mt-3">
                     <div class="col-md-6">
-                        <div class="form-group-custom">
-                            <label asp-for="NgayDi" class="control-label"><i class="fas fa-calendar-alt"></i> Ngày Đi</label>
-                            <input asp-for="NgayDi" class="form-control" type="date" />
-                            <span asp-validation-for="NgayDi" class="text-danger"></span>
-                        </div>
+                        <label asp-for="NgayDi" class="control-label"><i class="fas fa-calendar-alt"></i> Ngày Đi</label>
+                        <input asp-for="NgayDi" class="form-control" type="date" />
+                        <span asp-validation-for="NgayDi" class="text-danger"></span>
                     </div>
                     <div class="col-md-6">
-                        <div class="form-group-custom">
-                            <label asp-for="GioDi" class="control-label"><i class="fas fa-clock"></i> Giờ Đi</label>
-                            <input asp-for="GioDi" class="form-control" type="time" />
-                            <span asp-validation-for="GioDi" class="text-danger"></span>
-                        </div>
+                        <label asp-for="GioDi" class="control-label"><i class="fas fa-clock"></i> Giờ Đi</label>
+                        <input asp-for="GioDi" class="form-control" type="time" />
+                        <span asp-validation-for="GioDi" class="text-danger"></span>
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row mt-3">
                     <div class="col-md-6">
-                        <div class="form-group-custom">
-                            <label asp-for="GioDenDuKien" class="control-label"><i class="fas fa-hourglass-half"></i> Giờ Đến Dự Kiến</label>
-                            <input asp-for="GioDenDuKien" class="form-control" type="time" />
-                            <span asp-validation-for="GioDenDuKien" class="text-danger"></span>
-                        </div>
+                        <label asp-for="GioDenDuKien" class="control-label"><i class="fas fa-hourglass-half"></i> Giờ Đến Dự Kiến</label>
+                        <input asp-for="GioDenDuKien" class="form-control" type="time" />
+                        <span asp-validation-for="GioDenDuKien" class="text-danger"></span>
                     </div>
                     <div class="col-md-6">
-                        <div class="form-group-custom">
-                            <label asp-for="TrangThai" class="control-label"><i class="fas fa-check-circle"></i> Trạng Thái</label>
-                            <select asp-for="TrangThai" asp-items="Html.GetEnumSelectList<TrangThaiChuyenXe>()" class="form-select">
-                                <option value="">-- Chọn trạng thái --</option>
-                            </select>
-                            <span asp-validation-for="TrangThai" class="text-danger"></span>
-                        </div>
+                        <label asp-for="TrangThai" class="control-label"><i class="fas fa-check-circle"></i> Trạng Thái</label>
+                        <select asp-for="TrangThai" asp-items="Html.GetEnumSelectList<TrangThaiChuyenXe>()" class="form-select">
+                            <option value="">-- Chọn trạng thái --</option>
+                        </select>
+                        <span asp-validation-for="TrangThai" class="text-danger"></span>
                     </div>
+                </div>
+
+                <!-- QUẢN LÝ HÌNH ẢNH -->
+                <div class="form-group-custom mt-4">
+                    <label class="control-label"><i class="fas fa-images"></i> Hình ảnh hiện tại</label>
+                    <div id="current-images" class="row">
+                        @if (Model.Images != null && Model.Images.Any())
+                        {
+                            @foreach (var image in Model.Images)
+                            {
+                                <div class="col-md-3 mb-3 image-item" data-image-id="@image.ImageId">
+                                    <div class="card">
+                                        <img src="@image.ImageUrl" class="card-img-top" style="height:150px;object-fit:cover;" alt="Ảnh chuyến xe">
+                                        <div class="card-body text-center">
+                                            <button type="button" class="btn btn-danger btn-sm delete-temp">
+                                                <i class="fas fa-trash"></i> Xóa
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="col-12"><p class="text-muted">Chưa có hình ảnh</p></div>
+                        }
+                    </div>
+                </div>
+
+                <div class="form-group-custom">
+                    <label class="control-label"><i class="fas fa-plus-circle"></i> Thêm hình ảnh mới</label>
+                    <input type="file" class="form-control" name="newImages" multiple accept="image/*" />
                 </div>
             </div>
 
-            <div class="form-footer">
+            <!-- Hidden lưu danh sách ảnh bị xóa -->
+            <input type="hidden" id="deletedImages" name="deletedImages" value="" />
+
+            <div class="form-footer mt-4">
                 <a asp-action="Index" class="btn btn-secondary-custom">
                     <i class="fas fa-arrow-left"></i> Hủy
                 </a>
@@ -92,7 +116,49 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        $(document).ready(function () {
+            var deletedIds = [];
+            var formChanged = false;
+
+            // Khi nhấn "Xóa" hình (ẩn tạm và đánh dấu thay đổi)
+            $('.delete-temp').on('click', function () {
+                var imageCard = $(this).closest('.image-item');
+                var imageId = imageCard.data('image-id');
+
+                if (confirm("Bạn có chắc muốn xóa tạm ảnh này?")) {
+                    imageCard.hide();
+                    deletedIds.push(imageId);
+                    $('#deletedImages').val(deletedIds.join(','));
+                    formChanged = true; // đánh dấu form đã thay đổi
+                }
+            });
+
+            // Khi người dùng thay đổi bất kỳ input nào trong form
+            $('input, select, textarea').on('change input', function () {
+                formChanged = true;
+            });
+
+            // Khi nhấn “Hủy”
+            $('.btn-secondary-custom').on('click', function (e) {
+                e.preventDefault();
+
+                if (!formChanged) {
+                    // Nếu không có thay đổi => quay về trang trước (Index)
+                    window.location.href = '@Url.Action("Index", "ChuyenXe")';
+                } else {
+                    // Nếu có thay đổi => hỏi xác nhận
+                    if (confirm("Bạn có chắc muốn hủy các thay đổi và hoàn tác?")) {
+                        location.reload(); // reload lại trang để hoàn tác
+                    }
+                }
+            });
+        });
+    </script>
+
 }
+
 
 <style>
     body {

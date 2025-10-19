@@ -24,44 +24,34 @@
 
         <div class="panel-body">
             <dl class="details-list">
+                <!-- Các detail item hiện có... -->
+                <!-- THÊM PHẦN HIỂN THỊ ẢNH -->
                 <div class="detail-item">
-                    <dt><i class="fas fa-bus-alt"></i> Xe</dt>
-                    <dd><span class="badge bg-secondary-light">@Model.Xe.BienSoXe</span></dd>
-                </div>
-                <div class="detail-item">
-                    <dt><i class="fas fa-user-tie"></i> Tài Xế</dt>
-                    <dd>@(Model.TaiXe?.HoTen ?? "Chưa phân công")</dd>
-                </div>
-                <div class="detail-item">
-                    <dt><i class="fas fa-calendar-day"></i> Ngày Đi</dt>
-                    <dd>@Model.NgayDi.ToString("dd/MM/yyyy")</dd>
-                </div>
-                <div class="detail-item">
-                    <dt><i class="fas fa-clock"></i> Giờ Khởi Hành</dt>
-                    <dd>@Model.GioDi.ToString(@"hh\:mm")</dd>
-                </div>
-                <div class="detail-item">
-                    <dt><i class="fas fa-hourglass-end"></i> Giờ Đến Dự Kiến</dt>
-                    <dd>@Model.GioDenDuKien.ToString(@"hh\:mm")</dd>
-                </div>
-                <div class="detail-item">
-                    <dt><i class="fas fa-info-circle"></i> Trạng Thái</dt>
+                    <dt><i class="fas fa-images"></i> Hình ảnh</dt>
                     <dd>
-                        @if (Model.TrangThai == TrangThaiChuyenXe.DaHoanThanh)
+                        @if (Model.Images != null && Model.Images.Any())
                         {
-                            <span class="badge bg-success-light">Đã Hoàn Thành</span>
-                        }
-                        else if (Model.TrangThai == TrangThaiChuyenXe.DangDiChuyen)
-                        {
-                            <span class="badge bg-warning-light">Đang Di Chuyển</span>
-                        }
-                        else if (Model.TrangThai == TrangThaiChuyenXe.DaHuy)
-                        {
-                            <span class="badge bg-danger-light">Đã Hủy</span>
+                            <div class="row">
+                                @foreach (var image in Model.Images)
+                                {
+                                    <div class="col-md-3 mb-3">
+                                        <div class="card">
+                                            <img src="@image.ImageUrl" class="card-img-top"
+                                                 style="height: 150px; object-fit: cover;"
+                                                 alt="Ảnh chuyến xe">
+                                            <div class="card-body text-center">
+                                                <small class="text-muted">
+                                                    @image.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
                         }
                         else
                         {
-                            <span class="badge bg-info-light">@Model.TrangThai.ToString()</span>
+                            <span class="text-muted">Chưa có hình ảnh</span>
                         }
                     </dd>
                 </div>
