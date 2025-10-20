@@ -1,5 +1,5 @@
-﻿//BaoLong//
-using AdminDashboard.Models;
+﻿using AdminDashboard.Models;
+using AdminDashboard.Models.TrangThai;
 using AdminDashboard.TransportDBContext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -153,6 +153,51 @@ namespace AdminDashboard.Controllers
                 .ToListAsync();
 
             return View(donHangs);
+        }
+        // GET: ChuyenXe/DanhSach
+        public IActionResult ChuyenXe_User()
+        {
+            ViewBag.DanhSachTram = new SelectList(_context.Tram, "IdTram", "TenTram");
+            var danhSach = _context.ChuyenXe
+                .Include(c => c.LoTrinh).ThenInclude(l => l.TramDiNavigation)
+                .Include(c => c.LoTrinh).ThenInclude(l => l.TramToiNavigation)
+                .Include(c => c.Xe)
+                .Where(c => c.TrangThai == TrangThaiChuyenXe.DangMoBanVe
+                         || c.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh
+                         || c.TrangThai == TrangThaiChuyenXe.DaLenLich)
+                .ToList();
+
+            return View(danhSach);
+        }
+
+        [HttpGet]
+        public IActionResult TimKiemAjax(string diemDi, string diemDen, string ngayDi)
+        {
+            var query = _context.ChuyenXe
+                .Include(c => c.LoTrinh).ThenInclude(l => l.TramDiNavigation)
+                .Include(c => c.LoTrinh).ThenInclude(l => l.TramToiNavigation)
+                .Include(c => c.Xe)
+                .Where(c => c.TrangThai == TrangThaiChuyenXe.DangMoBanVe
+                         || c.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh
+                         || c.TrangThai == TrangThaiChuyenXe.DaLenLich)
+                .AsQueryable();
+
+            // So sánh theo ID Trạm vì dropdown chọn IdTram
+            if (!string.IsNullOrEmpty(diemDi))
+                query = query.Where(c => c.LoTrinh.TramDi == diemDi);
+
+            if (!string.IsNullOrEmpty(diemDen))
+                query = query.Where(c => c.LoTrinh.TramToi == diemDen);
+
+            if (!string.IsNullOrEmpty(ngayDi) && DateTime.TryParse(ngayDi, out DateTime parsedNgay))
+                query = query.Where(c => c.NgayDi.Date == parsedNgay.Date);
+
+            var ketQua = query
+                .OrderBy(c => c.NgayDi)
+                .ThenBy(c => c.GioDi)
+                .ToList();
+
+            return PartialView("_DanhSachChuyenXe", ketQua);
         }
 
     }

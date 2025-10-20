@@ -1,0 +1,112 @@
+﻿@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+
+<head>
+    <style>
+        .table-wrapper {
+            margin: 40px auto;
+            width: 90%;
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #FF6600, #FF944D);
+            color: white;
+        }
+
+        th, td {
+            padding: 14px;
+            font-size: 16px;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #fff7f2;
+        }
+
+        tbody tr:hover {
+            background-color: #ffeede;
+        }
+
+        .route {
+            color: #FF6600;
+            font-weight: 600;
+        }
+
+        .arrow {
+            color: #FF6600;
+            margin: 0 6px;
+        }
+
+        .btn-tuyen {
+            background: #fff3eb;
+            color: #ff6600;
+            border: 1px solid #ff944d;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.25s ease;
+        }
+
+            .btn-tuyen:hover {
+                background: linear-gradient(135deg, #FF6600, #FF944D);
+                color: white;
+                transform: translateY(-1px);
+            }
+
+        .alert {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-warning text-center">Không tìm thấy chuyến xe nào phù hợp.</div>
+    }
+    else
+    {
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tuyến xe</th>
+                        <th>Ngày đi</th>
+                        <th>Giờ đi</th>
+                        <th>Giờ đến dự kiến</th>
+                        <th>Biển số xe</th>
+                        <th>Giá vé</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cx in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="route">@cx.LoTrinh?.TramDiNavigation?.TenTram</span>
+                                <i class="bi bi-arrow-right arrow"></i>
+                                <span class="route">@cx.LoTrinh?.TramToiNavigation?.TenTram</span>
+                            </td>
+                            <td>@cx.NgayDi.ToString("dd/MM/yyyy")</td>
+                            <td>@cx.GioDi</td>
+                            <td>@cx.GioDenDuKien</td>
+                            <td>@cx.Xe?.BienSoXe</td>
+                            <td>--:--đ</td>
+                            <td><button class="btn-tuyen">Tìm tuyến xe</button></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</body>
