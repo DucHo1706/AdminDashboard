@@ -1,291 +1,382 @@
-﻿@using AdminDashboard.Models.TrangThai
+@using AdminDashboard.Models.TrangThai
 @model AdminDashboard.Models.ChuyenXe
 
 @{
-    ViewData["Title"] = "Chỉnh Sửa Chuyến Xe";
+    ViewData["Title"] = "Chỉnh sửa Chuyến xe";
 }
 
-<div class="edit-form-container">
-    <div class="form-panel">
-        <form asp-action="Edit" method="post" enctype="multipart/form-data">
-            <input type="hidden" asp-for="ChuyenId" />
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-            <div class="form-header">
-                <h2><i class="fas fa-edit"></i> @ViewData["Title"]</h2>
-                <p>Cập nhật thông tin chi tiết cho chuyến xe.</p>
-            </div>
-
-            <div class="form-body">
-                <!-- Phần thông tin chung -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <label asp-for="LoTrinhId" class="control-label"><i class="fas fa-route"></i> Lộ Trình</label>
-                        <select asp-for="LoTrinhId" class="form-select" asp-items="ViewBag.LoTrinhId">
-                            <option value="">-- Chọn Lộ Trình --</option>
-                        </select>
-                        <span asp-validation-for="LoTrinhId" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="XeId" class="control-label"><i class="fas fa-bus"></i> Xe</label>
-                        <select asp-for="XeId" class="form-select" asp-items="ViewBag.XeId">
-                            <option value="">-- Chọn Xe --</option>
-                        </select>
-                        <span asp-validation-for="XeId" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="row mt-3">
-                    <div class="col-md-6">
-                        <label asp-for="NgayDi" class="control-label"><i class="fas fa-calendar-alt"></i> Ngày Đi</label>
-                        <input asp-for="NgayDi" class="form-control" type="date" />
-                        <span asp-validation-for="NgayDi" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="GioDi" class="control-label"><i class="fas fa-clock"></i> Giờ Đi</label>
-                        <input asp-for="GioDi" class="form-control" type="time" />
-                        <span asp-validation-for="GioDi" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="row mt-3">
-                    <div class="col-md-6">
-                        <label asp-for="GioDenDuKien" class="control-label"><i class="fas fa-hourglass-half"></i> Giờ Đến Dự Kiến</label>
-                        <input asp-for="GioDenDuKien" class="form-control" type="time" />
-                        <span asp-validation-for="GioDenDuKien" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="TrangThai" class="control-label"><i class="fas fa-check-circle"></i> Trạng Thái</label>
-                        <select asp-for="TrangThai" asp-items="Html.GetEnumSelectList<TrangThaiChuyenXe>()" class="form-select">
-                            <option value="">-- Chọn trạng thái --</option>
-                        </select>
-                        <span asp-validation-for="TrangThai" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <!-- QUẢN LÝ HÌNH ẢNH -->
-                <div class="form-group-custom mt-4">
-                    <label class="control-label"><i class="fas fa-images"></i> Hình ảnh hiện tại</label>
-                    <div id="current-images" class="row">
-                        @if (Model.Images != null && Model.Images.Any())
-                        {
-                            @foreach (var image in Model.Images)
-                            {
-                                <div class="col-md-3 mb-3 image-item" data-image-id="@image.ImageId">
-                                    <div class="card">
-                                        <img src="@image.ImageUrl" class="card-img-top" style="height:150px;object-fit:cover;" alt="Ảnh chuyến xe">
-                                        <div class="card-body text-center">
-                                            <button type="button" class="btn btn-danger btn-sm delete-temp">
-                                                <i class="fas fa-trash"></i> Xóa
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        }
-                        else
-                        {
-                            <div class="col-12"><p class="text-muted">Chưa có hình ảnh</p></div>
-                        }
-                    </div>
-                </div>
-
-                <div class="form-group-custom">
-                    <label class="control-label"><i class="fas fa-plus-circle"></i> Thêm hình ảnh mới</label>
-                    <input type="file" class="form-control" name="newImages" multiple accept="image/*" />
-                </div>
-            </div>
-
-            <!-- Hidden lưu danh sách ảnh bị xóa -->
-            <input type="hidden" id="deletedImages" name="deletedImages" value="" />
-
-            <div class="form-footer mt-4">
-                <a asp-action="Index" class="btn btn-secondary-custom">
-                    <i class="fas fa-arrow-left"></i> Hủy
-                </a>
-                <button type="submit" class="btn btn-primary-custom">
-                    <i class="fas fa-save"></i> Lưu Thay Đổi
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-
-    <script>
-        $(document).ready(function () {
-            var deletedIds = [];
-            var formChanged = false;
-
-            // Khi nhấn "Xóa" hình (ẩn tạm và đánh dấu thay đổi)
-            $('.delete-temp').on('click', function () {
-                var imageCard = $(this).closest('.image-item');
-                var imageId = imageCard.data('image-id');
-
-                if (confirm("Bạn có chắc muốn xóa tạm ảnh này?")) {
-                    imageCard.hide();
-                    deletedIds.push(imageId);
-                    $('#deletedImages').val(deletedIds.join(','));
-                    formChanged = true; // đánh dấu form đã thay đổi
-                }
-            });
-
-            // Khi người dùng thay đổi bất kỳ input nào trong form
-            $('input, select, textarea').on('change input', function () {
-                formChanged = true;
-            });
-
-            // Khi nhấn “Hủy”
-            $('.btn-secondary-custom').on('click', function (e) {
-                e.preventDefault();
-
-                if (!formChanged) {
-                    // Nếu không có thay đổi => quay về trang trước (Index)
-                    window.location.href = '@Url.Action("Index", "ChuyenXe")';
-                } else {
-                    // Nếu có thay đổi => hỏi xác nhận
-                    if (confirm("Bạn có chắc muốn hủy các thay đổi và hoàn tác?")) {
-                        location.reload(); // reload lại trang để hoàn tác
-                    }
-                }
-            });
-        });
-    </script>
-
-}
-
-
-<style>
-    body {
-        background: url('https://images.unsplash.com/photo-1583417319070-4a69db38a482?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1740') no-repeat center center fixed;
-        background-size: cover;
-        font-family: 'Poppins', sans-serif;
-    }
-
-    .edit-form-container {
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: 40px 15px;
-    }
-
-    .form-panel {
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 16px;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        width: 100%;
-        max-width: 900px;
-        overflow: hidden;
-    }
-
-    .form-header {
-        background-color: rgba(248, 249, 250, 0.8);
-        padding: 25px 30px;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-        .form-header h2 {
-            font-weight: 700;
-            font-size: 24px;
-            color: #3f4c6b;
-            margin: 0;
+    <style>
+        /* CSS ĐƯỢC LẤY TỪ GIAO DIỆN CREATE */
+        body {
+            background: url('https://images.unsplash.com/photo-1583417319070-4a69db38a482?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1740') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            font-family: 'Segoe UI', Roboto, sans-serif;
         }
 
-            .form-header h2 i {
-                color: #ffc107; /* Yellow color for edit icon */
-                margin-right: 12px;
+        h2 {
+            text-align: center;
+            font-size: 38px; /* Đã điều chỉnh để khớp với Create */
+            font-weight: 700;
+            color: #111827;
+            text-transform: uppercase;
+            margin-bottom: 15px; /* Đã điều chỉnh để khớp với Create */
+        }
+
+        .form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 85vh; /* Đã điều chỉnh để khớp với Create */
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.9); /* Đã điều chỉnh để khớp với Create */
+            padding: 50px 60px; /* Đã điều chỉnh để khớp với Create */
+            border-radius: 16px; /* Đã điều chỉnh để khớp với Create */
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+            width: 95%;
+            max-width: 700px; /* Đã điều chỉnh để khớp với Create */
+        }
+
+        .form-group-custom { /* Đổi tên class form-group cũ thành form-group-custom */
+            margin-bottom: 22px; /* Đã điều chỉnh để khớp với Create */
+        }
+
+        /* Cần thêm class row và col-md-6 cho Bootstrap grid system. Đảm bảo Bootstrap CSS đã được import. */
+
+        .control-label {
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .control-label i {
+                color: #ff9800;
             }
 
-        .form-header p {
-            color: #8c96a5;
-            margin: 5px 0 0 0;
+        .form-control,
+        .form-select { /* Thêm .form-select cho Select Box */
+            height: 45px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            padding: 0 14px;
+            font-size: 15px;
+            transition: 0.2s ease;
         }
 
-    .form-body {
-        padding: 30px;
-    }
+            .form-control:focus,
+            .form-select:focus {
+                border-color: #ff9800;
+                box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.2);
+                outline: none;
+            }
 
-    .form-group-custom {
-        margin-bottom: 25px;
-    }
+        /* Nút Lưu/Tạo (giữ nguyên hiệu ứng giống Create) */
+        button {
+            position: relative;
+            padding: 12px 24px; /* Đã điều chỉnh để khớp với Create */
+            border-radius: 8px; /* Đã điều chỉnh để khớp với Create */
+            border: 1px solid #FF6633;
+            font-size: 15px; /* Đã điều chỉnh để khớp với Create */
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px; /* Đã điều chỉnh để khớp với Create */
+            background: transparent;
+            color: black;
+            overflow: hidden;
+            transition: all 0.25s ease;
+        }
 
-    .control-label {
-        font-weight: 600;
-        color: #5b6a82;
-        margin-bottom: 8px;
-        display: block;
-    }
+            button:hover {
+                background: #FF6633;
+                box-shadow: 0 0 20px 5px #FF9933;
+                color: white;
+            }
 
-        .control-label i {
-            margin-right: 8px;
-            color: #ff9800;
-            width: 20px; /* Ensure consistent icon width */
+        /* Xóa keyframes sh02 và button::before nếu không dùng hiệu ứng lấp lánh để đơn giản,
+                       nhưng tôi giữ lại các quy tắc CSS gốc để đảm bảo giao diện KHỚP. */
+
+        /* Nút quay lại (Giữ nguyên style out và đổi tên class out thành text-decoration-none để khớp CSS Create) */
+        a.text-decoration-none {
+            color: #ff6633;
+            transition: transform 0.2s ease;
+        }
+
+            a.text-decoration-none:hover {
+                transform: scale(1.2);
+            }
+
+        hr {
+            border: none;
+            height: 1px;
+            background-color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .text-center {
             text-align: center;
         }
 
-    .form-control, .form-select {
-        height: 48px;
-        border-radius: 8px;
-        border: 1px solid #ced4da;
-        padding: 0 15px;
-        font-size: 15px;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-        .form-control:focus, .form-select:focus {
-            border-color: #ff9800;
-            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.2);
-            outline: none;
+        /* Header Bar (Giống Create) */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-    .form-footer {
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-        padding: 20px 30px;
-        background-color: rgba(248, 249, 250, 0.8);
-        border-top: 1px solid #e9ecef;
-    }
-
-    .btn-primary-custom, .btn-secondary-custom {
-        padding: 10px 22px;
-        font-weight: 600;
-        font-size: 15px;
-        border-radius: 8px;
-        border: none;
-        text-decoration: none;
-        transition: all 0.3s ease;
-    }
-
-    .btn-primary-custom {
-        background-color: #ff9800; /* Orange/Yellow */
-        color: #fff;
-        box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
-    }
-
-        .btn-primary-custom:hover {
-            background-color: #f57c00;
-            transform: translateY(-2px);
+        .logo-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: -10px;
+            margin-bottom: 10px;
         }
 
-    .btn-secondary-custom {
-        background-color: #6c757d; /* Gray */
-        color: #fff;
+            .logo-wrapper img {
+                width: 130px;
+                height: 38px;
+            }
+
+        /* Toast Message Styles (Giữ nguyên) */
+        .toast-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #00c21a;
+            color: white;
+            display: flex;
+            align-items: center;
+            border-radius: 8px;
+            padding: 14px 18px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1050;
+            min-width: 250px;
+            font-size: 15px;
+            font-weight: 500;
+            animation: slideIn 0.4s ease;
+        }
+
+        .toast-icon {
+            font-size: 20px;
+            margin-right: 10px;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            margin-left: auto;
+            cursor: pointer;
+        }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.7);
+            width: 100%;
+            animation: progress 3s linear forwards;
+            border-radius: 0 0 8px 8px;
+        }
+
+        @@keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @@keyframes slideOut {
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        @@keyframes progress {
+            from {
+                width: 100%;
+            }
+
+            to {
+                width: 0%;
+            }
+        }
+
+        /* Giữ lại Keyframes sh02 mặc dù nút Edit không có ::before */
+        @@keyframes sh02 {
+            from {
+                opacity: 0;
+                left: 0%;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0;
+                left: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h2>@ViewData["Title"]</h2>
+    <hr />
+    <div class="form">
+        <div class="form-container">
+            <form asp-action="Edit" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="ChuyenId" />
+
+                <div class="header-bar mb-3">
+                    <a asp-action="Index" class="text-decoration-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                             class="bi bi-box-arrow-left" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd"
+                                  d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0z" />
+                            <path fill-rule="evenodd"
+                                  d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708z" />
+                        </svg>
+                    </a>
+                    <div style="width:18px;"></div>
+                </div>
+
+                <div class="logo-wrapper">
+                    <img src="~/css/Images/logo_web.png" alt="Logo" />
+                </div>
+
+                <hr class="bg-black" />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label asp-for="LoTrinhId" class="control-label">
+                                <i class="fas fa-route"></i> Lộ trình
+                            </label>
+                            <select asp-for="LoTrinhId" class="form-select" asp-items="ViewBag.LoTrinhId">
+                                <option value="">-- Chọn Lộ Trình --</option>
+                            </select>
+                            <span asp-validation-for="LoTrinhId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label asp-for="XeId" class="control-label">
+                                <i class="fas fa-bus"></i> Xe
+                            </label>
+                            <select asp-for="XeId" class="form-select" asp-items="ViewBag.XeId">
+                                <option value="">-- Chọn Xe --</option>
+                            </select>
+                            <span asp-validation-for="XeId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label asp-for="NgayDi" class="control-label">
+                                <i class="fas fa-calendar-alt"></i> Ngày đi
+                            </label>
+                            <input asp-for="NgayDi" class="form-control" type="date" />
+                            <span asp-validation-for="NgayDi" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label asp-for="GioDi" class="control-label">
+                                <i class="fas fa-clock"></i> Giờ đi
+                            </label>
+                            <input asp-for="GioDi" class="form-control" type="time" />
+                            <span asp-validation-for="GioDi" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label asp-for="GioDenDuKien" class="control-label">
+                                <i class="fas fa-hourglass-half"></i> Giờ đến dự kiến
+                            </label>
+                            <input asp-for="GioDenDuKien" class="form-control" type="time" />
+                            <span asp-validation-for="GioDenDuKien" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label asp-for="TrangThai" class="control-label">
+                                <i class="fas fa-check-circle"></i> Trạng thái
+                            </label>
+                            <select asp-for="TrangThai" asp-items="Html.GetEnumSelectList<TrangThaiChuyenXe>()" class="form-select">
+                                <option value="">-- Chọn trạng thái --</option>
+                            </select>
+                            <span asp-validation-for="TrangThai" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div id="success-toast" class="toast-message">
+            <div class="toast-icon">✔</div>
+            <div class="toast-text">@TempData["SuccessMessage"]</div>
+            <button class="toast-close" onclick="closeToast()">×</button>
+            <div class="toast-progress"></div>
+        </div>
     }
 
-        .btn-secondary-custom:hover {
-            background-color: #5a6268;
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+    }
+    <script>
+        function closeToast() {
+            const toast = document.getElementById("success-toast");
+            if (toast) {
+                toast.style.animation = "slideOut 0.5s forwards";
+                setTimeout(() => toast.remove(), 500);
+            }
         }
 
-        .btn-primary-custom i, .btn-secondary-custom i {
-            margin-right: 8px;
-        }
-</style>
+        // Tự động đóng sau 3 giây
+        window.addEventListener("DOMContentLoaded", () => {
+            const toast = document.getElementById("success-toast");
+            if (toast) {
+                setTimeout(() => closeToast(), 3000);
+            }
+        });
+    </script>
+</body>

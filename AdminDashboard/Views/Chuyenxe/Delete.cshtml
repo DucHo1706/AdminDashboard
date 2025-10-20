@@ -1,48 +1,58 @@
-﻿@* //BAOLONG// *@
-@model AdminDashboard.Models.ChuyenXe
+﻿@model AdminDashboard.Models.ChuyenXe
 
 @{
     ViewData["Title"] = "Xác Nhận Xóa Chuyến Xe";
+    // Thêm font Poppins nếu chưa có
+    // Layout = "_Layout"; // Giả sử đã có layout
 }
 
-<div class="delete-confirmation-container">
-    <div class="confirmation-panel">
-        <form asp-action="Delete">
+<div class="delete-confirmation-wrapper">
+    <div class="confirmation-card">
+        <form asp-action="Delete" method="post">
             <input type="hidden" asp-for="ChuyenId" />
 
-            <div class="panel-header">
-                <h3><i class="fas fa-exclamation-triangle"></i> @ViewData["Title"]</h3>
+            <div class="card-header-alert">
+                <i class="fas fa-exclamation-triangle fa-2x"></i>
+                <h3 class="card-title-alert">@ViewData["Title"]</h3>
             </div>
 
-            <div class="panel-body">
-                <p class="confirmation-text">
-                    Bạn có chắc chắn muốn xóa vĩnh viễn chuyến xe này không? Hành động này **không thể** được hoàn tác.
+            <div class="card-body-content">
+                <p class="warning-message">
+                    **CẢNH BÁO NGUY HIỂM!** Bạn có chắc chắn muốn **xóa vĩnh viễn** chuyến xe này không?
+                    Hành động này <span class="text-danger-highlight">không thể</span> được hoàn tác.
                 </p>
 
-                <div class="details-list">
-                    <div class="detail-item">
-                        <span class="detail-label">Lộ Trình:</span>
-                        <span class="detail-value">
-                            @Model.LoTrinh.TramDiNavigation.TenTram <i class="fas fa-long-arrow-alt-right mx-2"></i> @Model.LoTrinh.TramToiNavigation.TenTram
+                <div class="details-summary-box">
+                    <h5 class="summary-title">Thông Tin Chuyến Xe Cần Xóa</h5>
+
+                    <div class="detail-group">
+                        <span class="detail-label"><i class="fas fa-route"></i> Lộ Trình:</span>
+                        <span class="detail-value-route">
+                            @Model.LoTrinh.TramDiNavigation.TenTram
+                            <i class="fas fa-arrow-right mx-2 text-primary"></i>
+                            @Model.LoTrinh.TramToiNavigation.TenTram
                         </span>
                     </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Biển Số Xe:</span>
-                        <span class="detail-value">@Model.Xe.BienSoXe</span>
+
+                    <div class="detail-group">
+                        <span class="detail-label"><i class="fas fa-bus-alt"></i> Biển Số Xe:</span>
+                        <span class="detail-value-danger">@Model.Xe.BienSoXe</span>
                     </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Ngày Đi:</span>
+
+                    <div class="detail-group">
+                        <span class="detail-label"><i class="fas fa-calendar-alt"></i> Ngày Đi:</span>
                         <span class="detail-value">@Model.NgayDi.ToString("dd/MM/yyyy")</span>
                     </div>
+                    
                 </div>
             </div>
 
-            <div class="panel-footer">
-                <a asp-action="Index" class="btn btn-secondary-custom">
-                    <i class="fas fa-times"></i> Hủy
+            <div class="card-footer-actions">
+                <a asp-action="Index" class="btn btn-cancel-minimal">
+                    <i class="fas fa-times"></i> Giữ Lại / Hủy Bỏ
                 </a>
-                <button type="submit" class="btn btn-danger-custom">
-                    <i class="fas fa-trash-alt"></i> Tôi chắc chắn, Xóa!
+                <button type="submit" class="btn btn-delete-main">
+                    <i class="fas fa-trash-alt"></i> Tôi Hiểu, XÓA!
                 </button>
             </div>
         </form>
@@ -50,131 +60,196 @@
 </div>
 
 <style>
+    /* ------------------------------------- */
+    /* GLOBAL STYLES & FONTS (Giả định Poppins đã được load) */
+    /* ------------------------------------- */
     body {
-        background: url('https://images.unsplash.com/photo-1583417319070-4a69db38a482?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1740') no-repeat center center fixed;
-        background-size: cover;
+        /* Bỏ background phức tạp, dùng màu nền tối giản hơn hoặc nền mờ */
+        background-color: #f4f6f9; /* Màu nền nhẹ nhàng cho Admin Dashboard */
         font-family: 'Poppins', sans-serif;
     }
 
-    .delete-confirmation-container {
+    /* ------------------------------------- */
+    /* CONTAINER & CARD STYLES */
+    /* ------------------------------------- */
+    .delete-confirmation-wrapper {
         display: flex;
         justify-content: center;
-        align-items: flex-start;
+        align-items: center;
         padding: 50px 15px;
         min-height: 100vh;
     }
 
-    .confirmation-panel {
-        background: rgba(255, 255, 255, 0.95);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 16px;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+    .confirmation-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         width: 100%;
-        max-width: 700px;
+        max-width: 600px; /* Giảm max-width để tập trung hơn */
         overflow: hidden;
-        border-top: 5px solid #dc3545; /* Red border for emphasis */
+        border: 1px solid #e0e0e0;
     }
 
-    .panel-header {
-        padding: 20px 25px;
-        background-color: rgba(248, 249, 250, 0.8);
-        border-bottom: 1px solid #dee2e6;
+    /* ------------------------------------- */
+    /* HEADER (ALERT FOCUSED) */
+    /* ------------------------------------- */
+    .card-header-alert {
+        display: flex;
+        align-items: center;
+        padding: 25px 30px;
+        background-color: #fff3cd; /* Light Yellow/Warning Background */
+        color: #856404; /* Dark Yellow/Warning Text */
+        border-bottom: 3px solid #ffeeba;
     }
 
-        .panel-header h3 {
-            margin: 0;
-            font-size: 22px;
-            font-weight: 700;
-            color: #dc3545; /* Red color for warning */
+        .card-header-alert i {
+            margin-right: 15px;
+            color: #dc3545; /* Vẫn giữ icon màu đỏ để cảnh báo mạnh */
         }
 
-            .panel-header h3 i {
-                margin-right: 10px;
-            }
+        .card-title-alert {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            color: #212529; /* Màu chữ tiêu đề đen hơn */
+        }
 
-    .panel-body {
-        padding: 25px;
+    /* ------------------------------------- */
+    /* BODY CONTENT */
+    /* ------------------------------------- */
+    .card-body-content {
+        padding: 30px;
     }
 
-    .confirmation-text {
-        font-size: 16px;
+    .warning-message {
+        font-size: 17px;
         color: #495057;
-        margin-bottom: 25px;
+        margin-bottom: 30px;
         line-height: 1.6;
         text-align: center;
+        padding: 15px;
+        background-color: #fcebe9; /* Rất nhạt của màu đỏ */
+        border-left: 5px solid #dc3545;
+        border-radius: 5px;
+        font-weight: 500;
+    }
+    
+    .text-danger-highlight {
+        color: #dc3545;
+        font-weight: 700;
+        text-decoration: underline;
     }
 
-    .details-list {
-        background-color: rgba(248, 249, 250, 0.9);
-        border: 1px solid #dee2e6;
+    /* ------------------------------------- */
+    /* DETAILS SUMMARY BOX */
+    /* ------------------------------------- */
+    .details-summary-box {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
         border-radius: 8px;
-        padding: 20px;
+        padding: 20px 25px;
+    }
+    
+    .summary-title {
+        color: #6c757d;
+        font-size: 15px;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px dashed #ced4da;
     }
 
-    .detail-item {
+    .detail-group {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 12px 0;
-        border-bottom: 1px solid #e9ecef;
+        font-size: 16px;
     }
-
-        .detail-item:last-child {
-            border-bottom: none;
-        }
 
     .detail-label {
         color: #6c757d;
         font-weight: 500;
     }
 
+        .detail-label i {
+            margin-right: 8px;
+            color: #3498db; /* Icon màu xanh dương nhẹ */
+        }
+
     .detail-value {
         font-weight: 600;
         color: #212529;
     }
 
-    .panel-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 20px 25px;
-        background-color: rgba(248, 249, 250, 0.8);
-        border-top: 1px solid #dee2e6;
+    .detail-value-route {
+        font-weight: 600;
+        color: #28a745; /* Màu xanh lá cho lộ trình */
     }
 
-    .btn-danger-custom, .btn-secondary-custom {
-        padding: 12px 25px;
+    .detail-value-danger {
+        font-weight: 700;
+        color: #dc3545; /* Màu đỏ cho biển số xe */
+        text-transform: uppercase;
+    }
+    
+    .text-primary {
+        color: #007bff !important;
+    }
+
+
+    /* ------------------------------------- */
+    /* FOOTER ACTIONS */
+    /* ------------------------------------- */
+    .card-footer-actions {
+        display: flex;
+        justify-content: flex-end; /* Đẩy về bên phải */
+        gap: 15px;
+        padding: 20px 30px;
+        background-color: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+    }
+
+    /* Button Styles */
+    .btn {
+        padding: 10px 20px;
         font-weight: 600;
-        font-size: 15px;
-        border-radius: 8px;
+        font-size: 16px;
+        border-radius: 6px;
         border: none;
         text-decoration: none;
-        transition: all 0.3s ease;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
-    .btn-danger-custom {
-        background-color: #dc3545;
-        color: #fff;
-        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
-    }
-
-        .btn-danger-custom:hover {
-            background-color: #c82333;
-            transform: translateY(-2px);
-        }
-
-    .btn-secondary-custom {
+    .btn-cancel-minimal {
         background-color: #6c757d;
         color: #fff;
     }
 
-        .btn-secondary-custom:hover {
+        .btn-cancel-minimal:hover {
             background-color: #5a6268;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
-        .btn-danger-custom i, .btn-secondary-custom i {
+    .btn-delete-main {
+        background-color: #dc3545; /* Red */
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .btn-delete-main:hover {
+            background-color: #c82333; /* Darker Red */
+            transform: translateY(-1px) scale(1.02);
+            box-shadow: 0 6px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn i {
             margin-right: 8px;
         }
+
 </style>

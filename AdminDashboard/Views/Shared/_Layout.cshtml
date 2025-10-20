@@ -100,7 +100,7 @@
         /* User section */
         .user-section {
             padding: 0 15px;
-transition: all 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .sidebar.collapsed .user-section .dropdown,
@@ -119,6 +119,32 @@ transition: all 0.3s ease;
         .user-icon {
             display: none;
         }
+
+        select.form-control {
+            background-color: #ffb703;
+            color: #111;
+            border: 2px solid #fff;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-weight: 500;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658A.5.5 0 0 1 2.825 5h10.35a.5.5 0 0 1 .374.658l-4.796 5.482a.5.5 0 0 1-.706 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+            select.form-control:hover {
+                background-color: #fb8500;
+                color: white;
+            }
+
+        option {
+            background-color: #ffcc00;
+            color: black;
+        }
+
 
         /* Main content */
         .main-content {
@@ -181,13 +207,14 @@ transition: all 0.3s ease;
             }
         /* FOOTER */
         footer {
-            background-color: #212529 !important; 
-            color: #adb5bd; 
+            background-color: #212529 !important;
+            color: #adb5bd;
             padding: 30px 0;
             flex-shrink: 0;
             font-size: 14px;
-            border-top: none; 
+            border-top: none;
         }
+
         .footer-bottom {
             border-top: 1px solid #495057;
             padding-top: 20px;
@@ -211,7 +238,7 @@ transition: all 0.3s ease;
             <ul class="nav flex-column">
                 <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index"><i class="bi bi-house"></i><span>Trang chủ</span></a></li>
                 <li class="nav-item"><a class="nav-link" asp-controller="Home_User" asp-action="Home_User"><i class="bi bi-lock"></i><span>Bảo mật</span></a></li>
-<li class="nav-item"><a class="nav-link" asp-controller="Tram" asp-action="Index"><i class="bi bi-geo-alt"></i><span>Trạm</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Tram" asp-action="Index"><i class="bi bi-geo-alt"></i><span>Trạm</span></a></li>
                 <li class="nav-item"><a class="nav-link" asp-controller="ChuyenXe" asp-action="Index"><i class="bi bi-bus-front"></i><span>Chuyến Xe</span></a></li>
                 <li class="nav-item"><a class="nav-link" asp-controller="LoaiXe" asp-action="Index"><i class="bi bi-car-front"></i><span>Loại Xe</span></a></li>
                 <li class="nav-item"><a class="nav-link" asp-controller="Xe" asp-action="Index"><i class="bi bi-truck"></i><span>Xe</span></a></li>
@@ -238,7 +265,7 @@ transition: all 0.3s ease;
                 }
                 else
                 {
-                    <select id="viewSelector" class="form-select form-select-sm mt-2">
+                    <select id="viewSelector" class="form-select form-select-sm mt-2 form-control">
                         <option value="" disabled selected>Tài khoản</option>
                         <option value="/Auth/Login">Đăng nhập</option>
                         <option value="/Auth/Register">Đăng ký</option>
@@ -262,23 +289,23 @@ transition: all 0.3s ease;
     <!-- Footer -->
     <footer class="bg-dark text-white pt-4 pb-4">
         <div class="footer-bottom">
-                <div class="align-items-end">
-                    <div class=" text-start">
-                        <p class="mb-1">
-                            Công ty TNHH GoSix Việt Nam<br />
-Email: <a href="mailto:contact@gosix.vn" class="text-decoration-none text-white-50">contact@gosix.vn</a> | Liên hệ: **1900999999**
-                        </p>
-                        <p class="mb-1">
-                            Địa chỉ văn phòng: Tầng 6 và 7, Tòa nhà Mê Linh Point, Số 2 Ngô Đức Kế, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh
-                        </p>
-                        <p class="mb-2">
-                            Số Giấy chứng nhận đăng ký kinh doanh: 0317772069 được cấp bởi Sở Kế hoạch đầu tư Thành phố Hồ Chí Minh lần đầu ngày 4/6/2023.
-                        </p>
-                        <p class="mb-0 text-white-50">
-                            &copy; 2025 GoSix Vietnam All Rights Reserved
-                        </p>
-                    </div>
+            <div class="align-items-end">
+                <div class=" text-start">
+                    <p class="mb-1">
+                        Công ty TNHH GoSix Việt Nam<br />
+                        Email: <a href="mailto:contact@gosix.vn" class="text-decoration-none text-white-50">contact@gosix.vn</a> | Liên hệ: **1900999999**
+                    </p>
+                    <p class="mb-1">
+                        Địa chỉ văn phòng: Tầng 6 và 7, Tòa nhà Mê Linh Point, Số 2 Ngô Đức Kế, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh
+                    </p>
+                    <p class="mb-2">
+                        Số Giấy chứng nhận đăng ký kinh doanh: 0317772069 được cấp bởi Sở Kế hoạch đầu tư Thành phố Hồ Chí Minh lần đầu ngày 4/6/2023.
+                    </p>
+                    <p class="mb-0 text-white-50">
+                        &copy; 2025 GoSix Vietnam All Rights Reserved
+                    </p>
                 </div>
+            </div>
         </div>
     </footer>
 
