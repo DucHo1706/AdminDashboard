@@ -1,5 +1,6 @@
 ﻿using AdminDashboard.Models;
 using AdminDashboard.Models.TrangThai;
+using AdminDashboard.Services;
 using AdminDashboard.TransportDBContext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -10,10 +11,11 @@ namespace AdminDashboard.Controllers
     public class ChuyenXeController : Controller
     {
         private readonly Db27524Context _context; // Thay Db27524Context bằng tên DbContext của bạn nếu khác
-
-        public ChuyenXeController(Db27524Context context)
+        private readonly IImageService _imageService;
+        public ChuyenXeController(Db27524Context context, IImageService imageService)
         {
             _context = context;
+            _imageService = imageService;
         }
 
         // GET: ChuyenXe
@@ -31,24 +33,24 @@ namespace AdminDashboard.Controllers
             return View(chuyenXes);
         }
 
-        // GET: ChuyenXe/Details/5
-        public async Task<IActionResult> Details(string id)
-        {
-            if (id == null) return NotFound();
+        //// GET: ChuyenXe/Details/5
+        //public async Task<IActionResult> Details(string id)
+        //{
+        //    if (id == null) return NotFound();
 
-        var chuyenXe = await _context.ChuyenXe
-            .Include(c => c.LoTrinh)
-                .ThenInclude(lt => lt.TramDiNavigation) // Tải Trạm Đi
-            .Include(c => c.LoTrinh)
-                .ThenInclude(lt => lt.TramToiNavigation) // Tải Trạm Đến
-            .Include(c => c.Xe)
-            .Include(c => c.TaiXe)
-            .FirstOrDefaultAsync(m => m.ChuyenId == id);
+        //var chuyenXe = await _context.ChuyenXe
+        //    .Include(c => c.LoTrinh)
+        //        .ThenInclude(lt => lt.TramDiNavigation) // Tải Trạm Đi
+        //    .Include(c => c.LoTrinh)
+        //        .ThenInclude(lt => lt.TramToiNavigation) // Tải Trạm Đến
+        //    .Include(c => c.Xe)
+        //    .Include(c => c.TaiXe)
+        //    .FirstOrDefaultAsync(m => m.ChuyenId == id);
 
-            if (chuyenXe == null) return NotFound();
+        //    if (chuyenXe == null) return NotFound();
 
-            return View(chuyenXe);
-        }
+        //    return View(chuyenXe);
+        //}
 
         // GET: ChuyenXe/Create
         public IActionResult Create()
@@ -57,91 +59,171 @@ namespace AdminDashboard.Controllers
             return View();
         }
 
-
-        // POST: ChuyenXe/Create
+        // ✅ POST: ChuyenXe/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("LoTrinhId,XeId,NgayDi,GioDi,GioDenDuKien,TrangThai")] ChuyenXe chuyenXe)
+        public async Task<IActionResult> Create([Bind("LoTrinhId,XeId,NgayDi,GioDi,GioDenDuKien,TrangThai")] ChuyenXe chuyenXe, IFormFileCollection images)
         {
-            // Loại bỏ validation các navigation property
             ModelState.Remove("ChuyenId");
             ModelState.Remove("LoTrinh");
             ModelState.Remove("Xe");
             ModelState.Remove("TaiXe");
-
+            ModelState.Remove("Images");
 
             if (ModelState.IsValid)
             {
-                chuyenXe.ChuyenId = Guid.NewGuid().ToString("N").Substring(0, 8);
-
-                if (chuyenXe.TrangThai == 0)
-                    chuyenXe.TrangThai = TrangThaiChuyenXe.DaLenLich;
+                chuyenXe.ChuyenId = Guid.NewGuid().ToString("N")[..8];
+                chuyenXe.TrangThai = chuyenXe.TrangThai == 0 ? TrangThaiChuyenXe.DaLenLich : chuyenXe.TrangThai;
 
                 _context.Add(chuyenXe);
                 await _context.SaveChangesAsync();
+
+                // Upload ảnh (nếu có)
+                if (images?.Count > 0)
+                {
+                    var imageUrls = await _imageService.UploadImagesAsync(images);
+                    foreach (var url in imageUrls)
+                    {
+                        _context.ChuyenXeImage.Add(new ChuyenXeImage
+                        {
+                            ChuyenId = chuyenXe.ChuyenId,
+                            ImageUrl = url
+                        });
+                    }
+                    await _context.SaveChangesAsync();
+                }
 
                 TempData["SuccessMessage"] = "✅ Đã tạo chuyến xe thành công!";
                 return RedirectToAction(nameof(Index));
             }
 
-            foreach (var err in ModelState.Values.SelectMany(v => v.Errors))
-            {
-                Console.WriteLine("❌ ModelState Error: " + err.ErrorMessage);
-            }
-
             PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
             return View(chuyenXe);
         }
-
-        // GET: ChuyenXe/Edit/5
-        public async Task<IActionResult> Edit(string id)
-        {
-            if (id == null) return NotFound();
-
-            var chuyenXe = await _context.ChuyenXe.FindAsync(id);
-            if (chuyenXe == null) return NotFound();
-
-            PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
-            return View(chuyenXe);
-        }
-
-
-       
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("ChuyenId,LoTrinhId,XeId,NgayDi,GioDi,GioDenDuKien,TrangThai")] ChuyenXe chuyenXe)
+        public async Task<IActionResult> DeleteImage(int imageId)
         {
-            if (id != chuyenXe.ChuyenId) return NotFound();
-
-            ModelState.Remove("LoTrinh");
-            ModelState.Remove("Xe");
-            ModelState.Remove("TaiXe");
-
-            if (ModelState.IsValid)
+            var image = await _context.ChuyenXeImages.FindAsync(imageId);
+            if (image == null)
             {
-                try
-                {
-                    _context.Update(chuyenXe);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!_context.ChuyenXe.Any(e => e.ChuyenId == chuyenXe.ChuyenId))
-                        return NotFound();
-                    else
-                        throw;
-                }
-                return RedirectToAction(nameof(Index));
+                return Json(new { success = false, message = "Không thể xóa ảnh." });
+            }
+
+            try
+            {
+                _context.ChuyenXeImages.Remove(image);
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, message = "Xóa ảnh thành công!" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Lỗi khi xóa ảnh: {ex.Message}");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa ảnh." });
+            }
+        }
+
+        public async Task<IActionResult> Details(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return NotFound();
+
+            var chuyenXe = await _context.ChuyenXe
+                .Include(c => c.LoTrinh)
+                    .ThenInclude(lt => lt.TramDiNavigation)
+                .Include(c => c.LoTrinh)
+                    .ThenInclude(lt => lt.TramToiNavigation)
+                .Include(c => c.Xe)
+                .Include(c => c.TaiXe)
+                .Include(c => c.Images)
+                .FirstOrDefaultAsync(m => m.ChuyenId == id);
+
+            if (chuyenXe == null) return NotFound();
+
+            return View(chuyenXe);
+        }
+
+
+
+        // GET: ChuyenXe/Edit/5
+        public IActionResult Edit(string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var chuyenXe = _context.ChuyenXe
+                .Include(c => c.Images)
+                .FirstOrDefault(c => c.ChuyenId == id);
+
+            if (chuyenXe == null)
+            {
+                return NotFound();
             }
 
             PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
             return View(chuyenXe);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(ChuyenXe chuyenXe, string deletedImages, List<IFormFile> newImages)
+        {
+            var existing = await _context.ChuyenXes
+                .Include(c => c.Images)
+                .FirstOrDefaultAsync(c => c.ChuyenId == chuyenXe.ChuyenId);
+
+            if (existing == null)
+                return NotFound();
+
+            // Cập nhật thông tin cơ bản
+            existing.LoTrinhId = chuyenXe.LoTrinhId;
+            existing.XeId = chuyenXe.XeId;
+            existing.NgayDi = chuyenXe.NgayDi;
+            existing.GioDi = chuyenXe.GioDi;
+            existing.GioDenDuKien = chuyenXe.GioDenDuKien;
+            existing.TrangThai = chuyenXe.TrangThai;
+
+            // Xóa hình ảnh nếu có
+            if (!string.IsNullOrEmpty(deletedImages))
+            {
+                var ids = deletedImages.Split(',').Select(int.Parse).ToList();
+                var toRemove = existing.Images.Where(i => ids.Contains(i.ImageId)).ToList();
+
+                _context.ChuyenXeImages.RemoveRange(toRemove);
+            }
+
+            // Upload hình mới (nếu có)
+            if (newImages != null && newImages.Any())
+            {
+                foreach (var file in newImages)
+                {
+                    var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                    var path = Path.Combine("wwwroot/uploads/chuyenxe", fileName);
+
+                    using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    existing.Images.Add(new ChuyenXeImage
+                    {
+                        ChuyenId = existing.ChuyenId,
+                        ImageUrl = "/uploads/chuyenxe/" + fileName
+                    });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
         public async Task<IActionResult> Delete(string id)
         {
-            if (id == null) return NotFound();
+            if (string.IsNullOrEmpty(id)) return NotFound();
 
             var chuyenXe = await _context.ChuyenXe
                 .Include(c => c.LoTrinh)
@@ -153,20 +235,21 @@ namespace AdminDashboard.Controllers
             return View(chuyenXe);
         }
 
-        // ✅ POST: ChuyenXe/Delete/5 (ĐÃ SỬA)
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string ChuyenId)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var chuyen = await _context.ChuyenXe.FindAsync(ChuyenId);
-            if (chuyen == null)
-                return NotFound();
+            var chuyenXe = await _context.ChuyenXe.FindAsync(id);
+            if (chuyenXe == null) return NotFound();
 
-            _context.ChuyenXe.Remove(chuyen);
+            _context.ChuyenXe.Remove(chuyenXe);
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Xóa chuyến xe thành công!";
+
+            TempData["SuccessMessage"] = "🗑️ Đã xóa chuyến xe thành công!";
             return RedirectToAction(nameof(Index));
         }
+
 
 
         // Hàm hỗ trợ để lấy dữ liệu cho dropdown, tránh lặp code

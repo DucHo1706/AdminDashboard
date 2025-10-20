@@ -21,6 +21,10 @@ namespace AdminDashboard.TransportDBContext
         public DbSet<Ve> Ve { get; set; }
         public DbSet<BaiViet> BaiViet { get; set; }
         public virtual DbSet<TaiXe> TaiXe { get; set; }
+        public DbSet<ChuyenXeImage> ChuyenXeImage { get; set; }
+        public virtual DbSet<ChuyenXeImage> ChuyenXeImages { get; set; }
+        public DbSet<ChuyenXe> ChuyenXes { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -92,6 +96,23 @@ namespace AdminDashboard.TransportDBContext
                     .WithMany()
                     .HasForeignKey(dh => dh.ChuyenId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+            modelBuilder.Entity<ChuyenXeImage>(entity =>
+            {
+                entity.HasKey(e => e.ImageId);
+
+                entity.Property(e => e.ImageUrl)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("GETDATE()");
+
+                // Thiết lập quan hệ với ChuyenXe
+                entity.HasOne(e => e.ChuyenXe)
+                    .WithMany(c => c.Images)
+                    .HasForeignKey(e => e.ChuyenId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
             modelBuilder.Entity<TaiXe>().ToTable("TaiXe");
             modelBuilder.Entity<TaiXe>()

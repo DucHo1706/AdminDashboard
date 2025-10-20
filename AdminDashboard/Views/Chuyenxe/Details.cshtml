@@ -6,6 +6,114 @@
 }
 
 
+<div class="details-page-container">
+    <div class="details-panel">
+        <div class="panel-header">
+            <div class="route-start">
+                <span>Điểm đi</span>
+                <h2>@Model.LoTrinh.TramDiNavigation.TenTram</h2>
+            </div>
+            <div class="route-arrow">
+                <i class="fas fa-long-arrow-alt-right"></i>
+            </div>
+            <div class="route-end">
+                <span>Điểm đến</span>
+                <h2>@Model.LoTrinh.TramToiNavigation.TenTram</h2>
+            </div>
+        </div>
+
+        <div class="panel-body">
+            <dl class="details-list">
+                <!-- Các detail item hiện có... -->
+                <!-- THÊM PHẦN HIỂN THỊ ẢNH -->
+                <div class="detail-item">
+                    <dt><i class="fas fa-images"></i> Hình ảnh</dt>
+                    <dd>
+                        @if (Model.Images != null && Model.Images.Any())
+                        {
+                            <div class="row">
+                                @foreach (var image in Model.Images)
+                                {
+                                    <div class="col-md-3 mb-3">
+                                        <div class="card">
+                                            <img src="@image.ImageUrl" class="card-img-top"
+                                                 style="height: 150px; object-fit: cover;"
+                                                 alt="Ảnh chuyến xe">
+                                            <div class="card-body text-center">
+                                                <small class="text-muted">
+                                                    @image.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Chưa có hình ảnh</span>
+                        }
+                    </dd>
+                </div>
+            </dl>
+        </div>
+
+        <div class="panel-footer">
+            <a asp-action="Index" class="btn btn-secondary-custom">
+                <i class="fas fa-arrow-left"></i> Quay Lại Danh Sách
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model.ChuyenId" class="btn btn-edit-custom">
+                <i class="fas fa-edit"></i> Chỉnh Sửa
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background: url('https://images.unsplash.com/photo-1583417319070-4a69db38a482?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1740') no-repeat center center fixed;
+        background-size: cover;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .details-page-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px 15px;
+        min-height: 100vh;
+    }
+
+    .details-panel {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        width: 100%;
+        max-width: 800px;
+        overflow: hidden;
+    }
+
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 25px 30px;
+        background: linear-gradient(135deg, #ff9800, #ffc107);
+        color: #fff;
+    }
+
+    .route-start, .route-end {
+        flex: 1;
+    }
+
+    .route-end {
+        text-align: right;
+    }
+
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

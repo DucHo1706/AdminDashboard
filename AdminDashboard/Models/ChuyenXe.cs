@@ -44,6 +44,8 @@ namespace AdminDashboard.Models
 		public virtual NguoiDung TaiXe { get; set; }
 
 
+        public virtual ICollection<ChuyenXeImage> Images { get; set; } = new List<ChuyenXeImage>();
 
-	}
+
+    }
 }
