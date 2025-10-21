@@ -8,6 +8,10 @@
     {
         Layout = "~/Views/Shared/_UserLayout.cshtml";
     }
+    else if (User.IsInRole("TaiXe"))
+    {
+        Layout = "~/Views/Shared/_LayoutTaiXe.cshtml";
+    }
     else
     {
         Layout = "~/Views/Shared/_UserLayout.cshtml"; // Mặc định cho người chưa đăng nhập
