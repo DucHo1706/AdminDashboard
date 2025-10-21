@@ -35,13 +35,13 @@ if (!string.IsNullOrEmpty(cloudName) &&
     builder.Services.AddSingleton(cloudinary);
     builder.Services.AddScoped<IImageService, CloudinaryImageService>();
 
-    Console.WriteLine($"✅ Đã đăng ký Cloudinary service: {cloudName}");
+    Console.WriteLine($" Đã đăng ký Cloudinary service: {cloudName}");
 }
 else
 {
     // FALLBACK: Dùng LocalImageService nếu không có cấu hình Cloudinary
     builder.Services.AddScoped<IImageService, LocalImageService>();
-    Console.WriteLine("⚠️ Đang dùng LocalImageService - Chỉ nên dùng cho development");
+    Console.WriteLine(" Đang dùng LocalImageService - Chỉ nên dùng cho development");
 }
 
 builder.Services.AddAuthentication("CookieAuth")
@@ -54,7 +54,7 @@ builder.Services.AddAuthentication("CookieAuth")
     });
 
 builder.Services.AddScoped<IVnpayService, VnpayService>();
-
+builder.Services.AddHostedService<AdminDashboard.Services.TrangThaiChuyenXeService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline

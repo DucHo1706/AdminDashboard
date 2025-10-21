@@ -28,6 +28,7 @@
             font-family: 'Segoe UI', Roboto, sans-serif;
             overflow-x: hidden; /* tránh tràn ngang */
         }
+
         h1 {
             text-align: center;
             font-size: 2.5em;
@@ -67,6 +68,7 @@
             .btn_add:active {
                 transform: scale(0.9);
             }
+
         hr {
             max-width: 900px;
             height: 3px;
@@ -112,7 +114,7 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-       .modern-table tbody tr {
+        .modern-table tbody tr {
             transition: background-color 0.25s ease;
         }
 
@@ -213,26 +215,37 @@
                         @item.GioDi.ToString(@"hh\:mm")
                     </td>
                     <td>
+                           @if (item.TrangThai == TrangThaiChuyenXe.DaLenLich)
+                        {
+                            <form asp-action="MoBanVe" asp-route-id="@item.ChuyenId" method="post" onsubmit="return confirm('Bạn có chắc muốn mở bán vé cho chuyến xe này?');">
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="fas fa-ticket-alt"></i> Mở Bán Vé
+                            </button>
+                            </form>
+                            <span class="badge bg-success-light">Đã Lên Lịch</span>
+                        }
+                        @if (item.TrangThai == TrangThaiChuyenXe.DangMoBanVe)
+                        {
+                            <span class="badge bg-success-light">Đang Mở Bán Vé</span>
+                        }
                         @if (item.TrangThai == TrangThaiChuyenXe.DaHoanThanh)
                         {
-                            <span class="badge bg-success-light">Đã Hoàn Thành</span>
+                            <span class="badge bg-success-light">Đã Hoàn Thành </span>
                         }
-                        else if (item.TrangThai == TrangThaiChuyenXe.DangDiChuyen)
+                        
+                        @if (item.TrangThai == TrangThaiChuyenXe.DangDiChuyen)
                         {
                             <span class="badge bg-warning-light">Đang Di Chuyển</span>
                         }
-                        else if (item.TrangThai == TrangThaiChuyenXe.DaHuy)
+                        @if (item.TrangThai == TrangThaiChuyenXe.DaHuy)
                         {
                             <span class="badge bg-danger-light">Đã Hủy</span>
                         }
-                        else if (item.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh)
+                        @if (item.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh)
                         {
                             <span class="badge bg-info-light">Chờ Khởi Hành</span>
                         }
-                        else
-                        {
-                            <span class="badge bg-primary-light">@item.TrangThai.ToString()</span>
-                        }
+                       
                     </td>
                     <td>
                         <a asp-action="Edit" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-success">

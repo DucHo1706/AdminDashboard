@@ -373,7 +373,9 @@ namespace AdminDashboard.Controllers
                     .ThenInclude(x => x.LoaiXe) // Lấy thông tin loại xe
                 .Where(c => c.LoTrinh.TramDi == diemDiId &&
                             c.LoTrinh.TramToi == diemDenId &&
-                            c.NgayDi.Date == ngayDi.Date)
+                            c.NgayDi.Date == ngayDi.Date &&
+                            c.TrangThai == TrangThaiChuyenXe.DangMoBanVe)
+
                 .OrderBy(c => c.GioDi) // Sắp xếp theo giờ đi sớm nhất
                 .ToList();
 
@@ -387,6 +389,34 @@ namespace AdminDashboard.Controllers
 
             // Trả về View "TimKiem" và truyền danh sách kết quả tìm được
             return View(ketQua);
+        }
+
+
+
+        // POST: ChuyenXe/MoBanVe
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MoBanVe(string id)
+        {
+            var chuyenXe = await _context.ChuyenXe.FindAsync(id);
+            if (chuyenXe == null)
+            {
+                return NotFound();
+            }
+
+            if (chuyenXe.TrangThai == TrangThaiChuyenXe.DaLenLich)
+            {
+                chuyenXe.TrangThai = TrangThaiChuyenXe.DangMoBanVe;
+                _context.Update(chuyenXe);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = " Đã mở bán vé cho chuyến xe thành công!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = " Chỉ có thể mở bán vé cho chuyến xe 'Đã Lên Lịch'.";
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
     }
