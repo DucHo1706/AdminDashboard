@@ -1,0 +1,177 @@
+﻿@* //BAOLONG// *@
+@model AdminDashboard.Models.LoTrinh
+
+@{
+    ViewData["Title"] = "Xác nhận Xóa Lộ Trình";
+}
+
+<div class="delete-confirmation-container">
+    <div class="confirmation-panel">
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="LoTrinhId" />
+
+            <div class="panel-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> @ViewData["Title"]</h3>
+            </div>
+
+            <div class="panel-body">
+                <p class="confirmation-text">
+                    Bạn có chắc chắn muốn xóa vĩnh viễn lộ trình này không? Hành động này không thể được hoàn tác.
+                </p>
+
+                <div class="details-list">
+                    <div class="detail-item">
+                        <span class="detail-label">Mã Lộ Trình:</span>
+                        <span class="detail-value">@Model.LoTrinhId</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Lộ Trình:</span>
+                        <span class="detail-value">
+                            @Model.TramDiNavigation.TenTram <i class="fas fa-long-arrow-alt-right mx-2"></i> @Model.TramToiNavigation.TenTram
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Giá Vé:</span>
+                        <span class="detail-value price">@String.Format("{0:N0}", Model.GiaVeCoDinh) VNĐ</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-footer">
+                <a asp-action="Index" class="btn btn-secondary-custom">
+                    <i class="fas fa-times"></i> Hủy
+                </a>
+                <button type="submit" class="btn btn-danger-custom">
+                    <i class="fas fa-trash-alt"></i> Tôi chắc chắn, Xóa!
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f4f6f9;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .delete-confirmation-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 50px 15px;
+    }
+
+    .confirmation-panel {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        width: 100%;
+        max-width: 650px;
+        overflow: hidden;
+        border-top: 5px solid #dc3545; /* Red border for emphasis */
+    }
+
+    .panel-header {
+        padding: 20px 25px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+        .panel-header h3 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+            color: #dc3545; /* Red color for warning */
+        }
+
+            .panel-header h3 i {
+                margin-right: 10px;
+            }
+
+    .panel-body {
+        padding: 25px;
+    }
+
+    .confirmation-text {
+        font-size: 16px;
+        color: #495057;
+        margin-bottom: 25px;
+        line-height: 1.6;
+    }
+
+    .details-list {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+    .detail-label {
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .detail-value {
+        font-weight: 600;
+        color: #212529;
+    }
+
+        .detail-value.price {
+            color: #198754; /* Green color for price */
+        }
+
+    .panel-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 25px;
+        background-color: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .btn-danger-custom, .btn-secondary-custom {
+        padding: 12px 25px;
+        font-weight: 600;
+        font-size: 15px;
+        border-radius: 8px;
+        border: none;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-danger-custom {
+        background-color: #dc3545;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+
+        .btn-danger-custom:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+
+    .btn-secondary-custom {
+        background-color: #6c757d;
+        color: #fff;
+    }
+
+        .btn-secondary-custom:hover {
+            background-color: #5a6268;
+        }
+
+        .btn-danger-custom i, .btn-secondary-custom i {
+            margin-right: 8px;
+        }
+</style>

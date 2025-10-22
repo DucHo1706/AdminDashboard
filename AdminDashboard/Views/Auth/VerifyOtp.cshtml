@@ -1,0 +1,224 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Xác thực OTP";
+}
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - GoSix – Đi nhanh, sống trọn</title>
+
+    <link rel="shortcut icon" href="~/css/images/icon_logo.png" type="image/x-icon" />
+    <link rel="icon" href="~/css/images/icon_logo.png" type="image/png" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/AdminDashboard.styles.css" asp-append-version="true" />
+    <style>
+        body {
+            display: flex;
+            align-items: center; /* Căn giữa theo chiều dọc */
+            justify-content: center; /* Căn giữa theo chiều ngang */
+            min-height: 100vh;
+            /* === THAY ĐỔI: Gradient Vàng -> Cam === */
+            background: linear-gradient(135deg, #FFD54F 0%, #FF9800 100%);
+            padding: 1rem;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 450px; /* Giới hạn chiều rộng thẻ */
+            /* === GIỮ NGUYÊN: Nền thẻ màu Trắng === */
+            background-color: rgb(255, 255, 255); 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 15px; /* Bo góc mềm mại hơn */
+            border: none;
+        }
+
+        .content {
+            padding: 2.5rem; /* Tăng khoảng cách lề */
+            text-align: center; /* Căn giữa toàn bộ nội dung */
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Căn giữa các item con */
+        }
+
+        .otp-input {
+            width: 100%;
+            max-width: 280px; /* Giới hạn chiều rộng input */
+            height: auto;
+            padding: 10px 0;
+            margin-top: 10px;
+            border: none;
+            border-bottom: 2px solid #FAD7A0; /* Màu vàng nhạt cho đường viền */
+            outline: none;
+            font-size: 2.25rem; /* Font to, rõ ràng */
+            background-color: transparent;
+            text-align: center;
+            letter-spacing: 15px; /* Tăng khoảng cách chữ */
+            font-weight: bold;
+            color: #333;
+        }
+
+        .otp-input:focus {
+             /* === THAY ĐỔI: Màu Cam khi focus === */
+            border-bottom-color: #F57C00;
+        }
+
+        /* Ẩn mũi tên tăng/giảm của input type number (nếu dùng) */
+        .otp-input::-webkit-outer-spin-button,
+        .otp-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .otp-input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .resend-btn {
+            background: none;
+            border: none;
+             /* === THAY ĐỔI: Màu Cam === */
+            color: #F57C00;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 15px;
+            padding: 0;
+        }
+
+        .resend-btn:hover {
+             /* === THAY ĐỔI: Màu Cam đậm hơn === */
+            text-decoration: underline;
+            color: #E65100;
+        }
+
+        .countdown {
+            font-size: 14px;
+            color: #6c757d; /* Màu text-muted của Bootstrap */
+            margin-top: 1rem;
+        }
+        
+        /* === THÊM MỚI: Class cho nút màu cam === */
+        .btn-custom-orange {
+            background-color: #F57C00;
+            border-color: #F57C00;
+            color: #FFFFFF; /* Chữ màu trắng */
+        }
+        .btn-custom-orange:hover, .btn-custom-orange:focus {
+            background-color: #E65100;
+            border-color: #E65100;
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+<body>
+    <div class="card shadow-sm">
+        <form asp-action="VerifyOtp" method="post">
+            <div class="content">
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger w-100" role="alert">
+                        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+                    </div>
+                }
+
+                <h3 class="mb-3 fw-bold">Xác thực OTP</h3>
+                <p class="text-muted mb-4">Vui lòng nhập mã OTP đã được gửi đến email của bạn.</p>
+
+                <div class="mb-3 w-100">
+                    <label for="otpCode" class="form-label fw-bold">Nhập mã OTP</label>
+                    <input type="text" name="otpCode" id="otpCode" class="otp-input" placeholder="000000" maxlength="6" required autocomplete="off" />
+                </div>
+
+                <div class="countdown" id="countdown">Mã OTP có hiệu lực trong: <span id="timer">10:00</span></div>
+
+                <div class="d-grid gap-2 col-10 mx-auto mt-4">
+                     <button type="submit" class="btn btn-custom-orange btn-lg">Xác thực</button>
+                </div>
+
+                <button type="button" class="resend-btn" onclick="resendOtp()">Không nhận được mã? Gửi lại</button>
+
+                <input type="hidden" name="email" value="@ViewBag.Email" />
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Countdown timer
+        let timeLeft = 600; // 10 minutes in seconds
+        const timerElement = document.getElementById('timer');
+        const countdownElement = document.getElementById('countdown');
+
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval); // Dừng bộ đếm
+                countdownElement.innerHTML = "Mã OTP đã hết hạn";
+                countdownElement.style.color = "red";
+                document.getElementById('otpCode').disabled = true; // Vô hiệu hóa input
+            } else {
+                timeLeft--;
+            }
+        }
+        
+        // Update timer every second
+        const timerInterval = setInterval(updateTimer, 1000);
+        
+        // Auto-focus on OTP input
+        const otpInput = document.getElementById('otpCode');
+        if (otpInput) {
+            otpInput.focus();
+        }
+        
+        // Format OTP input (only numbers)
+        otpInput.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+        
+        function resendOtp() {
+            const email = document.querySelector('input[name="email"]').value;
+            // Hiển thị loading hoặc vô hiệu hóa nút
+            const resendButton = document.querySelector('.resend-btn');
+            resendButton.disabled = true;
+            resendButton.textContent = 'Đang gửi...';
+
+            fetch('/Auth/ResendOtp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    // Thêm RequestVerificationToken nếu bạn dùng AntiForgery
+                },
+                body: `email=${encodeURIComponent(email)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Mã OTP mới đã được gửi!');
+                    timeLeft = 600; // Reset timer
+                    countdownElement.style.color = "#6c757d";
+                    document.getElementById('otpCode').disabled = false;
+                    otpInput.focus();
+                    setInterval(updateTimer, 1000); // Khởi động lại timer
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Có lỗi xảy ra khi gửi lại OTP');
+            })
+            .finally(() => {
+                // Kích hoạt lại nút sau khi hoàn tất
+                resendButton.disabled = false;
+                resendButton.textContent = 'Không nhận được mã? Gửi lại';
+            });
+        }
+    </script>
+</body>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

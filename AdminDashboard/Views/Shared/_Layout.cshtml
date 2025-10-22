@@ -1,0 +1,346 @@
+﻿<!DOCTYPE html>
+<html lang="vi" class="h-100">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - GoSix – Đi nhanh, sống trọn</title>
+
+    <link rel="shortcut icon" href="~/css/images/icon_logo.png" type="image/x-icon" />
+    <link rel="icon" href="~/css/images/icon_logo.png" type="image/png" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/AdminDashboard.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Wrapper */
+        .wrapper {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: orange;
+            color: black;
+            width: 230px;
+            min-height: 100vh;
+            transition: width 0.3s ease;
+            padding-top: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-x: hidden;
+            z-index: 1030;
+        }
+
+            .sidebar.collapsed {
+                width: 70px;
+            }
+
+            .sidebar .logo {
+                text-align: center;
+                margin-bottom: 30px;
+                transition: all 0.3s ease;
+            }
+
+                .sidebar .logo img {
+                    max-height: 40px;
+                    transition: all 0.3s ease;
+                }
+
+            .sidebar.collapsed .logo img {
+                max-height: 18px;
+            }
+
+            .sidebar .nav-link {
+                color: black;
+                font-size: 17px;
+                padding: 10px 15px;
+                border-radius: 8px;
+                margin: 5px 10px;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                white-space: nowrap;
+            }
+
+                .sidebar .nav-link:hover {
+                    background-color: #ff8c00;
+                    color: white;
+                    text-decoration: none;
+                    transform: translateX(3px);
+                }
+
+                .sidebar .nav-link i {
+                    font-size: 20px;
+                }
+
+            .sidebar.collapsed .nav-link span {
+                display: none;
+            }
+
+        /* User section */
+        .user-section {
+            padding: 0 15px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.collapsed .user-section .dropdown,
+        .sidebar.collapsed .user-section select {
+            display: none;
+        }
+
+        .sidebar.collapsed .user-section .user-icon {
+            display: flex !important;
+            justify-content: center;
+            font-size: 22px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .user-icon {
+            display: none;
+        }
+
+        select.form-control {
+            background-color: #ffb703;
+            color: #111;
+            border: 2px solid #fff;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-weight: 500;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658A.5.5 0 0 1 2.825 5h10.35a.5.5 0 0 1 .374.658l-4.796 5.482a.5.5 0 0 1-.706 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+            select.form-control:hover {
+                background-color: #fb8500;
+                color: white;
+            }
+
+        option {
+            background-color: #ffcc00;
+            color: black;
+        }
+
+
+        /* Main content */
+        .main-content {
+            flex: 1 0 auto;
+            margin-left: 230px;
+            transition: margin-left 0.3s ease;
+            padding: 20px;
+        }
+
+            .main-content.collapsed {
+                margin-left: 70px;
+            }
+
+        .toggle-btn {
+            position: fixed;
+            top: 10px;
+            left: 240px;
+            background-color: orange;
+            border: none;
+            color: white;
+            font-size: 22px;
+            border-radius: 5px;
+            padding: 5px 10px;
+            transition: left 0.3s ease;
+            z-index: 1050;
+        }
+
+        .sidebar.collapsed ~ .toggle-btn {
+            left: 80px;
+        }
+
+        /* Footer */
+        footer {
+            width: 100%;
+            background: #343a40;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            flex-shrink: 0;
+        }
+
+        .username-text {
+            font-weight: bold;
+            color: black;
+        }
+
+            .username-text:hover {
+                color: white;
+            }
+
+        select {
+            background: white;
+            border: none;
+            border-radius: 5px;
+            padding: 6px;
+        }
+
+            select:hover {
+                cursor: pointer;
+            }
+        /* FOOTER */
+        footer {
+            background-color: #212529 !important;
+            color: #adb5bd;
+            padding: 30px 0;
+            flex-shrink: 0;
+            font-size: 14px;
+            border-top: none;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #495057;
+            padding-top: 20px;
+            margin-top: 20px;
+            padding-left: 150px;
+            margin-left: 150px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="sidebar">
+            <div class="logo">
+                <a asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/css/images/logo_web.png" alt="Logo" />
+                </a>
+            </div>
+
+            <ul class="nav flex-column">
+                <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index"><i class="bi bi-house"></i><span>Trang chủ</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Home_User" asp-action="Home_User"><i class="bi bi-lock"></i><span>Bảo mật</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Tram" asp-action="Index"><i class="bi bi-geo-alt"></i><span>Trạm</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="ChuyenXe" asp-action="Index"><i class="bi bi-bus-front"></i><span>Chuyến Xe</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="LoaiXe" asp-action="Index"><i class="bi bi-car-front"></i><span>Loại Xe</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Xe" asp-action="Index"><i class="bi bi-truck"></i><span>Xe</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="LoTrinh" asp-action="Index"><i class="bi bi-map"></i><span>Lộ Trình</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="TaiXe" asp-action="Index"><i class="bi bi-person"></i><span>Danh Sách Tài Xế</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="TaiXe" asp-action="PhanCongLich"><i class="bi bi-map"></i><span>Phân Lịch</span></a></li>
+            </ul>
+
+            <hr class="mx-3">
+
+            <div class="user-section">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <div class="dropdown">
+                        <a class="dropdown-toggle username-text" href="#" id="userDropdown" data-bs-toggle="dropdown">
+                            @User.Identity.Name
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-controller="Auth" asp-action="Account">Thông tin tài khoản</a></li>
+                            <li><a class="dropdown-item" asp-controller="Auth" asp-action="Logout">Đăng xuất</a></li>
+                        </ul>
+                    </div>
+                    <div class="user-icon">
+                        <i class="bi bi-person-circle" id="userIconCollapsed"></i>
+                    </div>
+                }
+                else
+                {
+                    <select id="viewSelector" class="form-select form-select-sm mt-2 form-control">
+                        <option value="" disabled selected>Tài khoản</option>
+                        <option value="/Auth/Login">Đăng nhập</option>
+                        <option value="/Auth/Register">Đăng ký</option>
+                    </select>
+                    <div class="user-icon">
+                        <i class="bi bi-person-circle" id="userIconCollapsed"></i>
+                    </div>
+                }
+            </div>
+        </nav>
+        <button id="toggleBtn" class="toggle-btn">☰</button>
+
+        <!-- Main content -->
+        <div id="mainContent" class="main-content">
+            <main role="main">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white pt-4 pb-4">
+        <div class="footer-bottom">
+            <div class="align-items-end">
+                <div class=" text-start">
+                    <p class="mb-1">
+                        Công ty TNHH GoSix Việt Nam<br />
+                        Email: <a href="mailto:contact@gosix.vn" class="text-decoration-none text-white-50">contact@gosix.vn</a> | Liên hệ: **1900999999**
+                    </p>
+                    <p class="mb-1">
+                        Địa chỉ văn phòng: Tầng 6 và 7, Tòa nhà Mê Linh Point, Số 2 Ngô Đức Kế, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh
+                    </p>
+                    <p class="mb-2">
+                        Số Giấy chứng nhận đăng ký kinh doanh: 0317772069 được cấp bởi Sở Kế hoạch đầu tư Thành phố Hồ Chí Minh lần đầu ngày 4/6/2023.
+                    </p>
+                    <p class="mb-0 text-white-50">
+                        &copy; 2025 GoSix Vietnam All Rights Reserved
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const sidebar = document.getElementById("sidebar");
+        const mainContent = document.getElementById("mainContent");
+        const toggleBtn = document.getElementById("toggleBtn");
+
+        toggleBtn.addEventListener("click", function () {
+            sidebar.classList.toggle("collapsed");
+            mainContent.classList.toggle("collapsed");
+        });
+
+        const selector = document.getElementById("viewSelector");
+        if (selector) {
+            selector.addEventListener("change", function () {
+                const selectedValue = this.value;
+                if (selectedValue) window.location.href = selectedValue;
+            });
+        }
+
+        const userIconCollapsed = document.getElementById("userIconCollapsed");
+        if (userIconCollapsed) {
+            userIconCollapsed.addEventListener("click", function () {
+                sidebar.classList.remove("collapsed");
+                mainContent.classList.remove("collapsed");
+            });
+        }
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

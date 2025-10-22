@@ -1,0 +1,244 @@
+﻿﻿
+@model AdminDashboard.Models.NguoiDung
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Quên mật khẩu";
+}
+
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - GoSix – Đi nhanh, sống trọn</title>
+
+    <link rel="shortcut icon" href="~/css/images/icon_logo.png" type="image/x-icon" />
+    <link rel="icon" href="~/css/images/icon_logo.png" type="image/png" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/AdminDashboard.styles.css" asp-append-version="true" />
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1 0 auto;
+        }
+
+        footer {
+            flex-shrink: 0;
+        }
+
+        .card {
+            width: 100%;
+            height: 500px;
+            position: relative;
+            background-color: rgb(255, 255, 255);
+            border-bottom: 3px solid #4c6bff;
+            overflow: hidden;
+            -webkit-box-shadow: 0px 12px 65px -39px rgba(0, 0, 0, 1);
+            -moz-box-shadow: 0px 12px 65px -39px rgba(0, 0, 0, 1);
+            box-shadow: 0px 12px 65px -39px rgba(0, 0, 0, 1);
+            border-radius: 5px;
+        }
+
+        .BG {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .BG svg {
+                position: absolute;
+                width: 50%;
+                left: -20%;
+                top: -20%;
+                fill: rgb(244, 244, 244);
+                transition: all 0.5s;
+            }
+
+        .content {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 25px;
+            color: rgb(30, 30, 30);
+            gap: 3px;
+        }
+
+        .heading {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: rgb(30, 30, 30);
+        }
+
+        .sub-sub-heading {
+            font-size: 12px;
+            color: rgb(128, 128, 128);
+        }
+
+        .card-btn {
+            margin-top: 20px;
+            height: 30px;
+            width: 100%;
+            border: none;
+            background: linear-gradient(60deg, #4c6bff, #8196ff);
+            color: white;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        .card:hover .BG svg {
+            left: 0%;
+            top: 0%;
+            transform: rotate(180deg) scale(9);
+            fill: #c0c7ec;
+        }
+        .forgot {
+            width: 50%;
+            height: 50px;
+            margin-top: 20px;
+            border: none;
+            border-bottom: 1px solid #c0c7ec;
+            outline: none;
+            font-size: 16px;
+            background-color: transparent;
+        }
+
+        .wave-group {
+            position: relative;
+        }
+
+            .wave-group .input {
+                font-size: 16px;
+                padding: 10px 10px 10px 5px;
+                display: block;
+                width: 200px;
+                border: none;
+                border-bottom: 1px solid #515151;
+                background: transparent;
+            }
+
+                .wave-group .input:focus {
+                    outline: none;
+                }
+
+            .wave-group .label {
+                color: #999;
+                font-size: 18px;
+                font-weight: normal;
+                position: absolute;
+                pointer-events: none;
+                left: 5px;
+                top: 10px;
+                display: flex;
+            }
+
+            .wave-group .label-char {
+                transition: 0.2s ease all;
+                transition-delay: calc(var(--index) * 0.05s);
+            }
+
+            .wave-group .input:focus ~ label .label-char,
+            .wave-group .input:valid ~ label .label-char {
+                transform: translateY(-20px);
+                font-size: 14px;
+                color: #5264ae;
+            }
+
+            .wave-group .bar {
+                position: relative;
+                display: block;
+                width: 200px;
+            }
+
+                .wave-group .bar:before,
+                .wave-group .bar:after {
+                    content: "";
+                    height: 2px;
+                    width: 0;
+                    bottom: 1px;
+                    position: absolute;
+                    background: #5264ae;
+                    transition: 0.2s ease all;
+                    -moz-transition: 0.2s ease all;
+                    -webkit-transition: 0.2s ease all;
+                }
+
+                .wave-group .bar:before {
+                    left: 50%;
+                }
+
+                .wave-group .bar:after {
+                    right: 50%;
+                }
+
+            .wave-group .input:focus ~ .bar:before,
+            .wave-group .input:focus ~ .bar:after {
+                width: 50%;
+            }
+
+
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Quên mật khẩu</h2>
+        <div class="card shadow-sm">
+            <div class="BG">
+                <svg viewBox="0 0 512 512"
+                     class="ionicon"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <path d="M256 176a80 80 0 1080 80 80.24 80.24 0 00-80-80zm172.72 80a165.53 165.53 0 01-1.64 22.34l48.69 38.12a11.59 11.59 0 012.63 14.78l-46.06 79.52a11.64 11.64 0 01-14.14 4.93l-57.25-23a176.56 176.56 0 01-38.82 22.67l-8.56 60.78a11.93 11.93 0 01-11.51 9.86h-92.12a12 12 0 01-11.51-9.53l-8.56-60.78A169.3 169.3 0 01151.05 393L93.8 416a11.64 11.64 0 01-14.14-4.92L33.6 331.57a11.59 11.59 0 012.63-14.78l48.69-38.12A174.58 174.58 0 0183.28 256a165.53 165.53 0 011.64-22.34l-48.69-38.12a11.59 11.59 0 01-2.63-14.78l46.06-79.52a11.64 11.64 0 0114.14-4.93l57.25 23a176.56 176.56 0 0138.82-22.67l8.56-60.78A11.93 11.93 0 01209.94 26h92.12a12 12 0 0111.51 9.53l8.56 60.78A169.3 169.3 0 01361 119l57.2-23a11.64 11.64 0 0114.14 4.92l46.06 79.52a11.59 11.59 0 01-2.63 14.78l-48.69 38.12a174.58 174.58 0 011.64 22.66z"></path>
+                </svg>
+            </div>
+            <form asp-action="ForgotPass" method="post">
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+                    </div>
+                }
+                <div class="content">
+                    <p class="heading">Oops!</p>
+                    <label class="form-label" style="font-weight:bold">Forgot password?</label>
+                    <p class="sub-sub-heading">Hãy nhập Email của bạn để khôi phục mật khẩu</p>
+                    <div class="wave-group">
+                        <input name="email" class="input" type="email" required="" />
+                        <span class="bar"></span>
+                        <label class="label">
+                            <span style="--index: 0" class="label-char">E</span>
+                            <span style="--index: 1" class="label-char">m</span>
+                            <span style="--index: 2" class="label-char">a</span>
+                            <span style="--index: 3" class="label-char">i</span>
+                            <span style="--index: 4" class="label-char">l</span>
+                        </label>                    
+                    </div>
+                    <div class="text-center mt-lg-5">
+                        <button type="submit" class="btn btn-success me-2">Gửi yêu cầu</button>
+                        <a asp-controller="Auth" asp-action="Login" class="btn btn-secondary">Quay lại đăng nhập</a>
+                    </div>
+                </div>
+            </form>
+            
+        </div>
+
+    </div>
+</body>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
