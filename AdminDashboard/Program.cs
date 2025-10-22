@@ -1,4 +1,5 @@
 ﻿using AdminDashboard.TransportDBContext;
+using AdminDashboard.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,9 @@ builder.Services.AddDbContext<Db27524Context>(options =>
 
 // Add services to the container
 builder.Services.AddControllersWithViews();
+
+// Đăng ký EmailService
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // 🔑 Thêm Authentication & Cookie
 builder.Services.AddAuthentication("CookieAuth")

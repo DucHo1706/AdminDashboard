@@ -1,6 +1,7 @@
 ﻿using AdminDashboard.Models;
 using AdminDashboard.Models.Login;
 using AdminDashboard.TransportDBContext;
+using AdminDashboard.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,10 +16,12 @@ namespace AdminDashboard.Controllers
     public class AuthController : Controller
     {
         private readonly Db27524Context _context;
+        private readonly IEmailService _emailService;
 
-        public AuthController(Db27524Context context)
+        public AuthController(Db27524Context context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         // ====== Login / Logout / Register (giữ nguyên phần logic bạn đã có) ======
@@ -284,6 +287,175 @@ namespace AdminDashboard.Controllers
         // ====== FORGOT PASSWORD ======
         public IActionResult ForgotPass()
         {
+            return View();
+        }
+
+        // ====== OTP FORGOT PASSWORD ======
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ForgotPassword(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                ViewBag.Error = "Vui lòng nhập email.";
+                return View();
+            }
+
+            // Kiểm tra email có tồn tại trong hệ thống không
+            var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+            {
+                ViewBag.Error = "Email không tồn tại trong hệ thống.";
+                return View();
+            }
+
+            // Tạo mã OTP 6 chữ số
+            var otpCode = new Random().Next(100000, 999999).ToString();
+
+            // Lưu mã OTP vào database
+            var otpRecord = new OtpCode
+            {
+                Email = email,
+                Code = otpCode,
+                CreatedAt = DateTime.Now,
+                ExpiresAt = DateTime.Now.AddMinutes(10), // OTP có hiệu lực 10 phút
+                IsUsed = false
+            };
+
+            _context.OtpCode.Add(otpRecord);
+            await _context.SaveChangesAsync();
+
+            // Gửi email OTP
+            var emailSent = await _emailService.SendOtpEmailAsync(email, otpCode);
+            if (!emailSent)
+            {
+                ViewBag.Error = "Không thể gửi email. Vui lòng thử lại sau.";
+                return View();
+            }
+
+            ViewBag.Success = "Mã OTP đã được gửi đến email của bạn.";
+            ViewBag.Email = email;
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult VerifyOtp(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return RedirectToAction("ForgotPassword");
+            }
+
+            ViewBag.Email = email;
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> VerifyOtp(string email, string otpCode)
+        {
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(otpCode))
+            {
+                ViewBag.Error = "Vui lòng nhập đầy đủ thông tin.";
+                ViewBag.Email = email;
+                return View();
+            }
+
+            // Kiểm tra mã OTP
+            var otpRecord = await _context.OtpCode
+                .FirstOrDefaultAsync(o => o.Email == email && o.Code == otpCode && !o.IsUsed);
+
+            if (otpRecord == null)
+            {
+                ViewBag.Error = "Mã OTP không đúng hoặc đã được sử dụng.";
+                ViewBag.Email = email;
+                return View();
+            }
+
+            if (otpRecord.ExpiresAt < DateTime.Now)
+            {
+                ViewBag.Error = "Mã OTP đã hết hạn.";
+                ViewBag.Email = email;
+                return View();
+            }
+
+            // Đánh dấu mã OTP đã được sử dụng
+            otpRecord.IsUsed = true;
+            otpRecord.UsedAt = DateTime.Now;
+            await _context.SaveChangesAsync();
+
+            // Chuyển đến trang đặt lại mật khẩu
+            return RedirectToAction("ResetPasswordWithOtp", new { email = email });
+        }
+
+        [HttpGet]
+        public IActionResult ResetPasswordWithOtp(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return RedirectToAction("ForgotPassword");
+            }
+
+            ViewBag.Email = email;
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPasswordWithOtp(string email, string newPassword, string confirmPassword)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return RedirectToAction("ForgotPassword");
+            }
+
+            ViewBag.Email = email;
+
+            if (string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
+            {
+                ViewBag.Error = "Vui lòng nhập đầy đủ thông tin.";
+                return View();
+            }
+
+            if (newPassword != confirmPassword)
+            {
+                ViewBag.Error = "Mật khẩu xác nhận không khớp.";
+                return View();
+            }
+
+            if (newPassword.Length < 6)
+            {
+                ViewBag.Error = "Mật khẩu phải có ít nhất 6 ký tự.";
+                return View();
+            }
+
+            // Tìm người dùng
+            var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+            {
+                ViewBag.Error = "Không tìm thấy tài khoản.";
+                return View();
+            }
+
+            // Kiểm tra xem có mã OTP hợp lệ đã được sử dụng gần đây không (trong vòng 30 phút)
+            var recentOtp = await _context.OtpCode
+                .FirstOrDefaultAsync(o => o.Email == email && o.IsUsed && o.UsedAt.HasValue && 
+                    o.UsedAt.Value.AddMinutes(30) > DateTime.Now);
+
+            if (recentOtp == null)
+            {
+                ViewBag.Error = "Phiên đặt lại mật khẩu đã hết hạn. Vui lòng thực hiện lại từ đầu.";
+                return View();
+            }
+
+            // Cập nhật mật khẩu mới
+            user.MatKhau = newPassword;
+            await _context.SaveChangesAsync();
+
+            ViewBag.Success = "Đặt lại mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới.";
             return View();
         }
     }

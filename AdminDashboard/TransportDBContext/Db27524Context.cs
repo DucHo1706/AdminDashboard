@@ -20,6 +20,7 @@ namespace AdminDashboard.TransportDBContext
         public DbSet<DonHang> DonHang { get; set; }
         public DbSet<Ve> Ve { get; set; }
         public DbSet<BaiViet> BaiViet { get; set; }
+        public DbSet<OtpCode> OtpCode { get; set; }
       
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
