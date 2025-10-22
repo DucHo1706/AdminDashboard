@@ -29,52 +29,114 @@
         }
 
         .search-box {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 60px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
-            background: #fff;
-            border-radius: 40px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             overflow: hidden;
+            border: 1px solid #eee;
             padding: 5px;
+            transition: box-shadow 0.3s ease;
         }
 
+            .search-box:hover {
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            }
+
         .search-item {
+            flex: 1;
             display: flex;
             align-items: center;
             padding: 10px 20px;
-            flex: 1;
-            border-right: 1px solid #eee;
-        }
-
-        .search-item:last-of-type {
-            border-right: none;
-        }
-
-        .search-item i {
-            color: #FF6600;
-            margin-right: 10px;
-        }
-
-        .form-control, .form-select {
-            border: none;
-            box-shadow: none;
+            border-right: 1px solid #e5e5e5;
+            position: relative;
             background: transparent;
-            font-weight: 500;
+            transition: background 0.3s ease;
         }
 
+            .search-item:last-of-type {
+                border-right: none;
+            }
+
+            .search-item:hover {
+                background: rgba(255, 255, 255, 0.98);
+            }
+
+            /* Icon trước mỗi ô */
+            .search-item i {
+                color: #FF6600;
+                font-size: 1.3rem;
+                margin-right: 10px;
+                transition: color 0.3s ease;
+            }
+
+            /* ===== Dropdown (Điểm đi / Điểm đến) ===== */
+            .search-item .form-select {
+                appearance: none;
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 40px;
+                border: 2px solid #eee;
+                padding: 10px 45px 10px 15px;
+                color: #333;
+                font-weight: 500;
+                width: 100%;
+                box-shadow: none !important;
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+
+                /* Viền cam khi focus */
+                .search-item .form-select:focus {
+                    border-color: #FF6600;
+                    box-shadow: 0 0 0 4px rgba(255, 102, 0, 0.15);
+                    background-color: #fff;
+                }
+
+            /* Icon mũi tên custom bên phải */
+            .search-item::after {
+                content: "\f282";
+                font-family: "bootstrap-icons";
+                position: absolute;
+                right: 25px;
+                color: #FF6600;
+                font-size: 1rem;
+                pointer-events: none;
+                transition: transform 0.2s ease;
+            }
+
+            /* Xoay nhẹ icon khi focus */
+            .search-item:focus-within::after {
+                transform: rotate(180deg);
+            }
+
+            /* Hover đổi màu viền */
+            .search-item:hover .form-select {
+                border-color: #FF944D;
+            }
+
+        /* Nút Tìm kiếm */
         .btn-search {
             background: linear-gradient(135deg, #FF6600, #FF944D);
             color: white;
             border: none;
-            border-radius: 40px;
-            padding: 10px 25px;
+            border-radius: 50px;
+            padding: 12px 28px;
             font-weight: 600;
-            transition: 0.3s;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(255, 102, 0, 0.25);
         }
 
-        .btn-search:hover {
-            opacity: 0.9;
-        }
+            .btn-search:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 15px rgba(255, 102, 0, 0.35);
+                opacity: 0.95;
+            }
 
         .table-wrapper {
             margin: 40px auto;
@@ -159,7 +221,7 @@
 <body>
     <div class="container my-5">
         <h2 class="text-center mb-4 text-white fw-bold" style="text-shadow: 1px 1px 3px black;">
-            Đặt Vé Xe Khách Nhanh Chóng
+            Lịch trình xe khách
         </h2>
 
         <!-- FORM TÌM KIẾM -->
@@ -175,10 +237,6 @@
                 <select id="diemDen" name="diemDen" class="form-select" asp-items="ViewBag.DanhSachTram">
                     <option value="">Chọn điểm đến</option>
                 </select>
-            </div>
-            <div class="search-item">
-                <i class="bi bi-calendar-event"></i>
-                <input type="date" id="ngayDi" name="ngayDi" class="form-control" />
             </div>
             <button type="submit" class="btn-search">
                 <i class="bi bi-search"></i> Tìm kiếm

@@ -19,6 +19,9 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f8f9fa;
         }
+        .banner {
+            padding: 30px 0;
+        }
 
         .search-box {
             background: rgba(255, 255, 255, 0.95);
@@ -203,10 +206,9 @@
     </style>
 </head>
 <body>
-    <div class="d-flex justify-content-center align-items:center mt-4">
-        <img src="~/css/images/banner.png" class="img-fluid" style="max-height: 550px; opacity: 0.9; border-radius:15px" alt="Banner" />
+    <div class="banner">
+        @await Component.InvokeAsync("Slider")
     </div>
-
     <button id="scrollTopBtn" title="Lên đầu trang"><i class="bi bi-arrow-up"></i></button>
 
     <div class="container my-5">

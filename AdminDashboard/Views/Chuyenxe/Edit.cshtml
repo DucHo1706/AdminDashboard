@@ -338,6 +338,7 @@
                             <span asp-validation-for="TrangThai" class="text-danger"></span>
                         </div>
                     </div>
+
                 </div>
 
                 <div class="text-center mt-4">
@@ -379,4 +380,46 @@
             }
         });
     </script>
+
+    <script>
+        $(document).ready(function () {
+            var deletedIds = [];
+            var formChanged = false;
+
+            // Khi nhấn "Xóa" hình (ẩn tạm và đánh dấu thay đổi)
+            $('.delete-temp').on('click', function () {
+                var imageCard = $(this).closest('.image-item');
+                var imageId = imageCard.data('image-id');
+
+                if (confirm("Bạn có chắc muốn xóa tạm ảnh này?")) {
+                    imageCard.hide();
+                    deletedIds.push(imageId);
+                    $('#deletedImages').val(deletedIds.join(','));
+                    formChanged = true; // đánh dấu form đã thay đổi
+                }
+            });
+
+            // Khi người dùng thay đổi bất kỳ input nào trong form
+            $('input, select, textarea').on('change input', function () {
+                formChanged = true;
+            });
+
+            // Khi nhấn “Hủy”
+            $('.btn-secondary-custom').on('click', function (e) {
+                e.preventDefault();
+
+                if (!formChanged) {
+                    // Nếu không có thay đổi => quay về trang trước (Index)
+                    window.location.href = '@Url.Action("Index", "ChuyenXe")';
+                } else {
+                    // Nếu có thay đổi => hỏi xác nhận
+                    if (confirm("Bạn có chắc muốn hủy các thay đổi và hoàn tác?")) {
+                        location.reload(); // reload lại trang để hoàn tác
+                    }
+                }
+            });
+        });
+    </script>
+
+    }
 </body>
