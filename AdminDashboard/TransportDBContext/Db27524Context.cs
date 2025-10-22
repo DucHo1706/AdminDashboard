@@ -20,11 +20,11 @@ namespace AdminDashboard.TransportDBContext
         public DbSet<DonHang> DonHang { get; set; }
         public DbSet<Ve> Ve { get; set; }
         public DbSet<BaiViet> BaiViet { get; set; }
-        public virtual DbSet<TaiXe> TaiXe { get; set; }
+        public DbSet<OtpCode> OtpCodes { get; set; }
+        public DbSet<TaiXe> TaiXe { get; set; }
         public DbSet<ChuyenXeImage> ChuyenXeImage { get; set; }
-        public virtual DbSet<ChuyenXeImage> ChuyenXeImages { get; set; }
+        public DbSet<ChuyenXeImage> ChuyenXeImages { get; set; }
         public DbSet<ChuyenXe> ChuyenXes { get; set; }
-
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -33,6 +33,7 @@ namespace AdminDashboard.TransportDBContext
             // Cấu hình khóa chính phức hợp cho bảng UserRole
             modelBuilder.Entity<UserRole>()
                 .HasKey(ur => new { ur.UserId, ur.RoleId });
+
             // Cấu hình mối quan hệ nhiều-nhiều giữa NguoiDung và VaiTro
             modelBuilder.Entity<UserRole>()
                 .HasOne(ur => ur.NguoiDung)          // Mỗi UserRole thuộc về một NguoiDung
@@ -97,37 +98,8 @@ namespace AdminDashboard.TransportDBContext
                     .HasForeignKey(dh => dh.ChuyenId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
-            modelBuilder.Entity<ChuyenXeImage>(entity =>
-            {
-                entity.HasKey(e => e.ImageId);
 
-                entity.Property(e => e.ImageUrl)
-                    .IsRequired()
-                    .HasMaxLength(500);
 
-                entity.Property(e => e.CreatedAt)
-                    .HasDefaultValueSql("GETDATE()");
-
-                // Thiết lập quan hệ với ChuyenXe
-                entity.HasOne(e => e.ChuyenXe)
-                    .WithMany(c => c.Images)
-                    .HasForeignKey(e => e.ChuyenId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
-            modelBuilder.Entity<TaiXe>().ToTable("TaiXe");
-            modelBuilder.Entity<TaiXe>()
-            .HasOne(t => t.NguoiDung)
-            .WithMany()
-            .HasForeignKey(t => t.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<TaiXe>()
-                .HasOne(t => t.Admin)
-                .WithMany()
-                .HasForeignKey(t => t.AdminId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            base.OnModelCreating(modelBuilder);
 
         }
 
