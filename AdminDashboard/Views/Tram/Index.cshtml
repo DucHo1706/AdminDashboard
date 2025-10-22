@@ -53,10 +53,10 @@
                             <td>
                                 <div class="action-buttons">
                                     <a asp-action="Edit" asp-route-id="@item.IdTram" class="btn-action btn-edit" title="Sửa">
-                                        <i class="fas fa-pencil-alt"></i>
+                                        <i class="bi bi-pencil"></i>
                                     </a>
                                     <a asp-action="Details" asp-route-id="@item.IdTram" class="btn-action btn-details" title="Chi tiết">
-                                        <i class="fas fa-info-circle"></i>
+                                        <i class="bi bi-list-ul"></i>
                                     </a>
                                     <button type="button" class="btn-action btn-delete" title="Xóa"
                                             data-bs-toggle="modal"
@@ -64,7 +64,7 @@
                                             data-id="@item.IdTram"
                                             data-tentram="@item.TenTram"
                                             data-diachi="@item.DiaChiTram">
-                                        <i class="fas fa-trash-alt"></i>
+                                        <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
                             </td>
@@ -214,38 +214,56 @@
 
     .action-buttons {
         display: flex;
-        gap: 10px;
+        gap: 8px;
         justify-content: center;
         align-items: center;
     }
 
     .btn-action {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
         color: #555;
-        background: #f0f0f0;
-        border: none;
-        transition: 0.25s;
+        background: transparent;
+        border: 2px solid;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        position: relative;
     }
 
-        .btn-action:hover {
-            transform: scale(1.1);
-            color: #fff;
+    .btn-edit {
+        border-color: #28a745;
+        color: #28a745;
+    }
+
+        .btn-edit:hover {
+            background-color: #28a745;
+            color: white;
+            transform: translateY(-2px);
         }
 
-    .btn-edit:hover {
-        background-color: #ffc107;
+    .btn-details {
+        border-color: #17a2b8;
+        color: #17a2b8;
     }
 
-    .btn-details:hover {
-        background-color: #0dcaf0;
+        .btn-details:hover {
+            background-color: #17a2b8;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    .btn-delete {
+        border-color: #dc3545;
+        color: #dc3545;
     }
 
-    .btn-delete:hover {
-        background-color: #dc3545;
-    }
+        .btn-delete:hover {
+            background-color: #dc3545;
+            color: white;
+            transform: translateY(-2px);
+        }
 </style>

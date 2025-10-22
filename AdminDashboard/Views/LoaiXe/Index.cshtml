@@ -35,13 +35,13 @@
                             <td class="vehicle-name">@item.TenLoaiXe</td>
                             <td class="action-buttons">
                                 <a asp-action="Edit" asp-route-id="@item.LoaiXeId" class="btn-action btn-edit" title="Sửa">
-                                    <i class="fas fa-edit"></i>
+                                    <i class="bi bi-pencil"></i>
                                 </a>
                                 <a asp-action="Details" asp-route-id="@item.LoaiXeId" class="btn-action btn-details" title="Chi tiết">
-                                    <i class="fas fa-info-circle"></i>
+                                    <i class="bi bi-list-ul"></i>
                                 </a>
                                 <a asp-action="Delete" asp-route-id="@item.LoaiXeId" class="btn-action btn-delete" title="Xóa">
-                                    <i class="fas fa-trash-alt"></i>
+                                    <i class="bi bi-trash"></i>
                                 </a>
                             </td>
                         </tr>
@@ -161,7 +161,7 @@
     .action-buttons {
         text-align: center;
         display: flex;
-        gap: 12px;
+        gap: 8px;
         justify-content: center;
         align-items: center;
     }
@@ -169,15 +169,16 @@
     .btn-action {
         width: 40px;
         height: 40px;
-        border-radius: 50%;
+        border-radius: 8px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         text-decoration: none;
-        color: #5b6a82;
-        background: #eef0f4;
-        transition: all 0.25s ease;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        color: #555;
+        background: transparent;
+        border: 2px solid;
+        transition: all 0.3s ease;
+        position: relative;
     }
 
         .btn-action i {
@@ -186,18 +187,33 @@
 
         .btn-action:hover {
             transform: translateY(-2px);
-            color: #fff;
+            color: white;
         }
 
-    .btn-edit:hover {
-        background-color: #0d6efd;
+    .btn-edit {
+        border-color: #28a745;
+        color: #28a745;
     }
 
-    .btn-details:hover {
-        background-color: #0dcaf0;
+        .btn-edit:hover {
+            background-color: #28a745;
+        }
+
+    .btn-details {
+        border-color: #17a2b8;
+        color: #17a2b8;
     }
 
-    .btn-delete:hover {
-        background-color: #dc3545;
+        .btn-details:hover {
+            background-color: #17a2b8;
+        }
+
+    .btn-delete {
+        border-color: #dc3545;
+        color: #dc3545;
     }
+
+        .btn-delete:hover {
+            background-color: #dc3545;
+        }
 </style>
