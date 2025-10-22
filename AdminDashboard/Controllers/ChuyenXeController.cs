@@ -84,7 +84,7 @@ namespace AdminDashboard.Controllers
                     var imageUrls = await _imageService.UploadImagesAsync(images);
                     foreach (var url in imageUrls)
                     {
-                        _context.ChuyenXeImages.Add(new ChuyenXeImage
+                        _context.ChuyenXeImage.Add(new ChuyenXeImage
                         {
                             ChuyenId = chuyenXe.ChuyenId,
                             ImageUrl = url
@@ -170,7 +170,7 @@ namespace AdminDashboard.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(ChuyenXe chuyenXe, string deletedImages, List<IFormFile> newImages)
         {
-            var existing = await _context.ChuyenXe
+            var existing = await _context.ChuyenXes
                 .Include(c => c.Images)
                 .FirstOrDefaultAsync(c => c.ChuyenId == chuyenXe.ChuyenId);
 
