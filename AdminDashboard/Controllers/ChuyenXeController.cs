@@ -5,7 +5,6 @@ using AdminDashboard.TransportDBContext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-
 namespace AdminDashboard.Controllers
 {
     public class ChuyenXeController : Controller
@@ -17,22 +16,84 @@ namespace AdminDashboard.Controllers
             _context = context;
             _imageService = imageService;
         }
-
-        // GET: ChuyenXe
         public async Task<IActionResult> Index()
         {
+            // 1. Tải danh sách chuyến xe ban đầu (có thể tải tất cả hoặc 100 chuyến gần nhất)
             var chuyenXes = await _context.ChuyenXe
-         .Include(c => c.LoTrinh)
-             .ThenInclude(lt => lt.TramDiNavigation)
-         .Include(c => c.LoTrinh)
-             .ThenInclude(lt => lt.TramToiNavigation)
-         .Include(c => c.Xe)
-          .Include(c => c.TaiXe)
-         .ToListAsync();
+                .Include(c => c.LoTrinh)
+                    .ThenInclude(lt => lt.TramDiNavigation)
+                .Include(c => c.LoTrinh)
+                    .ThenInclude(lt => lt.TramToiNavigation)
+                .Include(c => c.Xe)
+                .Include(c => c.TaiXe)
+                .OrderByDescending(c => c.NgayDi) // Sắp xếp cho hợp lý
+                .ToListAsync();
 
+            // 2. Nạp dropdown danh sách trạm (QUAN TRỌNG)
+            await PopulateTramDropdowns();
+
+            // 3. Trả về View với danh sách chuyến xe ban đầu
             return View(chuyenXes);
         }
 
+        // Hàm hỗ trợ nạp Dropdown Trạm
+        private async Task PopulateTramDropdowns()
+        {
+            var tramList = await _context.Tram.OrderBy(t => t.TenTram).ToListAsync();
+
+            // DÙNG IdTram LÀM VALUE, TenTram LÀM TEXT
+            ViewBag.TramDiList = new SelectList(tramList, "IdTram", "TenTram");
+            ViewBag.TramDenList = new SelectList(tramList, "IdTram", "TenTram");
+        }
+
+
+        // 🟢 [ĐÃ SỬA] - ACTION TÌM KIẾM AJAX BẰNG ID
+        [HttpGet]
+        public async Task<IActionResult> TimKiemAjax(string diemDi, string diemDen)
+        {
+            try
+            {
+                // 'diemDi' và 'diemDen' bây giờ là IdTram (ví dụ: "T001")
+                Console.WriteLine($"🔹 TimKiemAjax => ID Trạm Đi={diemDi}, ID Trạm Đến={diemDen}");
+
+                var query = _context.ChuyenXe
+                    .Include(c => c.LoTrinh)
+                        .ThenInclude(lt => lt.TramDiNavigation)
+                    .Include(c => c.LoTrinh)
+                        .ThenInclude(lt => lt.TramToiNavigation)
+                    .Include(c => c.Xe)
+                    .AsQueryable();
+
+                // 3. Áp dụng bộ lọc (SO SÁNH BẰNG ID CỦA LỘ TRÌNH)
+                if (!string.IsNullOrEmpty(diemDi))
+                {
+                    // So sánh khóa ngoại LoTrinh.TramDi với IdTram nhận về
+                    query = query.Where(c => c.LoTrinh.TramDi == diemDi);
+                }
+
+                if (!string.IsNullOrEmpty(diemDen))
+                {
+                    // So sánh khóa ngoại LoTrinh.TramToi với IdTram nhận về
+                    query = query.Where(c => c.LoTrinh.TramToi == diemDen);
+                }
+
+                // Nếu không chọn gì cả, trả về 0 kết quả
+                if (string.IsNullOrEmpty(diemDi) && string.IsNullOrEmpty(diemDen))
+                {
+                    query = query.Where(c => 1 == 0); // Trả về rỗng
+                }
+
+                var ketQua = await query.OrderBy(c => c.NgayDi).ThenBy(c => c.GioDi).ToListAsync();
+
+                // 4. Trả về Partial View chứa bảng kết quả
+                return PartialView("_BangChuyenXe", ketQua);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Lỗi server: {ex.Message}");
+                return Content($"<div class='alert alert-danger mt-3'>Đã xảy ra lỗi: {ex.Message}</div>");
+            }
+        }
         //// GET: ChuyenXe/Details/5
         //public async Task<IActionResult> Details(string id)
         //{

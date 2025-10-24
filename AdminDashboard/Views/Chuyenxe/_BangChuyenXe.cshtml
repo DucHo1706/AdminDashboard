@@ -1,0 +1,88 @@
+﻿@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+@using AdminDashboard.Models.TrangThai
+
+@* File này KHÔNG chứa thẻ <head>, <body>, <style>
+  vì nó được nhúng vào file Index.cshtml
+*@
+
+@if (Model.Any())
+{
+    <table class="table modern-table table-hover">
+        <thead>
+            <tr class="table">
+                <th>Lộ Trình</th>
+                <th>Biển Số Xe</th>
+                <th>Ngày Đi</th>
+                <th>Giờ Đi</th>
+                <th>Trạng Thái</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="fw-bold">
+                        @(item.LoTrinh?.TramDiNavigation?.TenTram)
+                        <i class="bi bi-arrow-right mx-1 text-muted"></i>
+                        @(item.LoTrinh?.TramToiNavigation?.TenTram)
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary-light">
+                            @item.Xe?.BienSoXe
+                        </span>
+                    </td>
+                    <td>@item.NgayDi.ToString("dd/MM/yyyy")</td>
+                    <td>@item.GioDi.ToString(@"hh\:mm")</td>
+                    <td>
+                        @if (item.TrangThai == TrangThaiChuyenXe.DangMoBanVe)
+                        {
+                            <span class="badge bg-success-light">Đang Mở Bán Vé</span>
+                        }
+                        else if (item.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh)
+                        {
+                            <span class="badge bg-info-light">Chờ Khởi Hành</span>
+                        }
+                        else if (item.TrangThai == TrangThaiChuyenXe.DaHuy)
+                        {
+                            <span class="badge bg-danger-light">Đã Hủy</span>
+                        }
+                        else if (item.TrangThai == TrangThaiChuyenXe.DangDiChuyen)
+                        {
+                            <span class="badge bg-warning-light">Đang Di Chuyển</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary-light">@item.TrangThai.ToString()</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-pencil-square"></i>
+                        </a> |
+                        <a asp-action="Details" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-info">
+                            <i class="bi bi-card-text"></i>
+                        </a> |
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteModal"
+                                data-id="@item.ChuyenId">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-warning text-center mt-3">
+        Không tìm thấy chuyến xe nào phù hợp với tiêu chí.
+    </div>
+}
+
+@* Modal Xóa và các script của Modal (nếu có)
+  NÊN được đặt ở file Index.cshtml chính để tránh tải lặp lại.
+*@
