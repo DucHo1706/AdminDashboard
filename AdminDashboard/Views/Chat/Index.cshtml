@@ -1,0 +1,24 @@
+﻿@using System.Security.Claims
+@{
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.Identity?.Name ?? "anon";
+}
+
+<input type="hidden" id="currentUserId" value="@userId" />
+
+<div class="row mt-3">
+    <div class="col-md-4">
+        <h5>Danh sách người dùng</h5>
+        <ul id="userList" class="list-group"></ul>
+    </div>
+    <div class="col-md-8">
+        <h5>Chat</h5>
+        <div id="chatBox" class="border p-2 mb-2" style="height:350px; overflow-y:auto"></div>
+        <div class="input-group">
+            <input id="messageInput" class="form-control" placeholder="Nhập tin nhắn..." />
+            <button id="sendButton" class="btn btn-success">Gửi</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+<script src="~/js/chat.js"></script>

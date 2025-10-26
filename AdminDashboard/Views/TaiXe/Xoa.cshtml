@@ -1,0 +1,64 @@
+﻿@model AdminDashboard.Models.TaiXe
+
+@{
+    ViewData["Title"] = "Xóa Tài Xế";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Xác nhận xóa tài xế</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h5><i class="icon fas fa-exclamation-triangle"></i> Cảnh báo!</h5>
+                        Bạn đang chuẩn bị xóa tài xế này. Thao tác này sẽ:
+                        <ul>
+                            <li>Xóa thông tin trong bảng tài xế</li>
+                            <li>Xóa vai trò "Tài xế" của người dùng</li>
+                            <li><strong>GIỮ LẠI</strong> thông tin trong bảng người dùng (có thể đăng nhập với vai trò khác)</li>
+                        </ul>
+                    </div>
+
+                    <h4>Thông tin tài xế</h4>
+                    <dl class="row">
+                        <dt class="col-sm-3">Họ tên:</dt>
+                        <dd class="col-sm-9">@Model.HoTen</dd>
+
+                        <dt class="col-sm-3">Email:</dt>
+                        <dd class="col-sm-9">@Model.NguoiDung?.Email</dd>
+
+                        <dt class="col-sm-3">Số điện thoại:</dt>
+                        <dd class="col-sm-9">@Model.NguoiDung?.SoDienThoai</dd>
+
+                        <dt class="col-sm-3">Bằng lái xe:</dt>
+                        <dd class="col-sm-9">@Model.BangLaiXe</dd>
+
+                        <dt class="col-sm-3">Ngày vào làm:</dt>
+                        <dd class="col-sm-9">@Model.NgayVaoLam.ToString("dd/MM/yyyy")</dd>
+
+                        <dt class="col-sm-3">Trạng thái:</dt>
+                        <dd class="col-sm-9">
+                            <span class="badge badge-success">@Model.TrangThai</span>
+                        </dd>
+                    </dl>
+
+                    <form asp-action="XoaConfirmed" method="post">
+                        <input type="hidden" asp-for="UserId" />
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Xác nhận xóa
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System; // Guid
 using System.Collections.Generic;
-
+using BCrypt.Net; 
 namespace AdminDashboard.Controllers
 {
     public class AuthController : Controller
@@ -38,10 +38,11 @@ namespace AdminDashboard.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(DangNhap model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid)
+                return View(model);
 
-            var input = model.EmailOrPhone?.Trim().ToLowerInvariant() ?? string.Empty;
-            var password = model.MatKhau ?? string.Empty;
+            string input = model.EmailOrPhone?.Trim().ToLowerInvariant() ?? string.Empty;
+            string password = model.MatKhau ?? string.Empty;
 
             if (string.IsNullOrWhiteSpace(input))
             {
@@ -50,10 +51,16 @@ namespace AdminDashboard.Controllers
             }
 
             var user = await _context.NguoiDung
-                .FirstOrDefaultAsync(u =>
-                    (u.Email.ToLower() == input || u.SoDienThoai == input) && u.MatKhau == password);
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == input || u.SoDienThoai == input);
 
             if (user == null)
+            {
+                ModelState.AddModelError("", "Tên đăng nhập hoặc mật khẩu không đúng.");
+                return View(model);
+            }
+
+            // Kiểm tra mật khẩu với BCrypt
+            if (!BCrypt.Net.BCrypt.Verify(password, user.MatKhau))
             {
                 ModelState.AddModelError("", "Tên đăng nhập hoặc mật khẩu không đúng.");
                 return View(model);
@@ -65,11 +72,13 @@ namespace AdminDashboard.Controllers
                 return View(model);
             }
 
+            // Lấy role
             var roleName = await _context.UserRole
                 .Where(ur => ur.UserId == user.UserId)
                 .Join(_context.VaiTro, ur => ur.RoleId, r => r.RoleId, (ur, r) => r.TenVaiTro)
-                .FirstOrDefaultAsync() ?? "Khach";
+                .FirstOrDefaultAsync() ?? "KhachHang";
 
+            // Tạo claim
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserId),
@@ -81,12 +90,13 @@ namespace AdminDashboard.Controllers
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
             await HttpContext.SignInAsync("CookieAuth", claimsPrincipal);
 
-            if (roleName == "Admin")
-                return RedirectToAction("Index", "Home");
-            else if (roleName == "TaiXe")
-                return RedirectToAction("LichLamViec", "TaiXe");
-            else
-                return RedirectToAction("Index", "Home");
+            // Redirect dựa theo role
+            return roleName switch
+            {
+                "Admin" => RedirectToAction("Index", "Home"),
+                "TaiXe" => RedirectToAction("LichLamViec", "TaiXe"),
+                _ => RedirectToAction("Account", "Auth"),
+            };
         }
 
         [HttpGet]

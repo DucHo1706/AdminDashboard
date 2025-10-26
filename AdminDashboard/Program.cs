@@ -1,37 +1,30 @@
 using AdminDashboard.TransportDBContext;
 using AdminDashboard.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
+using AdminDashboard.Hubs;
 using CloudinaryDotNet;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Đăng ký DbContext TRƯỚC khi build
+// DbContext
 builder.Services.AddDbContext<Db27524Context>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlOptions => sqlOptions.EnableRetryOnFailure() // Thêm retry
+        sqlOptions => sqlOptions.EnableRetryOnFailure()
     )
 );
 
-// Add services to the container
+// MVC, RazorPages, SignalR
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
+builder.Services.AddSignalR();
 
-// Đăng ký các dịch vụ
+// Services
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IOtpService, OtpService>();
+builder.Services.AddScoped<IVnpayService, VnpayService>();
 
-// 🔑 Thêm Authentication & Cookie
-builder.Services.AddAuthentication("CookieAuth")
-    .AddCookie("CookieAuth", options =>
-    {
-        options.LoginPath = "/Auth/Login";        // Trang login
-        options.LogoutPath = "/Auth/Logout";      // Trang logout
-        options.AccessDeniedPath = "/Auth/AccessDenied"; // Khi bị từ chối
-        options.ExpireTimeSpan = TimeSpan.FromHours(2);  // Cookie sống 2h
-    });
-
-// ĐĂNG KÝ CLOUDINARY SERVICE - ƯU TIÊN DÙNG CLOUDINARY
+// Cloudinary / LocalImageService
 var cloudinaryConfig = builder.Configuration.GetSection("Cloudinary");
 var cloudName = cloudinaryConfig["CloudName"];
 var apiKey = cloudinaryConfig["ApiKey"];
@@ -41,25 +34,29 @@ if (!string.IsNullOrEmpty(cloudName) &&
     !string.IsNullOrEmpty(apiKey) &&
     !string.IsNullOrEmpty(apiSecret))
 {
-    // SỬ DỤNG CLOUDINARY - TỐT NHẤT CHO PRODUCTION
     var account = new Account(cloudName, apiKey, apiSecret);
     var cloudinary = new Cloudinary(account);
-
     builder.Services.AddSingleton(cloudinary);
     builder.Services.AddScoped<IImageService, CloudinaryImageService>();
-
-    Console.WriteLine($" Đã đăng ký Cloudinary service: {cloudName}");
 }
 else
 {
-    // FALLBACK: Dùng LocalImageService nếu không có cấu hình Cloudinary
     builder.Services.AddScoped<IImageService, LocalImageService>();
-    Console.WriteLine(" Đang dùng LocalImageService - Chỉ nên dùng cho development");
 }
+
+// Authentication & Cookie
+builder.Services.AddAuthentication("CookieAuth")
+    .AddCookie("CookieAuth", options =>
+    {
+        options.LoginPath = "/Auth/Login";
+        options.LogoutPath = "/Auth/Logout";
+        options.AccessDeniedPath = "/Auth/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromHours(2);
+    });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// Pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -68,25 +65,16 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
-//  Bắt buộc: Authentication phải trước Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Routes & SignalR
+app.MapHub<ChatHub>("/chathub");
+app.MapRazorPages();
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Chat}/{action=Index}/{id?}"
+);
 
 app.Run();
-
-
-/*  Giải thích
-
-builder.Services.AddAuthentication(...).AddCookie(...) → đăng ký Cookie Authentication.
-
-app.UseAuthentication();  middleware kiểm tra cookie, bắt buộc trước UseAuthorization().
-
-Sau khi login, ASP.NET Core sẽ tự tạo cookie lưu session đăng nhập. 
-*/

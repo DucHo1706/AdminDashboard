@@ -25,6 +25,7 @@ namespace AdminDashboard.TransportDBContext
         public DbSet<ChuyenXeImage> ChuyenXeImage { get; set; }
         public DbSet<ChuyenXeImage> ChuyenXeImages { get; set; }
         public DbSet<ChuyenXe> ChuyenXes { get; set; }
+        public virtual DbSet<TaiXe> TaiXes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -61,10 +62,22 @@ namespace AdminDashboard.TransportDBContext
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
+       
+            base.OnModelCreating(modelBuilder);
+
+            // Khi xóa tài xế => xóa luôn người dùng liên quan
+            modelBuilder.Entity<TaiXe>()
+                .HasOne(tx => tx.NguoiDung)
+                .WithMany()
+                .HasForeignKey(tx => tx.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Nếu có liên kết khác (ví dụ Admin, LichPhanCong...) có thể thêm tương tự
+        
 
 
-            // 1. Cấu hình bảng Ve (Vé)
-            modelBuilder.Entity<Ve>(entity =>
+        // 1. Cấu hình bảng Ve (Vé)
+        modelBuilder.Entity<Ve>(entity =>
             {
              
                 entity.HasOne(v => v.DonHang)
