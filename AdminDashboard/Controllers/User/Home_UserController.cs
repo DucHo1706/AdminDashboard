@@ -42,7 +42,7 @@ namespace AdminDashboard.Controllers
 
             return View(upcomingTrips);
         }
-      
+
         public async Task<IActionResult> Account()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -199,6 +199,9 @@ namespace AdminDashboard.Controllers
 
             return PartialView("_DanhSachChuyenXe", ketQua);
         }
-
+        public IActionResult About()
+        {
+            return View();
+        }
     }
 }

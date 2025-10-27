@@ -27,6 +27,7 @@
             font-family: 'Segoe UI', Roboto, sans-serif;
         }
 
+
         h1 {
             text-align: center;
             font-size: 2.5em;
@@ -213,10 +214,123 @@
             margin-left: 5px;
             transition: all 0.3s ease;
         }
+
+/*         LOADING
+ */        #ajax-results-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 150px; /* giúp spinner luôn nằm giữa */
+        }
+
+        .dot-spinner {
+  --uib-size: 2.8rem;
+  --uib-speed: .9s;
+  --uib-color: #183153;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center !important;
+  height: var(--uib-size);
+  width: var(--uib-size);
+}
+
+.dot-spinner__dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+  width: 100%;
+}
+
+.dot-spinner__dot::before {
+  content: '';
+  height: 20%;
+  width: 20%;
+  border-radius: 50%;
+  background-color: var(--uib-color);
+  transform: scale(0);
+  opacity: 0.5;
+  animation: pulse0112 calc(var(--uib-speed) * 1.111) ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(18, 31, 53, 0.3);
+}
+
+.dot-spinner__dot:nth-child(2) {
+  transform: rotate(45deg);
+}
+
+.dot-spinner__dot:nth-child(2)::before {
+  animation-delay: calc(var(--uib-speed) * -0.875);
+}
+
+.dot-spinner__dot:nth-child(3) {
+  transform: rotate(90deg);
+}
+
+.dot-spinner__dot:nth-child(3)::before {
+  animation-delay: calc(var(--uib-speed) * -0.75);
+}
+
+.dot-spinner__dot:nth-child(4) {
+  transform: rotate(135deg);
+}
+
+.dot-spinner__dot:nth-child(4)::before {
+  animation-delay: calc(var(--uib-speed) * -0.625);
+}
+
+.dot-spinner__dot:nth-child(5) {
+  transform: rotate(180deg);
+}
+
+.dot-spinner__dot:nth-child(5)::before {
+  animation-delay: calc(var(--uib-speed) * -0.5);
+}
+
+.dot-spinner__dot:nth-child(6) {
+  transform: rotate(225deg);
+}
+
+.dot-spinner__dot:nth-child(6)::before {
+  animation-delay: calc(var(--uib-speed) * -0.375);
+}
+
+.dot-spinner__dot:nth-child(7) {
+  transform: rotate(270deg);
+}
+
+.dot-spinner__dot:nth-child(7)::before {
+  animation-delay: calc(var(--uib-speed) * -0.25);
+}
+
+.dot-spinner__dot:nth-child(8) {
+  transform: rotate(315deg);
+}
+
+.dot-spinner__dot:nth-child(8)::before {
+  animation-delay: calc(var(--uib-speed) * -0.125);
+}
+
+@@keyframes pulse0112 {
+  0%,
+  100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
     </style>
 </head>
 <body>
-    <h1>@ViewData["Title"]</h1>
+    <h1><a href="~/Chuyenxe?Index" class="text-decoration-none">@ViewData["Title"]</a></h1>
     <hr />
 
     @if (TempData["SuccessMessage"] != null)
@@ -266,21 +380,14 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <form asp-action="Delete" method="post">
-                    @* (Nội dung modal giữ nguyên... ) *@
                     <div class="modal-header bg-danger text-white">
                         <h5 class="modal-title" id="deleteModalLabel">Xác nhận Xóa</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                     </div>
                     <div class="modal-body">
-                        <input type="hidden" id="deleteChuyenId" name="ChuyenId" />
-                        <dl class="row">
-                            <dt class="col-sm-4">Lộ Trình</dt>
-                            <dd class="col-sm-8" id="deleteLoTrinh"></dd>
-                            <dt class="col-sm-4">Xe</dt>
-                            <dd class="col-sm-8" id="deleteXe"></dd>
-                            <dt class="col-sm-4">Ngày Đi</dt>
-                            <dd class="col-sm-8" id="deleteNgayDi"></dd>
-                        </dl>
+
+                        <input type="hidden" id="deleteChuyenId" name="id" />
+
                         <p class="text-danger mt-3">Bạn có chắc chắn muốn xóa chuyến xe này không?</p>
                     </div>
                     <div class="modal-footer">
@@ -294,7 +401,6 @@
 
     @section Scripts {
         <script>
-            // Chờ tài liệu (DOM) tải xong rồi mới chạy script
             $(function () {
 
                 // --- 1. SCRIPT CHO AJAX TÌM KIẾM ---
@@ -304,7 +410,18 @@
                     const diemDiValue = $('#diemDi').val();
                     const diemDenValue = $('#diemDen').val();
 
-                    $('#ajax-results-container').html("<div class='text-center p-5'><h4><i class='bi bi-arrow-clockwise'></i> Đang tải kết quả...</h4></div>");
+                    $('#ajax-results-container').html(
+                        '<div class="dot-spinner">' +
+                        '<div class="dot-spinner__dot"></div>' +
+                        '<div class="dot-spinner__dot"></div>' +
+                        '<div class="dot-spinner__dot"></div>' +
+                        '<div class="dot-spinner__dot"></div>' +
+                        '<div class="dot-spinner__dot"></div>' +
+                        '<div class="dot-spinner__dot"></div>' +
+                        '<div class="dot-spinner__dot"></div>' +
+                        '<div class="dot-spinner__dot"></div>' +
+                        '</div>'
+                    );
 
                     $.ajax({
                         url: '@Url.Action("TimKiemAjax", "ChuyenXe")',
@@ -347,7 +464,7 @@
                         const bsAlert = new bootstrap.Alert(alert);
                         bsAlert.close();
                     });
-                }, 3000); // 3 giây
+                }, 3000);
 
             });
         </script>

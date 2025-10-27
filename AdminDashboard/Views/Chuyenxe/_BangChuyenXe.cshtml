@@ -1,10 +1,6 @@
 ﻿@model IEnumerable<AdminDashboard.Models.ChuyenXe>
 @using AdminDashboard.Models.TrangThai
 
-@* File này KHÔNG chứa thẻ <head>, <body>, <style>
-  vì nó được nhúng vào file Index.cshtml
-*@
-
 @if (Model.Any())
 {
     <table class="table modern-table table-hover">
@@ -82,7 +78,3 @@ else
         Không tìm thấy chuyến xe nào phù hợp với tiêu chí.
     </div>
 }
-
-@* Modal Xóa và các script của Modal (nếu có)
-  NÊN được đặt ở file Index.cshtml chính để tránh tải lặp lại.
-*@

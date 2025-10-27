@@ -203,6 +203,25 @@
                 background-color: #FF9933;
                 transform: scale(1.1);
             }
+
+        /* 🔥 Loading Spinner */
+.loading-spinner {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 180px;
+}
+
+.pl__ring2, .pl__ring4, .pl__ring6 {
+    animation: spinner-rotation 1.4s linear infinite;
+}
+
+@@keyframes spinner-rotation {
+    0% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: -659; }
+}
+
     </style>
 </head>
 <body>
@@ -214,7 +233,7 @@
     <div class="container my-5">
         <h2 class="text-center mb-4" style="color: white; font-weight:bold; text-shadow: 1px 1px 2px black;">Đặt Vé Xe Khách Nhanh Chóng</h2>
 
-        <form asp-action="TimKiem" asp-controller="ChuyenXe" method="get" class="search-box">
+        <form id="formTimChuyen" asp-action="TimKiem" asp-controller="ChuyenXe" method="get" class="search-box">
             <div class="search-item">
                 <i class="bi bi-geo-alt-fill fs-4 me-3"></i>
                 <select name="diemDiId" class="form-select" asp-items="ViewBag.DanhSachTram">
@@ -247,7 +266,7 @@
             })();
         </script>
 
-        <div class="mt-5">
+        <div id="DanhSachChuyenXe" class="mt-5">
             @if (Model != null && Model.Any())
             {
                 <div class="row">
@@ -380,5 +399,22 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        $(function () {
+            $('#formTimChuyen').on('submit', function (e) {
+                $('#DanhSachChuyenXe').html(`
+                        <div class="loading-spinner">
+                            <svg class="pl" width="110" height="110" viewBox="0 0 128 128">
+                                <circle class="pl__ring2" cx="64" cy="64" r="52.5" fill="none" stroke="hsl(13,90%,55%)" stroke-width="12" transform="rotate(-90,64,64)" stroke-linecap="round" stroke-dasharray="329.9 329.9" stroke-dashoffset="-329.3"></circle>
+                                <circle class="pl__ring4" cx="64" cy="64" r="37.5" fill="none" stroke="hsl(33,90%,55%)" stroke-width="9" transform="rotate(-90,64,64)" stroke-linecap="round" stroke-dasharray="254.5 254.5" stroke-dashoffset="-254"></circle>
+                                <circle class="pl__ring6" cx="64" cy="64" r="22.5" fill="none" stroke="hsl(53,90%,55%)" stroke-width="9" transform="rotate(-90,64,64)" stroke-linecap="round" stroke-dasharray="204.2 204.2" stroke-dashoffset="-203.9"></circle>
+                            </svg>
+                        </div>
+                    `);
+            });
+        });
+    </script>
+
 </body>
-</html>

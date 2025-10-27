@@ -294,7 +294,10 @@ namespace AdminDashboard.Controllers
         {
             return View();
         }
-
+        public IActionResult History()
+        {
+            return View();
+        }
         [HttpPost]
         public async Task<IActionResult> ForgotPass(ForgotPasswordRequest model)
         {

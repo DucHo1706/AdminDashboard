@@ -9,17 +9,12 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body {
-            background: url('https://phongnhaexplorer.com/wp-content/uploads/2021/08/cay-thot-not-tinh-yeu-tay-ninh.jpg') no-repeat center center fixed;
-            background-size: cover;
             height: 100vh;
             font-family: 'Segoe UI', sans-serif;
         }
-        .container {
-            margin-top: 40px;
-        }
 
         .sidebar {
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 16px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             padding: 25px;
@@ -64,7 +59,7 @@
             }
 
         .background {
-            background-color: rgba(255, 255, 255, 0.5);
+            background-color: rgba(255, 255, 255, 0.8);
             border-radius: 15px;
             padding: 30px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -174,7 +169,7 @@
                 <div class="sidebar">
                     <h5>TÀI KHOẢN CÁ NHÂN</h5>
                     <a asp-controller="Auth" asp-action="Account" class="menu-item"><i class="bi bi-person-circle text-warning"></i>Thông tin tài khoản</a>
-                    <a asp-controller="Home_User" asp-action="PurchaseHistory" class="menu-item active"><i class="bi bi-clock-history text-info"></i>Lịch sử mua vé</a>
+                    <a asp-controller="Auth" asp-action="History" class="menu-item active"><i class="bi bi-clock-history text-info"></i>Lịch sử mua vé</a>
                     <a asp-controller="Auth" asp-action="ResetPassword" class="menu-item"><i class="bi bi-key-fill text-warning"></i>Đặt lại mật khẩu</a>
                     <a asp-controller="Auth" asp-action="Logout" class="menu-item"><i class="bi bi-box-arrow-right text-danger"></i>Đăng xuất</a>
                 </div>

@@ -19,253 +19,245 @@
     <link rel="stylesheet" href="~/AdminDashboard.styles.css" asp-append-version="true" />
     <style>
         body {
+            background-image: url("https://cdn.getyourguide.com/img/country/58d3f96892f56.jpeg/88.jpg");
+            background-size: cover;
+            background-position: center;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             min-height: 100vh;
         }
 
-        main {
-            flex: 1 0 auto;
-        }
-
-        footer {
-            flex-shrink: 0;
-        }
-
-        .card {
-            width: 100%;
-            height: 500px;
-            position: relative;
-            background-color: rgb(255, 255, 255);
-            border-bottom: 3px solid #4c6bff;
-            overflow: hidden;
-            -webkit-box-shadow: 0px 12px 65px -39px rgba(0, 0, 0, 1);
-            -moz-box-shadow: 0px 12px 65px -39px rgba(0, 0, 0, 1);
-            box-shadow: 0px 12px 65px -39px rgba(0, 0, 0, 1);
-            border-radius: 5px;
-        }
-
-        .BG {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-            .BG svg {
-                position: absolute;
-                width: 50%;
-                left: -20%;
-                top: -20%;
-                fill: rgb(244, 244, 244);
-                transition: all 0.5s;
-            }
-
-        .content {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
+        .otp-Form {
+            width: 320px;
+            height: auto; 
+            background-color: rgb(255, 255, 255,0.9);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            padding: 25px;
-            color: rgb(30, 30, 30);
-            gap: 3px;
+            justify-content: center;
+            padding: 20px 30px;
+            gap: 20px;
+            position: relative;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.082);
+            border-radius: 15px;
         }
 
-        .heading {
-            font-size: 1.4em;
+        .mainHeading {
+            font-size: 1.2em; 
+            color: rgb(15, 15, 15);
             font-weight: 700;
-            color: rgb(30, 30, 30);
         }
 
-        .sub-sub-heading {
-            font-size: 12px;
-            color: rgb(128, 128, 128);
+        .otpSubheading {
+            font-size: 0.9em;
+            color: black;
+            line-height: 1.5;
+            text-align: center;
         }
 
-        .card-btn {
-            margin-top: 20px;
-            height: 30px;
+        .inputContainer {
             width: 100%;
-            border: none;
-            background: linear-gradient(60deg, #4c6bff, #8196ff);
-            color: white;
-            border-radius: 30px;
-            cursor: pointer;
-        }
-
-        .card:hover .BG svg {
-            left: 0%;
-            top: 0%;
-            transform: rotate(180deg) scale(9);
-            fill: #c0c7ec;
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
         }
 
         .otp-input {
-            width: 50px;
-            height: 50px;
-            margin: 0 5px;
+            background-color: rgb(255,165,0);
+            width: 40px;
+            height: 40px;
             text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            border: none;
+            border-radius: 7px;
+            caret-color: #FF9933;
+            color: rgb(44, 44, 44);
             outline: none;
-            transition: border-color 0.3s;
+            font-weight: 600;
+            font-size: 1.2em; 
         }
 
-        .otp-input:focus {
-            border-color: #4c6bff;
+            .otp-input:focus,
+            .otp-input:valid {
+                background-color: #FFCC00;
+                transition-duration: .3s;
+            }
+
+       @@keyframes glowing-pulse {
+          0% {
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+          }
+
+          50% {
+            box-shadow: 0 0 0 20px rgba(255, 255, 255, 0.4);
+          }
+
+          100% {
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+          }
         }
 
-        .otp-container {
+        .verifyButton {
+          position: relative;
+          display: inline-block;
+          background: linear-gradient(to right, #FFB900, #FF7730);
+          background-size: 200% auto;
+          border: none;
+          border-radius: 25px;
+          color: white;
+          padding: 10px 20px;
+          font-size: 12px;
+          text-transform: uppercase;
+          box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+          animation: glowing-pulse 2s infinite;
+          transition: color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .verifyButton::before {
+          content: "";
+          position: absolute;
+          top: -5px;
+          left: -5px;
+          right: -5px;
+          bottom: -5px;
+          border-radius: 30px;
+          box-shadow: 0 0 20px #FF7730;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.3s ease;
+        }
+
+        .verifyButton::after {
+          content: "";
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
+
+        .verifyButton:hover {
+          color: #FFB900;
+          box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.4);
+          transform: scale(1.05);
+          background-position: right center;
+        }
+
+        .verifyButton:hover::before {
+          opacity: 1;
+        }
+
+       
+        .resendNote {
+            font-size: 0.8em;
+            color: black;
+            width: 100%;
             display: flex;
+            align-items: center;
             justify-content: center;
-            margin: 20px 0;
+            gap: 5px;
         }
 
-        .wave-group {
-            position: relative;
+        .resendBtn {
+            background-color: transparent;
+            border: none;
+            color: #FF6600;
+            cursor: pointer;
+            font-size: 1em; 
+            font-weight: 700;
         }
 
-            .wave-group .input {
-                font-size: 16px;
-                padding: 10px 10px 10px 5px;
-                display: block;
-                width: 200px;
-                border: none;
-                border-bottom: 1px solid #515151;
-                background: transparent;
-            }
-
-                .wave-group .input:focus {
-                    outline: none;
-                }
-
-            .wave-group .label {
-                color: #999;
-                font-size: 18px;
-                font-weight: normal;
-                position: absolute;
-                pointer-events: none;
-                left: 5px;
-                top: 10px;
-                display: flex;
-            }
-
-            .wave-group .label-char {
-                transition: 0.2s ease all;
-                transition-delay: calc(var(--index) * 0.05s);
-            }
-
-            .wave-group .input:focus ~ label .label-char,
-            .wave-group .input:valid ~ label .label-char {
-                transform: translateY(-20px);
-                font-size: 14px;
-                color: #5264ae;
-            }
-
-            .wave-group .bar {
-                position: relative;
-                display: block;
-                width: 200px;
-            }
-
-                .wave-group .bar:before,
-                .wave-group .bar:after {
-                    content: "";
-                    height: 2px;
-                    width: 0;
-                    bottom: 1px;
-                    position: absolute;
-                    background: #5264ae;
-                    transition: 0.2s ease all;
-                    -moz-transition: 0.2s ease all;
-                    -webkit-transition: 0.2s ease all;
-                }
-
-                .wave-group .bar:before {
-                    left: 50%;
-                }
-
-                .wave-group .bar:after {
-                    right: 50%;
-                }
-
-            .wave-group .input:focus ~ .bar:before,
-            .wave-group .input:focus ~ .bar:after {
-                width: 50%;
-            }
     </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h2 class="text-center mb-4">Xác minh mã OTP</h2>
-        <div class="card shadow-sm">
-            <div class="BG">
-                <svg viewBox="0 0 512 512"
-                     class="ionicon"
-                     xmlns="http://www.w3.org/2000/svg">
-                    <path d="M256 176a80 80 0 1080 80 80.24 80.24 0 00-80-80zm172.72 80a165.53 165.53 0 01-1.64 22.34l48.69 38.12a11.59 11.59 0 012.63 14.78l-46.06 79.52a11.64 11.64 0 01-14.14 4.93l-57.25-23a176.56 176.56 0 01-38.82 22.67l-8.56 60.78a11.93 11.93 0 01-11.51 9.86h-92.12a12 12 0 01-11.51-9.53l-8.56-60.78A169.3 169.3 0 01151.05 393L93.8 416a11.64 11.64 0 01-14.14-4.92L33.6 331.57a11.59 11.59 0 012.63-14.78l48.69-38.12A174.58 174.58 0 0183.28 256a165.53 165.53 0 011.64-22.34l-48.69-38.12a11.59 11.59 0 01-2.63-14.78l46.06-79.52a11.64 11.64 0 0114.14-4.93l57.25 23a176.56 176.56 0 0138.82-22.67l8.56-60.78A11.93 11.93 0 01209.94 26h92.12a12 12 0 0111.51 9.53l8.56 60.78A169.3 169.3 0 01361 119l57.2-23a11.64 11.64 0 0114.14 4.92l46.06 79.52a11.59 11.59 0 01-2.63 14.78l-48.69 38.12a174.58 174.58 0 011.64 22.66z"></path>
-                </svg>
+
+    <form asp-action="VerifyOtp" method="post" class="otp-Form" id="otp-form">
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger" role="alert">
+                @Html.ValidationSummary(false, "", new { @class = "text-danger" })
             </div>
-            <form asp-action="VerifyOtp" method="post">
-                @if (!ViewData.ModelState.IsValid)
-                {
-                    <div class="alert alert-danger" role="alert">
-                        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
-                    </div>
-                }
-                <div class="content">
-                    <p class="heading">Xác minh OTP</p>
-                    <label class="form-label" style="font-weight:bold">Nhập mã OTP</label>
-                    <p class="sub-sub-heading">Chúng tôi đã gửi mã OTP 6 chữ số đến email: <strong>@Model.Email</strong></p>
-                    
-                    <div class="wave-group">
-                        <input asp-for="OtpCode" class="input" type="text" maxlength="6" required="" placeholder="Nhập mã OTP" />
-                        <span class="bar"></span>
-                        <label class="label">
-                            <span style="--index: 0" class="label-char">O</span>
-                            <span style="--index: 1" class="label-char">T</span>
-                            <span style="--index: 2" class="label-char">P</span>
-                            <span style="--index: 3" class="label-char"> </span>
-                            <span style="--index: 4" class="label-char">C</span>
-                            <span style="--index: 5" class="label-char">o</span>
-                            <span style="--index: 6" class="label-char">d</span>
-                            <span style="--index: 7" class="label-char">e</span>
-                        </label>
-                    </div>
-                    
-                    <input asp-for="Email" type="hidden" />
-                    
-                    <div class="text-center mt-lg-5">
-                        <button type="submit" class="btn btn-success me-2">Xác minh</button>
-                        <a asp-controller="Auth" asp-action="ForgotPass" class="btn btn-secondary">Quay lại</a>
-                    </div>
-                </div>
-            </form>
+        }
+
+        <span class="mainHeading">Xác minh OTP</span>
+        <p class="otpSubheading">Chúng tôi đã gửi mã OTP 6 chữ số đến email: <br> <strong>@Model.Email</strong></p>
+
+        <input asp-for="Email" type="hidden" />
+
+        <input asp-for="OtpCode" id="combinedOtp" type="hidden" />
+
+        <div class="inputContainer">
+            <input required="required" maxlength="1" type="text" class="otp-input" name="otp1">
+            <input required="required" maxlength="1" type="text" class="otp-input" name="otp2">
+            <input required="required" maxlength="1" type="text" class="otp-input" name="otp3">
+            <input required="required" maxlength="1" type="text" class="otp-input" name="otp4">
+            <input required="required" maxlength="1" type="text" class="otp-input" name="otp5">
+            <input required="required" maxlength="1" type="text" class="otp-input" name="otp6">
         </div>
-    </div>
-</body>
-@section Scripts {
+
+        <div style="padding-top:20px; padding-bottom:10px;">
+            <button class="verifyButton" type="submit">Xác minh</button>
+        </div>
+
+        <p class="resendNote">
+            Không nhận được mã?
+            <a asp-controller="Auth" asp-action="ForgotPass" asp-route-email="@Model.Email" class="resendBtn" style="text-decoration: none;">Gửi lại mã</a>
+        </p>
+
+        <a asp-controller="Auth" asp-action="ForgotPass" class="btn btn-sm btn-outline-secondary mt-2">Quay lại</a>
+
+    </form>
+
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Auto-focus và format OTP input
-        document.addEventListener('DOMContentLoaded', function() {
-            const otpInput = document.querySelector('input[name="OtpCode"]');
-            if (otpInput) {
-                otpInput.addEventListener('input', function(e) {
-                    // Chỉ cho phép nhập số
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('otp-form');
+            const inputs = document.querySelectorAll('.otp-input');
+            const combinedOtpInput = document.getElementById('combinedOtp');
+
+            inputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
                     e.target.value = e.target.value.replace(/[^0-9]/g, '');
+
+                    if (e.target.value.length === 1 && index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    }
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
+                        inputs[index - 1].focus();
+                    }
+                });
+            });
+
+            inputs[0].addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasteData = (e.clipboardData || window.clipboardData).getData('text');
+
+                if (pasteData.length === 6 && /^[0-9]+$/.test(pasteData)) {
+                    inputs.forEach((input, index) => {
+                        input.value = pasteData[index];
+                    });
+                    inputs[5].focus(); 
+                }
+            });
+            form.addEventListener('submit', function () {
+                let combinedOtp = '';
+                inputs.forEach(input => {
+                    combinedOtp += input.value;
+                });
+                combinedOtpInput.value = combinedOtp;
+            });
+            const serverOtpValue = combinedOtpInput.value;
+            if (serverOtpValue && serverOtpValue.length === 6) {
+                inputs.forEach((input, index) => {
+                    input.value = serverOtpValue[index];
                 });
             }
         });
     </script>
-}
+</body>
+</html>

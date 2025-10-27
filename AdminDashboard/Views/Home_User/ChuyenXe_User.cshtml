@@ -215,6 +215,28 @@
         #scrollTopBtn:hover {
             opacity: 0.9;
         }
+
+
+        /* 🔥 Loading Spinner */
+.loading-spinner {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 180px;
+}
+
+.pl__ring2,
+.pl__ring4,
+.pl__ring6 {
+    animation: spinner-rotation 1.4s linear infinite;
+}
+
+@@keyframes spinner-rotation {
+    0% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: -659; }
+}
+
     </style>
 </head>
 
@@ -303,16 +325,31 @@
                 const diemDen = $('#diemDen').val();
                 const ngayDi = $('#ngayDi').val();
 
+                // Ẩn bảng ban đầu + hiển thị spinner loading
+                $('#ketQuaTimKiem').show();
+                $('#dsChuyenXe').html(`
+                        <div class="loading-spinner">
+                            <svg class="pl" width="110" height="110" viewBox="0 0 128 128">
+                                <circle class="pl__ring2" cx="64" cy="64" r="52.5" fill="none" stroke="hsl(13,90%,55%)" stroke-width="12" transform="rotate(-90,64,64)" stroke-linecap="round" stroke-dasharray="329.9 329.9" stroke-dashoffset="-329.3"></circle>
+                                <circle class="pl__ring4" cx="64" cy="64" r="37.5" fill="none" stroke="hsl(33,90%,55%)" stroke-width="9" transform="rotate(-90,64,64)" stroke-linecap="round" stroke-dasharray="254.5 254.5" stroke-dashoffset="-254"></circle>
+                                <circle class="pl__ring6" cx="64" cy="64" r="22.5" fill="none" stroke="hsl(53,90%,55%)" stroke-width="9" transform="rotate(-90,64,64)" stroke-linecap="round" stroke-dasharray="204.2 204.2" stroke-dashoffset="-203.9"></circle>
+                            </svg>
+                        </div>
+                    `);
+
                 $.ajax({
                     url: '/Home_User/TimKiemAjax',
                     type: 'GET',
                     data: { diemDi, diemDen, ngayDi },
                     success: function (data) {
-                        $('#dsChuyenXe').html(data);
-                        $('#ketQuaTimKiem').slideDown(400);
+                        $('#dsChuyenXe').hide().html(data).fadeIn(300);
                     },
                     error: function () {
-                        alert('Lỗi khi tải dữ liệu!');
+                        $('#dsChuyenXe').html(`
+                                <div class="alert alert-danger text-center mt-3">
+                                    Không thể tải dữ liệu. Vui lòng thử lại!
+                                </div>
+                            `);
                     }
                 });
             });
@@ -325,4 +362,5 @@
         };
         scrollBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
     </script>
+
 </body>

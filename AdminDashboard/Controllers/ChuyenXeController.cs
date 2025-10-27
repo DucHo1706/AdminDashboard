@@ -4,7 +4,8 @@ using AdminDashboard.Services;
 using AdminDashboard.TransportDBContext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore; // Cần có thư viện này để dùng DbUpdateException
+
 namespace AdminDashboard.Controllers
 {
     public class ChuyenXeController : Controller
@@ -47,7 +48,7 @@ namespace AdminDashboard.Controllers
         }
 
 
-        // 🟢 [ĐÃ SỬA] - ACTION TÌM KIẾM AJAX BẰNG ID
+        //  ACTION TÌM KIẾM AJAX BẰNG ID
         [HttpGet]
         public async Task<IActionResult> TimKiemAjax(string diemDi, string diemDen)
         {
@@ -281,7 +282,7 @@ namespace AdminDashboard.Controllers
         }
 
 
-
+        // (GET) PHIÊN BẢN CỦA BẠN (GIỮ NGUYÊN)
         public async Task<IActionResult> Delete(string id)
         {
             if (string.IsNullOrEmpty(id)) return NotFound();
@@ -302,16 +303,42 @@ namespace AdminDashboard.Controllers
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var chuyenXe = await _context.ChuyenXe.FindAsync(id);
-            if (chuyenXe == null) return NotFound();
+            if (chuyenXe == null)
+            {
+                return NotFound();
+            }
 
-            _context.ChuyenXe.Remove(chuyenXe);
-            await _context.SaveChangesAsync();
+            // --- KIỂM TRA TRẠNG THÁI ---
+            // Chỉ cho phép xóa nếu trạng thái là "Đã Lên Lịch"
+            if (chuyenXe.TrangThai == TrangThaiChuyenXe.DaLenLich) // 🟢 [ĐÃ SỬA] Chỉ giữ lại DaLenLich
+            {
+                // Trạng thái hợp lệ, TIẾP TỤC thử xóa
+                try
+                {
+                    _context.ChuyenXe.Remove(chuyenXe);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "🗑️ Đã xóa chuyến xe thành công!";
+                }
+                catch (DbUpdateException ex)
+                {
+                    Console.WriteLine($"LỖI KHÔNG THỂ XÓA (DB): {ex.Message}");
+                    TempData["ErrorMessage"] = "❌ Lỗi: Không thể xóa chuyến xe này do có ràng buộc dữ liệu.";
+                }
+                catch (Exception ex)
+                {
+                    TempData["ErrorMessage"] = $"❌ Đã xảy ra lỗi không xác định: {ex.Message}";
+                }
+            }
+            else // Ngược lại, nếu trạng thái KHÔNG phải là "Đã Lên Lịch"
+            {
+                // Báo lỗi ngay lập tức, KHÔNG thử xóa
+                // 🟢 [ĐÃ SỬA] Cập nhật thông báo lỗi
+                TempData["ErrorMessage"] = $"❌ Lỗi: Không thể xóa chuyến xe đang ở trạng thái '{chuyenXe.TrangThai}'. Chỉ có thể xóa chuyến xe 'Đã Lên Lịch'.";
+            }
+            // --- KẾT THÚC KIỂM TRA TRẠNG THÁI ---
 
-            TempData["SuccessMessage"] = "🗑️ Đã xóa chuyến xe thành công!";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index)); // Luôn quay về trang Index
         }
-
-
 
         // Hàm hỗ trợ để lấy dữ liệu cho dropdown, tránh lặp code
         private void PopulateDropdownLists(object selectedLoTrinh = null, object selectedXe = null)
@@ -339,11 +366,11 @@ namespace AdminDashboard.Controllers
 
             var chuyenXeCanPhanCong = await _context.ChuyenXe
                 .Include(c => c.Xe)
-        .Include(c => c.LoTrinh) // Tải Lộ Trình
-            .ThenInclude(lt => lt.TramDiNavigation) // Tải Trạm Đi BÊN TRONG Lộ Trình
-        .Include(c => c.LoTrinh) // Phải Include lại để ThenInclude tiếp cho thuộc tính khác
-            .ThenInclude(lt => lt.TramToiNavigation) // Tải Trạm Tới BÊN TRONG Lộ Trình
-        .FirstOrDefaultAsync(c => c.ChuyenId == id);
+            .Include(c => c.LoTrinh) // Tải Lộ Trình
+                .ThenInclude(lt => lt.TramDiNavigation) // Tải Trạm Đi BÊN TRONG Lộ Trình
+            .Include(c => c.LoTrinh) // Phải Include lại để ThenInclude tiếp cho thuộc tính khác
+                .ThenInclude(lt => lt.TramToiNavigation) // Tải Trạm Tới BÊN TRONG Lộ Trình
+            .FirstOrDefaultAsync(c => c.ChuyenId == id);
             if (chuyenXeCanPhanCong == null) return NotFound();
 
             // --- LOGIC TÌM TÀI XẾ RẢNH ---
