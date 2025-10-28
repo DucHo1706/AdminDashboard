@@ -158,7 +158,6 @@ namespace AdminDashboard.Controllers
             return RedirectToAction("Account", "Auth");
         }
 
-
         // ====== Account view ======
         [HttpGet]
         public async Task<IActionResult> Account()
@@ -295,7 +294,10 @@ namespace AdminDashboard.Controllers
         {
             return View();
         }
-
+        public IActionResult History()
+        {
+            return View();
+        }
         [HttpPost]
         public async Task<IActionResult> ForgotPass(ForgotPasswordRequest model)
         {
@@ -324,6 +326,11 @@ namespace AdminDashboard.Controllers
 
                 if (emailSent)
                 {
+                    // Lưu thời gian tạo OTP vào TempData
+                    var otpCreatedTime = DateTime.Now;
+                    TempData["OtpCreatedTime"] = otpCreatedTime.ToString("O");
+                    TempData["OtpExpiresIn"] = 180; // 3 phút = 180 giây
+
                     TempData["SuccessMessage"] = "Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.";
                     return RedirectToAction("VerifyOtp", new { email = model.Email });
                 }
