@@ -1,6 +1,7 @@
 ﻿@model AdminDashboard.Models.DonHang
 
 @{
+
     var isPaid = string.Equals(Model.TrangThaiThanhToan, "Đã thanh toán", StringComparison.OrdinalIgnoreCase);
     var isPending = string.Equals(Model.TrangThaiThanhToan, "DangChoThanhToan", StringComparison.OrdinalIgnoreCase);
     var isFailed = string.Equals(Model.TrangThaiThanhToan, "Giao dịch thất bại", StringComparison.OrdinalIgnoreCase) || string.Equals(Model.TrangThaiThanhToan, "Đã hủy", StringComparison.OrdinalIgnoreCase);
