@@ -20,8 +20,18 @@ namespace AdminDashboard.TransportDBContext
         public DbSet<DonHang> DonHang { get; set; }
         public DbSet<Ve> Ve { get; set; }
         public DbSet<BaiViet> BaiViet { get; set; }
+<<<<<<< HEAD
+        public DbSet<OtpCode> OtpCodes { get; set; }
+        public DbSet<TaiXe> TaiXe { get; set; }
+        public DbSet<ChuyenXeImage> ChuyenXeImage { get; set; }
+        public DbSet<ChuyenXeImage> ChuyenXeImages { get; set; }
+        public DbSet<ChuyenXe> ChuyenXes { get; set; }
+        public virtual DbSet<TaiXe> TaiXes { get; set; }
+
+=======
         public DbSet<OtpCode> OtpCode { get; set; }
       
+>>>>>>> master
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -57,10 +67,29 @@ namespace AdminDashboard.TransportDBContext
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
+<<<<<<< HEAD
+       
+            base.OnModelCreating(modelBuilder);
+
+            // Khi xóa tài xế => xóa luôn người dùng liên quan
+            modelBuilder.Entity<TaiXe>()
+                .HasOne(tx => tx.NguoiDung)
+                .WithMany()
+                .HasForeignKey(tx => tx.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Nếu có liên kết khác (ví dụ Admin, LichPhanCong...) có thể thêm tương tự
+        
+
+
+        // 1. Cấu hình bảng Ve (Vé)
+        modelBuilder.Entity<Ve>(entity =>
+=======
 
 
             // 1. Cấu hình bảng Ve (Vé)
             modelBuilder.Entity<Ve>(entity =>
+>>>>>>> master
             {
              
                 entity.HasOne(v => v.DonHang)

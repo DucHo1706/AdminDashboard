@@ -99,6 +99,36 @@ namespace AdminDashboard.Migrations
                     b.ToTable("ChuyenXe");
                 });
 
+<<<<<<< HEAD
+            modelBuilder.Entity("AdminDashboard.Models.ChuyenXeImage", b =>
+                {
+                    b.Property<int>("ImageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ImageId"));
+
+                    b.Property<string>("ChuyenId")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ImageId");
+
+                    b.HasIndex("ChuyenId");
+
+                    b.ToTable("ChuyenXeImages");
+                });
+
+=======
+>>>>>>> master
             modelBuilder.Entity("AdminDashboard.Models.DonHang", b =>
                 {
                     b.Property<string>("DonHangId")
@@ -118,6 +148,12 @@ namespace AdminDashboard.Migrations
                     b.Property<DateTime>("NgayDat")
                         .HasColumnType("datetime2");
 
+<<<<<<< HEAD
+                    b.Property<DateTime>("ThoiGianHetHan")
+                        .HasColumnType("datetime2");
+
+=======
+>>>>>>> master
                     b.Property<decimal>("TongTien")
                         .HasColumnType("numeric(10,2)");
 
@@ -245,11 +281,16 @@ namespace AdminDashboard.Migrations
 
             modelBuilder.Entity("AdminDashboard.Models.OtpCode", b =>
                 {
+<<<<<<< HEAD
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+=======
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+>>>>>>> master
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -261,8 +302,12 @@ namespace AdminDashboard.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
+<<<<<<< HEAD
+                        .HasColumnType("nvarchar(max)");
+=======
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+>>>>>>> master
 
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("datetime2");
@@ -270,12 +315,67 @@ namespace AdminDashboard.Migrations
                     b.Property<bool>("IsUsed")
                         .HasColumnType("bit");
 
+<<<<<<< HEAD
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("OtpCodes");
+                });
+
+            modelBuilder.Entity("AdminDashboard.Models.TaiXe", b =>
+                {
+                    b.Property<int>("TaiXeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TaiXeId"));
+
+                    b.Property<string>("AdminId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("BangLaiXe")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("HoTen")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("NgayVaoLam")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("TaiXeId");
+
+                    b.HasIndex("AdminId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TaiXe");
+=======
                     b.Property<DateTime?>("UsedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.ToTable("OtpCode");
+>>>>>>> master
                 });
 
             modelBuilder.Entity("AdminDashboard.Models.Tram", b =>
@@ -427,6 +527,20 @@ namespace AdminDashboard.Migrations
                     b.Navigation("Xe");
                 });
 
+<<<<<<< HEAD
+            modelBuilder.Entity("AdminDashboard.Models.ChuyenXeImage", b =>
+                {
+                    b.HasOne("AdminDashboard.Models.ChuyenXe", "ChuyenXe")
+                        .WithMany("Images")
+                        .HasForeignKey("ChuyenId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChuyenXe");
+                });
+
+=======
+>>>>>>> master
             modelBuilder.Entity("AdminDashboard.Models.DonHang", b =>
                 {
                     b.HasOne("AdminDashboard.Models.ChuyenXe", "ChuyenXe")
@@ -476,6 +590,28 @@ namespace AdminDashboard.Migrations
                     b.Navigation("TramToiNavigation");
                 });
 
+<<<<<<< HEAD
+            modelBuilder.Entity("AdminDashboard.Models.TaiXe", b =>
+                {
+                    b.HasOne("AdminDashboard.Models.NguoiDung", "Admin")
+                        .WithMany()
+                        .HasForeignKey("AdminId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AdminDashboard.Models.NguoiDung", "NguoiDung")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Admin");
+
+                    b.Navigation("NguoiDung");
+                });
+
+=======
+>>>>>>> master
             modelBuilder.Entity("AdminDashboard.Models.UserRole", b =>
                 {
                     b.HasOne("AdminDashboard.Models.VaiTro", "VaiTro")
@@ -525,6 +661,14 @@ namespace AdminDashboard.Migrations
                     b.Navigation("LoaiXe");
                 });
 
+<<<<<<< HEAD
+            modelBuilder.Entity("AdminDashboard.Models.ChuyenXe", b =>
+                {
+                    b.Navigation("Images");
+                });
+
+=======
+>>>>>>> master
             modelBuilder.Entity("AdminDashboard.Models.NguoiDung", b =>
                 {
                     b.Navigation("UserRoles");

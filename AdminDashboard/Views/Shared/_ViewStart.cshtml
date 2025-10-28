@@ -4,10 +4,21 @@
     {
         Layout = "~/Views/Shared/_AdminLayout.cshtml";
     }
+<<<<<<< HEAD
+    else if (User.IsInRole("User"))
+    {
+        Layout = "~/Views/Shared/_UserLayout.cshtml";
+    }
+    else if (User.IsInRole("TaiXe"))
+    {
+        Layout = "~/Views/Shared/_LayoutTaiXe.cshtml";
+    }
+=======
     else if (User.IsInRole("KhachHang"))
     {
         Layout = "~/Views/Shared/_UserLayout.cshtml";
     }
+>>>>>>> master
     else
     {
         Layout = "~/Views/Shared/_UserLayout.cshtml"; // Mặc định cho người chưa đăng nhập

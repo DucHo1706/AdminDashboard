@@ -1,0 +1,187 @@
+﻿@using AdminDashboard.Models
+@model IEnumerable<TaiXe>
+
+@{
+    ViewData["Title"] = "Quản lý tài xế";
+}
+
+<div class="container mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="fas fa-users me-2"></i> Danh sách tài xế</h4>
+            <div>
+                <a asp-action="Create" class="btn btn-light text-primary fw-semibold me-2">
+                    <i class="fas fa-plus-circle me-1"></i> Thêm tài xế mới
+                </a>
+                <a asp-action="PhanCongLich" class="btn btn-outline-light me-2">
+                    <i class="fas fa-calendar-plus me-1"></i> Phân công lịch
+                </a>
+                <a asp-action="LichSuPhanCong" class="btn btn-outline-light">
+                    <i class="fas fa-history me-1"></i> Lịch sử phân công
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i> @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+                </div>
+            }
+
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Hiện chưa có tài xế nào được đăng ký.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Họ tên</th>
+                                <th>Email</th>
+                                <th>Bằng lái xe</th>
+                                <th>Ngày vào làm</th>
+                                <th>Trạng thái</th>
+                                <th class="text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-user-circle me-2 text-muted"></i>
+                                            @item.HoTen
+                                        </div>
+                                    </td>
+                                    <td>@item.NguoiDung?.Email</td>
+                                    <td>
+                                        <span class="badge bg-secondary">@item.BangLaiXe</span>
+                                    </td>
+                                    <td>@item.NgayVaoLam.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        @if (item.NguoiDung.TrangThai == TrangThaiNguoiDung.HoatDong)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle me-1"></i>Hoạt động
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-ban me-1"></i>Bị khóa
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="text-nowrap text-center">
+                                        <div class="btn-group" role="group">
+                                            <!-- Nút Xem Lịch Làm Việc -->
+                                            <a asp-action="LichLamViec" asp-route-taiXeId="@item.UserId"
+                                               class="btn btn-info btn-sm me-1" title="Xem lịch làm việc">
+                                                <i class="fas fa-calendar-alt"></i>
+                                            </a>
+
+                                            <!-- Nút Xem Danh Sách Chuyến -->
+                                            <a asp-action="DanhSachChuyen" asp-route-taiXeId="@item.UserId"
+                                               class="btn btn-primary btn-sm me-1" title="Xem danh sách chuyến">
+                                                <i class="fas fa-route"></i>
+                                            </a>
+
+                                            <!-- Nút Xóa -->
+                                            <form asp-action="Delete" method="post" style="display:inline;"
+                                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa tài xế này?');">
+                                                <input type="hidden" name="userId" value="@item.UserId" />
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-danger btn-sm me-1" title="Xóa tài xế">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
+
+                                            <!-- Nút Khóa/Mở khóa -->
+                                            @if (item.NguoiDung.TrangThai == TrangThaiNguoiDung.HoatDong)
+                                            {
+                                                <form asp-action="KhoaTaiKhoan" asp-route-id="@item.UserId" method="post" style="display:inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-warning btn-sm" title="Khóa tài khoản">
+                                                        <i class="fas fa-lock"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <form asp-action="MoKhoaTaiKhoan" asp-route-id="@item.UserId" method="post" style="display:inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-success btn-sm" title="Mở khóa tài khoản">
+                                                        <i class="fas fa-unlock"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <!-- Thêm phần footer với các nút chức năng chính -->
+        <div class="card-footer bg-light">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="mb-3">Quản lý lịch trình:</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a asp-action="LichLamViec" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-calendar me-1"></i> Lịch làm việc
+                        </a>
+                        <a asp-action="DanhSachChuyen" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-list me-1"></i> Danh sách chuyến
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="mb-3">Phân công:</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a asp-action="PhanCongLich" class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-tasks me-1"></i> Phân công lịch
+                        </a>
+                        <a asp-action="LichSuPhanCong" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-history me-1"></i> Lịch sử phân công
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-group .btn {
+        margin-right: 0.25rem;
+    }
+
+    .table th {
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .badge {
+        font-size: 0.75em;
+    }
+</style>

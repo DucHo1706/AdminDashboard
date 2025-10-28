@@ -1,0 +1,136 @@
+﻿@model AdminDashboard.Models.DonHang
+
+@{
+    var isPaid = string.Equals(Model.TrangThaiThanhToan, "Đã thanh toán", StringComparison.OrdinalIgnoreCase);
+    var isPending = string.Equals(Model.TrangThaiThanhToan, "DangChoThanhToan", StringComparison.OrdinalIgnoreCase);
+    var isFailed = string.Equals(Model.TrangThaiThanhToan, "Giao dịch thất bại", StringComparison.OrdinalIgnoreCase) || string.Equals(Model.TrangThaiThanhToan, "Đã hủy", StringComparison.OrdinalIgnoreCase);
+    ViewData["Title"] = isPaid ? "Thanh toán thành công" : (isPending ? "Chưa thanh toán" : "Giao dịch thất bại");
+    var danhSachVe = ViewBag.DanhSachVe as List<Ve>;
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg @(isPaid ? "border-success" : (isPending ? "border-warning" : "border-danger"))">
+                <div class="card-header text-white text-center @(isPaid ? "bg-success" : (isPending ? "bg-warning" : "bg-danger"))">
+                    <h2 class="mb-0">
+                        @if (isPaid)
+                        {
+                            <text><i class="bi bi-check-circle-fill"></i> Thanh toán thành công</text>
+                        }
+                        else if (isPending)
+                        {
+                            <text><i class="bi bi-hourglass-split"></i> Đơn hàng chưa thanh toán</text>
+                        }
+                        else
+                        {
+                            <text><i class="bi bi-x-circle-fill"></i> Giao dịch thất bại</text>
+                        }
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    @if (isPaid)
+                    {
+                        <p class="text-center">Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi. Dưới đây là thông tin chi tiết vé.</p>
+                    }
+                    else if (isPending)
+                    {
+                        <p class="text-center">
+                            Đơn hàng của bạn đang chờ thanh toán. Thời gian còn lại:
+                            <span id="countdown-detail" data-expire="@Model.ThoiGianHetHan.ToString("o")">--:--</span>
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="text-center">Giao dịch thất bại hoặc đã hết thời gian thanh toán.</p>
+                    }
+                    <hr />
+                    <h5 class="mt-4">Thông tin đơn hàng</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>Mã đơn hàng:</strong> @Model.DonHangId</li>
+                        <li class="list-group-item"><strong>Khách hàng:</strong> @Model.nguoiDung.HoTen</li>
+                        <li class="list-group-item"><strong>Ngày đặt:</strong> @Model.NgayDat.ToString("dd/MM/yyyy HH:mm")</li>
+                    </ul>
+
+                    <h5 class="mt-4">Thông tin hành trình</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>Tuyến đường:</strong> @Model.ChuyenXe.LoTrinh.TramDiNavigation.TenTram → @Model.ChuyenXe.LoTrinh.TramToiNavigation.TenTram</li>
+                        <li class="list-group-item"><strong>Ngày đi:</strong> @Model.ChuyenXe.NgayDi.ToString("dd/MM/yyyy")</li>
+                        <li class="list-group-item"><strong>Giờ khởi hành:</strong> @Model.ChuyenXe.GioDi.ToString(@"hh\:mm")</li>
+                    </ul>
+
+                    <h5 class="mt-4">Chi tiết vé</h5>
+                    <ul class="list-group list-group-flush">
+                        @if (danhSachVe != null)
+                        {
+                            <li class="list-group-item">
+                                <strong>Số ghế đã đặt:</strong>
+                                @foreach (var ve in danhSachVe)
+                                {
+                                    <span class="badge bg-primary fs-6 me-1">@ve.Ghe.SoGhe</span>
+                                }
+                            </li>
+                        }
+                        <li class="list-group-item"><strong>Tổng tiền:</strong> <span class="fw-bold fs-4 text-danger">@Model.TongTien.ToString("N0") VNĐ</span></li>
+                        <li class="list-group-item"><strong>Trạng thái:</strong>
+                            @if (isPaid)
+                            {
+                                <span class="badge bg-success">Đã thanh toán</span>
+                            }
+                            else if (isPending)
+                            {
+                                <span class="badge bg-warning text-dark">Chờ thanh toán</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Giao dịch thất bại</span>
+                            }
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-footer text-center">
+                    <a asp-action="Index" asp-controller="Home" class="btn btn-primary">Về trang chủ</a>
+                    <a asp-action="PurchaseHistory" asp-controller="Home_User" class="btn btn-secondary">Xem lịch sử đặt vé</a>
+                    @if (isPending)
+                    {
+                        <form asp-action="PayAgain" asp-controller="Booking" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@Model.DonHangId" />
+                            <button type="submit" class="btn btn-danger ms-2">Thanh toán lại</button>
+                        </form>
+                        <form asp-action="CancelOrder" asp-controller="Booking" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.DonHangId" />
+                            <button type="submit" class="btn btn-outline-secondary ms-2">Hủy mua vé</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (isPending)
+{
+<script>
+    (function () {
+        const el = document.getElementById('countdown-detail');
+        if (!el) return;
+        function format(ms) {
+            if (ms <= 0) return '00:00:00';
+            const totalSec = Math.floor(ms / 1000);
+            const h = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+            const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+            const s = String(totalSec % 60).padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        }
+        function tick() {
+            const now = new Date();
+            const expire = new Date(el.getAttribute('data-expire'));
+            const remain = expire - now;
+            el.textContent = remain <= 0 ? 'Hết hạn' : format(remain);
+        }
+        tick();
+        setInterval(tick, 1000);
+    })();
+</script>
+}

@@ -1,0 +1,235 @@
+﻿@* //BAOLONG// *@
+@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+
+@{
+    ViewData["Title"] = "Kết Quả Tìm Kiếm";
+}
+
+<div class="search-results-container">
+    <div class="results-header">
+        @if (ViewBag.DiemDi != null)
+        {
+            <h1>@ViewBag.DiemDi <i class="bi bi-arrow-right"></i> @ViewBag.DiemDen</h1>
+            <p>Hiển thị các chuyến xe có sẵn trong ngày <strong>@ViewBag.NgayDi</strong></p>
+        }
+        else
+        {
+            <h1>Kết Quả Tìm Kiếm</h1>
+        }
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="results-list">
+            @foreach (var chuyen in Model)
+            {
+                <div class="ticket-card">
+                    <div class="card-main-info">
+                        <div class="time-location">
+                            <span class="time">@chuyen.GioDi.ToString(@"hh\:mm")</span>
+                            <span class="location">@chuyen.LoTrinh.TramDiNavigation.TenTram</span>
+                        </div>
+                        <div class="duration-arrow">
+                            @* ===== DÒNG CODE ĐÃ ĐƯỢC THAY ĐỔI ===== *@
+                            <span class="duration">@((chuyen.GioDenDuKien - chuyen.GioDi).ToString(@"hh\:mm")) giờ</span>
+                            <div class="arrow-line"></div>
+                            <span class="bus-type">@chuyen.Xe.LoaiXe.TenLoaiXe</span>
+                        </div>
+                        <div class="time-location text-end">
+                            <span class="time">@chuyen.GioDenDuKien.ToString(@"hh\:mm")</span>
+                            <span class="location">@chuyen.LoTrinh.TramToiNavigation.TenTram</span>
+                        </div>
+                    </div>
+                    <div class="card-booking-info">
+                        <div class="price">
+                            <span>Giá vé chỉ từ</span>
+                            <strong>@String.Format("{0:N0}", chuyen.LoTrinh.GiaVeCoDinh) VNĐ</strong>
+                        </div>
+                        <a asp-action="ChonGhe" asp-controller="Booking" asp-route-chuyenId="@chuyen.ChuyenId" class="btn btn-booking">
+                            Chọn Chuyến <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="no-results-panel">
+            <i class="bi bi-compass-fill"></i>
+            <h3>Không tìm thấy chuyến xe phù hợp</h3>
+            <p>Rất tiếc, chúng tôi không tìm thấy hành trình nào theo yêu cầu của bạn. <br>Vui lòng thử lại với điểm đi, điểm đến hoặc ngày khác.</p>
+            <a asp-controller="Home_User" asp-action="Home_User" class="btn btn-back-home">
+                <i class="bi bi-arrow-left"></i> Quay lại trang tìm kiếm
+            </a>
+        </div>
+    }
+</div>
+
+<style>
+    body {
+        background-color: #f4f6f9;
+    }
+
+    .search-results-container {
+        max-width: 900px;
+        margin: 40px auto;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .results-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+        .results-header h1 {
+            font-weight: 700;
+            color: #3f4c6b;
+        }
+
+        .results-header p {
+            font-size: 18px;
+            color: #6c757d;
+        }
+
+    .results-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .ticket-card {
+        display: flex;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+        .ticket-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+
+    .card-main-info {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 25px;
+    }
+
+    .time-location {
+        flex-basis: 30%;
+    }
+
+        .time-location .time {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            display: block;
+        }
+
+        .time-location .location {
+            font-size: 15px;
+            color: #6c757d;
+        }
+
+    .duration-arrow {
+        text-align: center;
+        flex-grow: 1;
+        padding: 0 20px;
+    }
+
+    .arrow-line {
+        height: 1px;
+        background-color: #ddd;
+        position: relative;
+        margin: 5px 0;
+    }
+
+        .arrow-line::after {
+            content: '\25B6';
+            position: absolute;
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ddd;
+            font-size: 14px;
+        }
+
+    .duration-arrow .duration, .duration-arrow .bus-type {
+        font-size: 13px;
+        color: #888;
+        display: block;
+    }
+
+    .card-booking-info {
+        background: #fff9f7;
+        border-left: 1px solid #feebe3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        width: 220px;
+        text-align: center;
+    }
+
+    .price {
+        margin-bottom: 15px;
+    }
+
+        .price span {
+            display: block;
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .price strong {
+            font-size: 22px;
+            color: #f06428;
+            font-weight: 700;
+        }
+
+    .btn-booking {
+        background: #f06428;
+        color: #fff;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 10px 25px;
+        text-decoration: none;
+        transition: background-color 0.2s ease;
+    }
+
+        .btn-booking:hover {
+            background: #d95a24;
+            color: #fff;
+        }
+
+    .no-results-panel {
+        text-align: center;
+        padding: 50px;
+        border-radius: 12px;
+        background-color: #fff;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+        .no-results-panel i {
+            font-size: 48px;
+            color: #0dcaf0;
+            margin-bottom: 15px;
+        }
+
+        .no-results-panel h3 {
+            font-weight: 600;
+            color: #3f4c6b;
+        }
+
+    .btn-back-home {
+        background-color: #ff9800;
+        color: #fff;
+        font-weight: 600;
+    }
+</style>

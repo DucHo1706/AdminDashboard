@@ -1,3 +1,154 @@
+<<<<<<< HEAD
+﻿@* //Tan Huy - GoSix// *@
+@model AdminDashboard.Models.Tram
+
+@{
+    ViewData["Title"] = "Thêm Trạm Mới";
+}
+
+<div class="create-form-container">
+    <div class="form-panel">
+        <form asp-action="Create" onsubmit="return validateForm()">
+            <div class="form-header">
+                <h2><i class="fas fa-map-marker-alt"></i> @ViewData["Title"]</h2>
+                <p>Điền thông tin chi tiết để thêm trạm mới vào hệ thống.</p>
+            </div>
+
+            <div class="form-body">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <!-- Tên trạm -->
+                <div class="form-group-custom">
+                    <label asp-for="TenTram" class="control-label">
+                        <i class="fas fa-building"></i> Tên Trạm
+                    </label>
+                    <input asp-for="TenTram" class="form-control" placeholder="Nhập tên trạm..." />
+                    <span asp-validation-for="TenTram" class="text-danger"></span>
+                </div>
+
+                <!-- Tỉnh/Thành -->
+                <div class="form-group-custom">
+                    <label class="control-label"><i class="fas fa-city"></i> Tỉnh/Thành phố</label>
+                    <select id="province" class="form-select" required>
+                        <option value="">-- Chọn Tỉnh/Thành phố --</option>
+                    </select>
+                    @Html.HiddenFor(model => model.Tinh, new { id = "hiddenTinh" })
+                    <span class="text-danger" id="provinceValidation" style="display:none;">Vui lòng chọn tỉnh/thành phố</span>
+                </div>
+
+                <!-- Quận/Huyện -->
+                <div class="form-group-custom">
+                    <label class="control-label"><i class="fas fa-map"></i> Quận/Huyện</label>
+                    <select id="district" class="form-select" disabled required>
+                        <option value="">-- Chọn Quận/Huyện --</option>
+                    </select>
+                    @Html.HiddenFor(model => model.Huyen, new { id = "hiddenHuyen" })
+                    <span class="text-danger" id="districtValidation" style="display:none;">Vui lòng chọn quận/huyện</span>
+                </div>
+
+                <!-- Phường/Xã -->
+                <div class="form-group-custom">
+                    <label class="control-label"><i class="fas fa-map-pin"></i> Phường/Xã</label>
+                    <select id="ward" class="form-select" disabled required>
+                        <option value="">-- Chọn Phường/Xã --</option>
+                    </select>
+                    @Html.HiddenFor(model => model.Xa, new { id = "hiddenXa" })
+                    <span class="text-danger" id="wardValidation" style="display:none;">Vui lòng chọn phường/xã</span>
+                </div>
+
+                <!-- Địa chỉ chi tiết -->
+                <div class="form-group-custom">
+                    <label class="control-label"><i class="fas fa-home"></i> Địa chỉ chi tiết</label>
+                    <input id="detailAddress" class="form-control" placeholder="Ví dụ: 93 Giảng Võ, phường Giảng Võ..." required />
+                    <span class="text-danger" id="detailAddressValidation" style="display:none;">Vui lòng nhập địa chỉ chi tiết</span>
+                </div>
+
+                @Html.HiddenFor(model => model.DiaChiTram, new { id = "fullAddress" })
+            </div>
+
+            <div class="form-footer">
+                <a asp-action="Index" class="btn btn-secondary-custom">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+                <button type="submit" class="btn btn-primary-custom">
+                    <i class="fas fa-save"></i> Lưu trạm
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        const provinceApi = 'https://provinces.open-api.vn/api/p/';
+        const districtApi = 'https://provinces.open-api.vn/api/d/';
+        const wardApi = 'https://provinces.open-api.vn/api/w/';
+
+        async function loadProvinces() {
+            const response = await fetch(provinceApi);
+            const provinces = await response.json();
+            const provinceSelect = document.getElementById('province');
+            provinces.forEach(province => {
+                const option = document.createElement('option');
+                option.value = province.code;
+                option.textContent = province.name;
+                provinceSelect.appendChild(option);
+            });
+        }
+
+        async function loadDistricts(provinceCode) {
+            const response = await fetch(`${provinceApi}${provinceCode}?depth=2`);
+            const province = await response.json();
+            const districtSelect = document.getElementById('district');
+            districtSelect.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
+            districtSelect.disabled = false;
+
+            province.districts.forEach(district => {
+                const option = document.createElement('option');
+                option.value = district.code;
+                option.textContent = district.name;
+                districtSelect.appendChild(option);
+            });
+
+            const wardSelect = document.getElementById('ward');
+            wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+            wardSelect.disabled = true;
+
+            combineAddress();
+        }
+
+        async function loadWards(districtCode) {
+            const response = await fetch(`${districtApi}${districtCode}?depth=2`);
+            const district = await response.json();
+            const wardSelect = document.getElementById('ward');
+            wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+            wardSelect.disabled = false;
+
+            district.wards.forEach(ward => {
+                const option = document.createElement('option');
+                option.value = ward.code;
+                option.textContent = ward.name;
+                wardSelect.appendChild(option);
+            });
+
+            combineAddress();
+        }
+
+        function combineAddress() {
+            const province = document.getElementById('province');
+            const district = document.getElementById('district');
+            const ward = document.getElementById('ward');
+            const detail = document.getElementById('detailAddress').value;
+
+            const provinceText = province.options[province.selectedIndex]?.textContent || '';
+            const districtText = district.options[district.selectedIndex]?.textContent || '';
+            const wardText = ward.options[ward.selectedIndex]?.textContent || '';
+
+=======
 ﻿@model AdminDashboard.Models.Tram
 
 <h2>Thêm Trạm</h2>
@@ -134,10 +285,41 @@
             const wardText = wardSelect.options[wardSelect.selectedIndex]?.textContent || '';
 
             // Cập nhật các trường ẩn
+>>>>>>> master
             document.getElementById('hiddenTinh').value = provinceText;
             document.getElementById('hiddenHuyen').value = districtText;
             document.getElementById('hiddenXa').value = wardText;
 
+<<<<<<< HEAD
+            const full = [detail, wardText, districtText, provinceText].filter(x => x).join(', ');
+            document.getElementById('fullAddress').value = full;
+        }
+
+        function validateForm() {
+            let ok = true;
+            const requiredFields = [
+                ['province', 'provinceValidation'],
+                ['district', 'districtValidation'],
+                ['ward', 'wardValidation'],
+                ['detailAddress', 'detailAddressValidation']
+            ];
+
+            requiredFields.forEach(([id, warn]) => {
+                const field = document.getElementById(id);
+                const alert = document.getElementById(warn);
+                alert.style.display = (field.value ? 'none' : 'block');
+                if (!field.value) ok = false;
+            });
+
+            if (!ok) alert("Vui lòng nhập đầy đủ thông tin trạm!");
+            return ok;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProvinces();
+            document.getElementById('province').addEventListener('change', e => e.target.value ? loadDistricts(e.target.value) : null);
+            document.getElementById('district').addEventListener('change', e => e.target.value ? loadWards(e.target.value) : null);
+=======
             // Tạo địa chỉ đầy đủ
             const fullAddress = [detailAddress, wardText, districtText, provinceText]
                 .filter(part => part && part.trim() !== '')
@@ -209,8 +391,132 @@
                 }
             });
 
+>>>>>>> master
             document.getElementById('ward').addEventListener('change', combineAddress);
             document.getElementById('detailAddress').addEventListener('input', combineAddress);
         });
     </script>
+<<<<<<< HEAD
 }
+
+<style>
+    body {
+        background-color: #f4f6f9;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .create-form-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px 15px;
+    }
+
+    .form-panel {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        width: 100%;
+        max-width: 800px;
+        overflow: hidden;
+    }
+
+    .form-header {
+        background-color: #fff7ec;
+        padding: 25px 30px;
+        border-bottom: 1px solid #ffe2b6;
+    }
+
+        .form-header h2 {
+            font-weight: 700;
+            font-size: 24px;
+            color: #3f4c6b;
+            margin: 0;
+        }
+
+            .form-header h2 i {
+                color: #ff9800;
+                margin-right: 12px;
+            }
+
+        .form-header p {
+            color: #8c96a5;
+            margin-top: 5px;
+        }
+
+    .form-body {
+        padding: 30px;
+    }
+
+    .form-group-custom {
+        margin-bottom: 22px;
+    }
+
+    .control-label {
+        font-weight: 600;
+        color: #5b6a82;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+        .control-label i {
+            margin-right: 8px;
+            color: #ff9800;
+        }
+
+    .form-control, .form-select {
+        height: 48px;
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        padding: 0 15px;
+        font-size: 15px;
+        transition: 0.25s ease;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #ff9800;
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.25);
+            outline: none;
+        }
+
+    .form-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 20px 30px;
+        background-color: #fff7ec;
+        border-top: 1px solid #ffe2b6;
+    }
+
+    .btn-primary-custom, .btn-secondary-custom {
+        padding: 10px 22px;
+        font-weight: 600;
+        font-size: 15px;
+        border-radius: 8px;
+        border: none;
+        transition: 0.25s ease;
+    }
+
+    .btn-primary-custom {
+        background-color: #ff9800;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+    }
+
+        .btn-primary-custom:hover {
+            background-color: #f57c00;
+            transform: translateY(-2px);
+        }
+
+    .btn-secondary-custom {
+        background-color: #e9ecef;
+        color: #495057;
+    }
+
+        .btn-secondary-custom:hover {
+            background-color: #dee2e6;
+        }
+</style>
+=======
+}
+>>>>>>> master

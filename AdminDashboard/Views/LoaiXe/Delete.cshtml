@@ -1,3 +1,178 @@
+<<<<<<< HEAD
+﻿@* //Tan Huy - GoSix// *@
+@model AdminDashboard.Models.LoaiXe
+
+@{
+    ViewData["Title"] = "Xác nhận Xóa Loại Xe";
+}
+
+<div class="delete-confirmation-container">
+    <div class="confirmation-panel">
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="LoaiXeId" />
+
+            <div class="panel-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> @ViewData["Title"]</h3>
+                <p>Hành động này sẽ xóa vĩnh viễn loại xe khỏi hệ thống. Vui lòng xác nhận trước khi tiếp tục.</p>
+            </div>
+
+            <div class="panel-body">
+                <div class="details-list">
+                    <div class="detail-item">
+                        <span class="detail-label">Mã Loại Xe:</span>
+                        <span class="detail-value id-badge">@Model.LoaiXeId</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Tên Loại Xe:</span>
+                        <span class="detail-value">@Model.TenLoaiXe</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-footer">
+                <a asp-action="Index" class="btn btn-secondary-custom">
+                    <i class="fas fa-times"></i> Hủy
+                </a>
+                <button type="submit" class="btn btn-danger-custom">
+                    <i class="fas fa-trash-alt"></i> Xác nhận Xóa
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f4f6f9;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .delete-confirmation-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 50px 15px;
+    }
+
+    .confirmation-panel {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        width: 100%;
+        max-width: 700px;
+        overflow: hidden;
+        border-top: 5px solid #ff9800; /* Orange Gosix */
+    }
+
+    .panel-header {
+        background-color: #fff7ec;
+        padding: 25px 30px;
+        border-bottom: 1px solid #ffe2b6;
+    }
+
+        .panel-header h3 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+            color: #dc3545; /* Red warning */
+        }
+
+            .panel-header h3 i {
+                margin-right: 10px;
+            }
+
+        .panel-header p {
+            color: #6c757d;
+            margin-top: 8px;
+            font-size: 15px;
+        }
+
+    .panel-body {
+        padding: 25px 30px;
+    }
+
+    .details-list {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        border: 1px solid #dee2e6;
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+    .detail-label {
+        color: #6c757d;
+        font-weight: 500;
+        font-size: 15px;
+    }
+
+    .detail-value {
+        font-weight: 600;
+        color: #212529;
+        text-align: right;
+    }
+
+        .detail-value.id-badge {
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+    .panel-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 30px;
+        background-color: #fff7ec;
+        border-top: 1px solid #ffe2b6;
+    }
+
+    .btn-danger-custom, .btn-secondary-custom {
+        padding: 12px 25px;
+        font-weight: 600;
+        font-size: 15px;
+        border-radius: 8px;
+        border: none;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-danger-custom {
+        background-color: #dc3545;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+
+        .btn-danger-custom:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+
+    .btn-secondary-custom {
+        background-color: #6c757d;
+        color: #fff;
+    }
+
+        .btn-secondary-custom:hover {
+            background-color: #5a6268;
+        }
+
+        .btn-danger-custom i, .btn-secondary-custom i {
+            margin-right: 8px;
+        }
+</style>
+=======
 ﻿@model AdminDashboard.Models.LoaiXe
 
 <h2>Xóa Trạm</h2>
@@ -19,3 +194,4 @@
     <button type="submit" class="btn btn-danger">Xóa</button> |
     <a asp-action="Index">Quay lại</a>
 </form>
+>>>>>>> master

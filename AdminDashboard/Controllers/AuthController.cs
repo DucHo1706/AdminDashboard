@@ -10,18 +10,34 @@ using System.Threading.Tasks;
 using System.Linq;
 using System; // Guid
 using System.Collections.Generic;
+<<<<<<< HEAD
+using BCrypt.Net; 
+=======
 
+>>>>>>> master
 namespace AdminDashboard.Controllers
 {
     public class AuthController : Controller
     {
         private readonly Db27524Context _context;
         private readonly IEmailService _emailService;
+<<<<<<< HEAD
+        private readonly IOtpService _otpService;
+        private readonly ILogger<AuthController> _logger;
+
+        public AuthController(Db27524Context context, IEmailService emailService, IOtpService otpService, ILogger<AuthController> logger)
+        {
+            _context = context;
+            _emailService = emailService;
+            _otpService = otpService;
+            _logger = logger;
+=======
 
         public AuthController(Db27524Context context, IEmailService emailService)
         {
             _context = context;
             _emailService = emailService;
+>>>>>>> master
         }
 
         // ====== Login / Logout / Register (giữ nguyên phần logic bạn đã có) ======
@@ -285,10 +301,173 @@ namespace AdminDashboard.Controllers
             return View();
         }
         // ====== FORGOT PASSWORD ======
+<<<<<<< HEAD
+        [HttpGet]
+=======
+>>>>>>> master
         public IActionResult ForgotPass()
         {
             return View();
         }
+<<<<<<< HEAD
+        public IActionResult History()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> ForgotPass(ForgotPasswordRequest model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // Kiểm tra email có tồn tại trong hệ thống không
+            var user = await _context.NguoiDung
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == model.Email.ToLower());
+
+            if (user == null)
+            {
+                ModelState.AddModelError("Email", "Email này không tồn tại trong hệ thống.");
+                return View(model);
+            }
+
+            try
+            {
+                // Tạo mã OTP
+                var otpCode = await _otpService.GenerateOtpAsync(model.Email);
+
+                // Gửi email OTP
+                var emailSent = await _emailService.SendOtpEmailAsync(model.Email, otpCode);
+
+                if (emailSent)
+                {
+                    // Lưu thời gian tạo OTP vào TempData
+                    var otpCreatedTime = DateTime.Now;
+                    TempData["OtpCreatedTime"] = otpCreatedTime.ToString("O");
+                    TempData["OtpExpiresIn"] = 180; // 3 phút = 180 giây
+
+                    TempData["SuccessMessage"] = "Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.";
+                    return RedirectToAction("VerifyOtp", new { email = model.Email });
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Không thể gửi email. Vui lòng thử lại sau.");
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ForgotPass action");
+                ModelState.AddModelError("", "Đã xảy ra lỗi. Vui lòng thử lại sau.");
+                return View(model);
+            }
+        }
+
+        // ====== VERIFY OTP ======
+        [HttpGet]
+        public IActionResult VerifyOtp(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("ForgotPass");
+            }
+
+            var model = new VerifyOtpRequest { Email = email };
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> VerifyOtp(VerifyOtpRequest model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            try
+            {
+                var isValid = await _otpService.VerifyOtpAsync(model.Email, model.OtpCode);
+
+                if (isValid)
+                {
+                    TempData["SuccessMessage"] = "Mã OTP hợp lệ. Vui lòng đặt lại mật khẩu mới.";
+                    return RedirectToAction("ResetPasswordWithOtp", new { email = model.Email, otpCode = model.OtpCode });
+                }
+                else
+                {
+                    ModelState.AddModelError("OtpCode", "Mã OTP không đúng hoặc đã hết hạn.");
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in VerifyOtp action");
+                ModelState.AddModelError("", "Đã xảy ra lỗi. Vui lòng thử lại sau.");
+                return View(model);
+            }
+        }
+
+        // ====== RESET PASSWORD WITH OTP ======
+        [HttpGet]
+        public IActionResult ResetPasswordWithOtp(string email, string otpCode)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(otpCode))
+            {
+                return RedirectToAction("ForgotPass");
+            }
+
+            var model = new ResetPasswordRequest 
+            { 
+                Email = email, 
+                OtpCode = otpCode 
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPasswordWithOtp(ResetPasswordRequest model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            try
+            {
+                // Xác minh lại OTP
+                var isValidOtp = await _otpService.VerifyOtpAsync(model.Email, model.OtpCode);
+
+                if (!isValidOtp)
+                {
+                    ModelState.AddModelError("", "Mã OTP không hợp lệ hoặc đã hết hạn.");
+                    return View(model);
+                }
+
+                // Tìm user và cập nhật mật khẩu
+                var user = await _context.NguoiDung
+                    .FirstOrDefaultAsync(u => u.Email.ToLower() == model.Email.ToLower());
+
+                if (user == null)
+                {
+                    ModelState.AddModelError("", "Không tìm thấy tài khoản.");
+                    return View(model);
+                }
+
+                // Cập nhật mật khẩu mới
+                user.MatKhau = model.NewPassword;
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Đặt lại mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới.";
+                return RedirectToAction("Login");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ResetPasswordWithOtp action");
+                ModelState.AddModelError("", "Đã xảy ra lỗi khi đặt lại mật khẩu. Vui lòng thử lại sau.");
+                return View(model);
+            }
+=======
 
         // ====== OTP FORGOT PASSWORD ======
         [HttpGet]
@@ -457,6 +636,7 @@ namespace AdminDashboard.Controllers
 
             ViewBag.Success = "Đặt lại mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới.";
             return View();
+>>>>>>> master
         }
     }
 }

@@ -1,5 +1,9 @@
+<<<<<<< HEAD
+﻿@model AdminDashboard.Models.Login.ForgotPasswordRequest
+=======
 ﻿﻿
 @model AdminDashboard.Models.NguoiDung
+>>>>>>> master
 
 @{
     Layout = null;
@@ -7,6 +11,10 @@
 }
 
 <!DOCTYPE html>
+<<<<<<< HEAD
+<html lang="vi">
+=======
+>>>>>>> master
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,6 +24,128 @@
     <link rel="icon" href="~/css/images/icon_logo.png" type="image/png" />
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+<<<<<<< HEAD
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+
+    <style>
+        /* CSS tùy chỉnh cho giao diện sang trọng (Cam, Vàng, Trắng) */
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif; /* Font chữ hiện đại, cao cấp */
+            background-color: #FCFAF8; /* Màu nền Trắng-kem, ấm áp */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* Thẻ Card chính */
+        .auth-card {
+            background-color: #FFFFFF; /* Màu trắng */
+            border: none;
+            border-radius: 1rem; /* Bo góc mềm mại */
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.07); /* Đổ bóng nhẹ nhàng, lan tỏa */
+            padding: 2.5rem 3rem; /* Tăng không gian bên trong */
+            max-width: 480px;
+            width: 100%;
+        }
+
+        /* Logo */
+        .auth-logo img {
+            width: 70px;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Tiêu đề */
+        .auth-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333333;
+        }
+
+        /* Chữ mô tả */
+        .auth-subtitle {
+            color: #777777;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        /* Nhãn của input */
+        .form-label-custom {
+            font-weight: 600;
+            color: #4A4A4A;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        /* Ô input */
+        .form-control-custom {
+            font-size: 1rem;
+            padding: 0.9rem 1.25rem;
+            border: 1px solid #EAEAEA;
+            border-radius: 0.5rem; /* Bo góc nhẹ */
+            background-color: #FDFDFD;
+            box-shadow: none; /* Bỏ bóng mặc định của Bootstrap */
+            transition: all 0.3s ease;
+        }
+
+            /* Hiệu ứng "Glow" VÀNG khi focus */
+            .form-control-custom:focus {
+                border-color: #FDBB2D;
+                box-shadow: 0 0 0 0.25rem rgba(253, 187, 45, 0.25);
+            }
+
+        /* Nút bấm chính (Tông màu CAM-VÀNG) */
+        .btn-primary-custom {
+            /* Dùng Gradient (chuyển màu) cho sang trọng */
+            background-image: linear-gradient(45deg, #F58529 0%, #FDBB2D 100%);
+            border: none;
+            color: #ffffff;
+            padding: 0.85rem 1.5rem;
+            font-weight: 700;
+            font-size: 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(245, 133, 41, 0.2); /* Đổ bóng CAM */
+        }
+            /* Hiệu ứng nhấc lên khi hover */
+            .btn-primary-custom:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 7px 20px rgba(245, 133, 41, 0.35);
+                color: #ffffff;
+            }
+
+        /* Nút bấm phụ (Quay lại) */
+        .btn-secondary-custom {
+            background-color: transparent;
+            border: none;
+            color: #777777;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+            .btn-secondary-custom:hover {
+                color: #F58529; /* Chuyển màu CAM khi hover */
+            }
+
+        /* Tùy chỉnh Alert báo lỗi */
+        .alert-danger {
+            background-color: #fff8f8;
+            border-color: #fdd;
+            color: #d9534f;
+            border-radius: 0.5rem;
+        }
+=======
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/AdminDashboard.styles.css" asp-append-version="true" />
     <style>
@@ -192,10 +322,69 @@
                 width: 50%;
             }
 
+>>>>>>> master
 
     </style>
 </head>
 <body>
+<<<<<<< HEAD
+
+    <main class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+
+                <div class="auth-card">
+                    <div class="text-center auth-logo">
+                        <img src="~/css/images/icon_logo.png" alt="GoSix Logo" />
+                    </div>
+
+                    <h3 class="auth-title text-center mb-2">Quên mật khẩu?</h3>
+                    <p class="auth-subtitle text-center">
+                        Đừng lo lắng. Hãy nhập email để chúng tôi gửi link khôi phục.
+                    </p>
+
+                    <form asp-action="ForgotPass" method="post">
+
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger" role="alert">
+                                <h5 class="alert-heading" style="font-size: 1.1rem; font-weight: 700;">
+                                    <i class="fas fa-exclamation-triangle me-2"></i> Có lỗi xảy ra
+                                </h5>
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label-custom">Địa chỉ Email</label>
+                            <input asp-for="Email" class="form-control form-control-custom" type="email" placeholder="example@email.com" required />
+                            <span asp-validation-for="Email" class="text-danger mt-1 d-block" style="font-size: 0.9rem;"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary-custom">
+                                <i class="fas fa-paper-plane me-2"></i> Gửi yêu cầu
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <a asp-controller="Auth" asp-action="Login" class="btn-secondary-custom">
+                                <i class="fas fa-arrow-left me-1"></i> Quay lại đăng nhập
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }
+</body>
+</html>
+=======
     <div class="container mt-5">
         <h2 class="text-center mb-4">Quên mật khẩu</h2>
         <div class="card shadow-sm">
@@ -243,3 +432,4 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+>>>>>>> master

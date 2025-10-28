@@ -1,3 +1,174 @@
+<<<<<<< HEAD
+﻿@* //Tan Huy - GoSix// *@
+@model AdminDashboard.Models.LoaiXe
+
+@{
+    ViewData["Title"] = "Thêm Loại Xe Mới";
+}
+
+<div class="create-form-container">
+    <div class="form-panel">
+        <form asp-action="Create">
+            <div class="form-header">
+                <h2><i class="fas fa-bus-alt"></i> @ViewData["Title"]</h2>
+                <p>Nhập thông tin để thêm loại xe mới vào hệ thống.</p>
+            </div>
+
+            <div class="form-body">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <!-- Tên loại xe -->
+                <div class="form-group-custom">
+                    <label asp-for="TenLoaiXe" class="control-label">
+                        <i class="fas fa-car-side"></i> Tên Loại Xe
+                    </label>
+                    <input asp-for="TenLoaiXe" class="form-control" placeholder="Nhập tên loại xe..." />
+                    <span asp-validation-for="TenLoaiXe" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <a asp-action="Index" class="btn btn-secondary-custom">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+                <button type="submit" class="btn btn-primary-custom">
+                    <i class="fas fa-save"></i> Lưu loại xe
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<style>
+    body {
+        background-color: #f4f6f9;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .create-form-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px 15px;
+    }
+
+    .form-panel {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        width: 100%;
+        max-width: 700px;
+        overflow: hidden;
+    }
+
+    .form-header {
+        background-color: #fff7ec;
+        padding: 25px 30px;
+        border-bottom: 1px solid #ffe2b6;
+    }
+
+        .form-header h2 {
+            font-weight: 700;
+            font-size: 24px;
+            color: #3f4c6b;
+            margin: 0;
+        }
+
+            .form-header h2 i {
+                color: #ff9800; /* Orange Gosix */
+                margin-right: 10px;
+            }
+
+        .form-header p {
+            color: #8c96a5;
+            margin-top: 6px;
+            font-size: 15px;
+        }
+
+    .form-body {
+        padding: 30px;
+    }
+
+    .form-group-custom {
+        margin-bottom: 22px;
+    }
+
+    .control-label {
+        font-weight: 600;
+        color: #5b6a82;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+        .control-label i {
+            margin-right: 8px;
+            color: #ff9800;
+        }
+
+    .form-control {
+        height: 48px;
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        padding: 0 15px;
+        font-size: 15px;
+        transition: 0.25s ease;
+    }
+
+        .form-control:focus {
+            border-color: #ff9800;
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.25);
+            outline: none;
+        }
+
+    .form-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 20px 30px;
+        background-color: #fff7ec;
+        border-top: 1px solid #ffe2b6;
+    }
+
+    .btn-primary-custom, .btn-secondary-custom {
+        padding: 10px 22px;
+        font-weight: 600;
+        font-size: 15px;
+        border-radius: 8px;
+        border: none;
+        transition: 0.25s ease;
+    }
+
+    .btn-primary-custom {
+        background-color: #ff9800;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+    }
+
+        .btn-primary-custom:hover {
+            background-color: #f57c00;
+            transform: translateY(-2px);
+        }
+
+    .btn-secondary-custom {
+        background-color: #e9ecef;
+        color: #495057;
+    }
+
+        .btn-secondary-custom:hover {
+            background-color: #dee2e6;
+        }
+
+        .btn-primary-custom i, .btn-secondary-custom i {
+            margin-right: 8px;
+        }
+</style>
+=======
 ﻿@model AdminDashboard.Models.LoaiXe
 
 <h2>Thêm Loại Xe</h2>
@@ -13,3 +184,4 @@
     <button type="submit" class="btn btn-primary">Lưu</button> |
     <a asp-action="Index">Quay lại</a>
 </form>
+>>>>>>> master
