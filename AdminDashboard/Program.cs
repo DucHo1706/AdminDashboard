@@ -20,7 +20,7 @@ builder.Services.AddControllersWithViews();
 // Đăng ký các dịch vụ
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IOtpService, OtpService>();
-
+builder.Services.AddScoped< IVnpayService,VnpayService>();
 // 🔑 Thêm Authentication & Cookie
 builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", options =>

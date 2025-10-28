@@ -326,6 +326,11 @@ namespace AdminDashboard.Controllers
 
                 if (emailSent)
                 {
+                    // Lưu thời gian tạo OTP vào TempData
+                    var otpCreatedTime = DateTime.Now;
+                    TempData["OtpCreatedTime"] = otpCreatedTime.ToString("O");
+                    TempData["OtpExpiresIn"] = 180; // 3 phút = 180 giây
+                    
                     TempData["SuccessMessage"] = "Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.";
                     return RedirectToAction("VerifyOtp", new { email = model.Email });
                 }
@@ -353,6 +358,11 @@ namespace AdminDashboard.Controllers
             }
 
             var model = new VerifyOtpRequest { Email = email };
+            
+            // Pass OTP expiry info to view
+            ViewBag.OtpExpiresIn = 180; // 3 phút = 180 giây
+            ViewBag.OtpCreatedTime = TempData["OtpCreatedTime"]?.ToString();
+            
             return View(model);
         }
 
@@ -389,10 +399,18 @@ namespace AdminDashboard.Controllers
 
         // ====== RESET PASSWORD WITH OTP ======
         [HttpGet]
-        public IActionResult ResetPasswordWithOtp(string email, string otpCode)
+        public async Task<IActionResult> ResetPasswordWithOtp(string email, string otpCode)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(otpCode))
             {
+                return RedirectToAction("ForgotPass");
+            }
+
+            // Kiểm tra OTP còn hợp lệ không
+            var isValidOtp = await _otpService.IsOtpValidAsync(email);
+            if (!isValidOtp)
+            {
+                TempData["ErrorMessage"] = "Mã OTP đã hết hạn. Vui lòng yêu cầu mã OTP mới.";
                 return RedirectToAction("ForgotPass");
             }
 
@@ -414,13 +432,14 @@ namespace AdminDashboard.Controllers
 
             try
             {
-                // Xác minh lại OTP
-                var isValidOtp = await _otpService.VerifyOtpAsync(model.Email, model.OtpCode);
+                // Xác minh OTP và đánh dấu đã sử dụng
+                var isValidOtp = await _otpService.VerifyOtpAsync(model.Email, model.OtpCode, "ResetPassword", markAsUsed: true);
 
                 if (!isValidOtp)
                 {
-                    ModelState.AddModelError("", "Mã OTP không hợp lệ hoặc đã hết hạn.");
-                    return View(model);
+                    // OTP hết hạn - redirect về trang ForgotPass với thông báo
+                    TempData["ErrorMessage"] = "Mã OTP đã hết hạn. Vui lòng yêu cầu mã OTP mới.";
+                    return RedirectToAction("ForgotPass");
                 }
 
                 // Tìm user và cập nhật mật khẩu

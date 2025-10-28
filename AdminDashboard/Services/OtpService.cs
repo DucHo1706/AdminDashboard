@@ -1,57 +1,82 @@
-using AdminDashboard.Models;
-using AdminDashboard.TransportDBContext;
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Concurrent;
 
 namespace AdminDashboard.Services
 {
     public interface IOtpService
     {
         Task<string> GenerateOtpAsync(string email, string purpose = "ResetPassword");
-        Task<bool> VerifyOtpAsync(string email, string otpCode, string purpose = "ResetPassword");
+        Task<bool> VerifyOtpAsync(string email, string otpCode, string purpose = "ResetPassword", bool markAsUsed = false);
         Task<bool> IsOtpValidAsync(string email, string purpose = "ResetPassword");
         Task CleanupExpiredOtpsAsync();
     }
 
+    public class OtpInfo
+    {
+        public string Email { get; set; }
+        public string Code { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime ExpiresAt { get; set; }
+        public bool IsUsed { get; set; }
+        public string Purpose { get; set; }
+    }
+
     public class OtpService : IOtpService
     {
-        private readonly Db27524Context _context;
         private readonly ILogger<OtpService> _logger;
         private readonly Random _random = new Random();
+        
+        // Sử dụng in-memory storage với ConcurrentDictionary để thread-safe
+        private static readonly ConcurrentDictionary<string, OtpInfo> _otpStorage = new();
 
-        public OtpService(Db27524Context context, ILogger<OtpService> logger)
+        public OtpService(ILogger<OtpService> logger)
         {
-            _context = context;
             _logger = logger;
+            
+            // Chạy cleanup mỗi 1 phút
+            Task.Run(async () =>
+            {
+                while (true)
+                {
+                    await CleanupExpiredOtpsAsync();
+                    await Task.Delay(TimeSpan.FromMinutes(1));
+                }
+            });
         }
 
-        public async Task<string> GenerateOtpAsync(string email, string purpose = "ResetPassword")
+        public Task<string> GenerateOtpAsync(string email, string purpose = "ResetPassword")
         {
             try
             {
                 // Xóa các OTP cũ của email này
-                var existingOtps = await _context.OtpCodes
-                    .Where(o => o.Email == email && o.Purpose == purpose)
-                    .ToListAsync();
-
-                _context.OtpCodes.RemoveRange(existingOtps);
+                var keysToRemove = _otpStorage.Keys
+                    .Where(k => k.Contains(email.ToLowerInvariant()) && k.Contains(purpose))
+                    .ToList();
+                
+                foreach (var key in keysToRemove)
+                {
+                    _otpStorage.TryRemove(key, out _);
+                }
 
                 // Tạo mã OTP 6 chữ số
                 var otpCode = _random.Next(100000, 999999).ToString();
+                var expiresAt = DateTime.Now.AddMinutes(3); // OTP có hiệu lực 3 phút
 
-                var otp = new OtpCode
+                var otpInfo = new OtpInfo
                 {
                     Email = email.ToLowerInvariant(),
                     Code = otpCode,
                     CreatedAt = DateTime.Now,
-                    ExpiresAt = DateTime.Now.AddMinutes(10), // OTP có hiệu lực 10 phút
-                    Purpose = purpose
+                    ExpiresAt = expiresAt,
+                    Purpose = purpose,
+                    IsUsed = false
                 };
 
-                _context.OtpCodes.Add(otp);
-                await _context.SaveChangesAsync();
+                // Lưu vào in-memory storage
+                var storageKey = $"{email.ToLowerInvariant()}_{purpose}_{DateTime.Now.Ticks}";
+                _otpStorage.TryAdd(storageKey, otpInfo);
 
-                _logger.LogInformation($"OTP generated for {email}: {otpCode}");
-                return otpCode;
+                _logger.LogInformation($"OTP generated for {email}: {otpCode}, expires at {expiresAt}");
+                return Task.FromResult(otpCode);
             }
             catch (Exception ex)
             {
@@ -60,13 +85,16 @@ namespace AdminDashboard.Services
             }
         }
 
-        public async Task<bool> VerifyOtpAsync(string email, string otpCode, string purpose = "ResetPassword")
+        public Task<bool> VerifyOtpAsync(string email, string otpCode, string purpose = "ResetPassword", bool markAsUsed = false)
         {
             try
             {
-                var otp = await _context.OtpCodes
-                    .FirstOrDefaultAsync(o => 
-                        o.Email == email.ToLowerInvariant() && 
+                var normalizedEmail = email.ToLowerInvariant();
+                
+                // Tìm OTP hợp lệ trong storage
+                var otp = _otpStorage.Values
+                    .FirstOrDefault(o => 
+                        o.Email == normalizedEmail && 
                         o.Code == otpCode && 
                         o.Purpose == purpose &&
                         !o.IsUsed &&
@@ -75,62 +103,73 @@ namespace AdminDashboard.Services
                 if (otp == null)
                 {
                     _logger.LogWarning($"Invalid OTP attempt for {email}: {otpCode}");
-                    return false;
+                    return Task.FromResult(false);
                 }
 
-                // Đánh dấu OTP đã được sử dụng
-                otp.IsUsed = true;
-                await _context.SaveChangesAsync();
+                // Chỉ đánh dấu OTP đã được sử dụng nếu markAsUsed = true
+                if (markAsUsed)
+                {
+                    otp.IsUsed = true;
+                }
 
                 _logger.LogInformation($"OTP verified successfully for {email}");
-                return true;
+                return Task.FromResult(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Failed to verify OTP for {email}");
-                return false;
+                return Task.FromResult(false);
             }
         }
 
-        public async Task<bool> IsOtpValidAsync(string email, string purpose = "ResetPassword")
+        public Task<bool> IsOtpValidAsync(string email, string purpose = "ResetPassword")
         {
             try
             {
-                var otp = await _context.OtpCodes
-                    .FirstOrDefaultAsync(o => 
-                        o.Email == email.ToLowerInvariant() && 
+                var normalizedEmail = email.ToLowerInvariant();
+                
+                var otp = _otpStorage.Values
+                    .FirstOrDefault(o => 
+                        o.Email == normalizedEmail && 
                         o.Purpose == purpose &&
                         !o.IsUsed &&
                         o.ExpiresAt > DateTime.Now);
 
-                return otp != null;
+                return Task.FromResult(otp != null);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Failed to check OTP validity for {email}");
-                return false;
+                return Task.FromResult(false);
             }
         }
 
-        public async Task CleanupExpiredOtpsAsync()
+        public Task CleanupExpiredOtpsAsync()
         {
             try
             {
-                var expiredOtps = await _context.OtpCodes
-                    .Where(o => o.ExpiresAt < DateTime.Now)
-                    .ToListAsync();
+                var now = DateTime.Now;
+                var expiredKeys = _otpStorage
+                    .Where(kvp => kvp.Value.ExpiresAt < now)
+                    .Select(kvp => kvp.Key)
+                    .ToList();
 
-                if (expiredOtps.Any())
+                foreach (var expiredKey in expiredKeys)
                 {
-                    _context.OtpCodes.RemoveRange(expiredOtps);
-                    await _context.SaveChangesAsync();
-                    _logger.LogInformation($"Cleaned up {expiredOtps.Count} expired OTPs");
+                    _otpStorage.TryRemove(expiredKey, out _);
+                }
+
+                if (expiredKeys.Any())
+                {
+                    _logger.LogInformation($"Cleaned up {expiredKeys.Count} expired OTPs");
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to cleanup expired OTPs");
             }
+
+            return Task.CompletedTask;
         }
     }
 }

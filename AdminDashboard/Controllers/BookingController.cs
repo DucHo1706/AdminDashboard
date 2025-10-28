@@ -46,28 +46,43 @@ namespace AdminDashboard.Controllers
                 return NotFound("Chuyến xe không tồn tại.");
             }
 
-            // Dọn dẹp các đơn đã hết hạn cho chuyến này: giải phóng ghế và đánh dấu hủy
-            var expiredOrders = await _context.DonHang
-                .Where(d => d.ChuyenId == chuyenId && d.TrangThaiThanhToan == "DangChoThanhToan" && d.ThoiGianHetHan < DateTime.Now)
-                .ToListAsync();
-            if (expiredOrders.Any())
-            {
-                foreach (var dh in expiredOrders)
-                {
-                    var vesExpired = await _context.Ve.Where(v => v.DonHangId == dh.DonHangId).ToListAsync();
-                    _context.Ve.RemoveRange(vesExpired);
-                    dh.TrangThaiThanhToan = "Đã hủy";
-                }
-                await _context.SaveChangesAsync();
-            }
+            // Khởi tạo danh sách ghế đã đặt
+            List<string> danhSachGheDaDat = new List<string>();
 
-            // Lấy ID của những ghế đang bị giữ hợp lệ (chưa hết hạn) hoặc đã thanh toán
-            var danhSachGheDaDat = await _context.Ve
-                .Where(v => v.DonHang.ChuyenId == chuyenId &&
-                            (v.DonHang.TrangThaiThanhToan == "Đã thanh toán" ||
-                             (v.DonHang.TrangThaiThanhToan == "DangChoThanhToan" && v.DonHang.ThoiGianHetHan >= DateTime.Now)))
-                .Select(v => v.GheID)
-                .ToListAsync();
+            // Dọn dẹp các đơn đã hết hạn cho chuyến này: giải phóng ghế và đánh dấu hủy
+            // Chỉ xử lý nếu có cột ThoiGianHetHan (skip nếu migration chưa được apply)
+            try
+            {
+                var expiredOrders = await _context.DonHang
+                    .Where(d => d.ChuyenId == chuyenId && d.TrangThaiThanhToan == "DangChoThanhToan" && d.ThoiGianHetHan < DateTime.Now)
+                    .ToListAsync();
+                if (expiredOrders.Any())
+                {
+                    foreach (var dh in expiredOrders)
+                    {
+                        var vesExpired = await _context.Ve.Where(v => v.DonHangId == dh.DonHangId).ToListAsync();
+                        _context.Ve.RemoveRange(vesExpired);
+                        dh.TrangThaiThanhToan = "Đã hủy";
+                    }
+                    await _context.SaveChangesAsync();
+                }
+
+                // Lấy ID của những ghế đang bị giữ hợp lệ (chưa hết hạn) hoặc đã thanh toán
+                danhSachGheDaDat = await _context.Ve
+                    .Where(v => v.DonHang.ChuyenId == chuyenId &&
+                                (v.DonHang.TrangThaiThanhToan == "Đã thanh toán" ||
+                                 (v.DonHang.TrangThaiThanhToan == "DangChoThanhToan" && v.DonHang.ThoiGianHetHan >= DateTime.Now)))
+                    .Select(v => v.GheID)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                // Nếu cột ThoiGianHetHan không tồn tại, chỉ lấy ghế đã thanh toán
+                danhSachGheDaDat = await _context.Ve
+                    .Where(v => v.DonHang.ChuyenId == chuyenId && v.DonHang.TrangThaiThanhToan == "Đã thanh toán")
+                    .Select(v => v.GheID)
+                    .ToListAsync();
+            }
 
             // Đưa danh sách ghế đã đặt vào ViewBag
             ViewBag.DanhSachGheDaDat = danhSachGheDaDat;
