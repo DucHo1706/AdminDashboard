@@ -1,8 +1,13 @@
 ﻿using AdminDashboard.Models;
+<<<<<<< HEAD
 using AdminDashboard.Models.TrangThai;
 using AdminDashboard.TransportDBContext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+=======
+using AdminDashboard.TransportDBContext;
+using Microsoft.AspNetCore.Mvc;
+>>>>>>> master
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -19,6 +24,7 @@ namespace AdminDashboard.Controllers
 
         public IActionResult Home_User()
         {
+<<<<<<< HEAD
             // Lấy tất cả các trạm để hiển thị trong dropdown
             var danhSachTram = _context.Tram.ToList();
 
@@ -43,6 +49,11 @@ namespace AdminDashboard.Controllers
             return View(upcomingTrips);
         }
       
+=======
+            return View();
+        }
+
+>>>>>>> master
         public async Task<IActionResult> Account()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -131,6 +142,7 @@ namespace AdminDashboard.Controllers
                 return View(model);
             }
         }
+<<<<<<< HEAD
 
 
 
@@ -200,5 +212,7 @@ namespace AdminDashboard.Controllers
             return PartialView("_DanhSachChuyenXe", ketQua);
         }
 
+=======
+>>>>>>> master
     }
 }

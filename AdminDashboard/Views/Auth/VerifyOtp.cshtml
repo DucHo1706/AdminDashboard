@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @model AdminDashboard.Models.Login.VerifyOtpRequest
 
 @{
@@ -269,3 +270,239 @@
         });
     </script>
 }
+=======
+@{
+    ViewData["Title"] = "Xác thực mã OTP";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* * * CSS tùy chỉnh cho giao diện "bắt mắt"
+         * Sử dụng lại nền tảng "đẳng cấp" từ trước và đổi màu nhấn sang XANH LÁ
+         */
+
+    /* Nền và font chữ cơ bản */
+    body {
+        background-color: #f8f9fa;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Canh giữa form */
+    .auth-container {
+        min-height: 90vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Thiết kế thẻ Card */
+    .auth-card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        background-color: #ffffff;
+    }
+
+    /* Tiêu đề form (Màu XANH LÁ) */
+    .auth-title {
+        font-weight: 700;
+        font-size: 1.75rem;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+        .auth-title .fas {
+            color: #28a745; /* Màu nhấn XANH LÁ */
+        }
+
+    /* Chữ phụ (mô tả) */
+    .auth-subtitle {
+        color: #6c757d;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    /* *
+         * ĐÂY LÀ PHẦN QUAN TRỌNG: 6 Ô INPUT OTP
+         */
+    .otp-input-container {
+        gap: 0.75rem; /* Khoảng cách giữa các ô */
+    }
+
+    .otp-input {
+        width: 48px;
+        height: 60px;
+        font-size: 1.75rem;
+        font-weight: 600;
+        text-align: center;
+        padding: 0.5rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.75rem;
+        transition: all 0.2s ease;
+        color: #2c3e50;
+    }
+        /* Hiệu ứng "pop" (nảy lên) và "glow" (phát sáng) khi focus */
+        .otp-input:focus {
+            border-color: #28a745; /* Viền XANH LÁ */
+            box-shadow: 0 0 15px rgba(40,167,69,0.2); /* Đổ bóng XANH LÁ */
+            transform: scale(1.05); /* Phóng to nhẹ */
+            z-index: 10;
+        }
+
+    /* Nút bấm (Màu XANH LÁ) */
+    .btn-primary-custom {
+        font-weight: 600;
+        font-size: 1rem;
+        padding: 0.85rem 1.5rem;
+        border-radius: 0.75rem;
+        background-color: #28a745; /* Nền XANH LÁ */
+        border-color: #28a745;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(40,167,69,0.3); /* Đổ bóng XANH LÁ */
+    }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40,167,69,0.4);
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+    /* Link Gửi lại / Quay lại (Màu XANH LÁ khi hover) */
+    .auth-link {
+        font-weight: 500;
+        color: #5a6a7b;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+        .auth-link:hover {
+            color: #28a745; /* Màu XANH LÁ */
+        }
+
+    .resend-text {
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
+</style>
+
+<div class="auth-container">
+    <div class="col-md-5 col-lg-4">
+        <div class="card auth-card">
+            <div class="card-body p-lg-4">
+
+                <h4 class="auth-title">
+                    <i class="fas fa-shield-alt me-2"></i>Xác thực OTP
+                </h4>
+
+                @if (!string.IsNullOrEmpty(ViewBag.Error))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i> @ViewBag.Error
+                    </div>
+                }
+
+                <p class="auth-subtitle">
+                    Một mã 6 chữ số đã được gửi đến
+                    <strong class="d-block text-dark mt-1">@ViewBag.Email</strong>
+                </p>
+
+                <form method="post" asp-action="VerifyOtp" id="otp-form">
+                    <input type="hidden" name="email" value="@ViewBag.Email" />
+                    <input type="hidden" name="otpCode" id="otp-full-code" />
+
+                    <div class="d-flex justify-content-center otp-input-container mb-4">
+                        <input type="tel" class="form-control otp-input" maxlength="1" pattern="[0-9]" required>
+                        <input type="tel" class="form-control otp-input" maxlength="1" pattern="[0-9]" required>
+                        <input type="tel" class="form-control otp-input" maxlength="1" pattern="[0-9]" required>
+                        <input type="tel" class="form-control otp-input" maxlength="1" pattern="[0-9]" required>
+                        <input type="tel" class="form-control otp-input" maxlength="1" pattern="[0-9]" required>
+                        <input type="tel" class="form-control otp-input" maxlength="1" pattern="[0-9]" required>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary-custom">
+                            <i class="fas fa-check me-2"></i> Xác thực
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-4">
+                    <p class="resend-text mb-2">
+                        Chưa nhận được mã?
+                        <a href="#" class="auth-link fw-bold">Gửi lại</a>
+                    </p>
+                    <a href="@Url.Action("ForgotPassword", "Auth")" class="auth-link">
+                        <i class="fas fa-arrow-left me-1"></i> Quay lại
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById('otp-form');
+        const inputs = form.querySelectorAll('.otp-input');
+        const hiddenInput = document.getElementById('otp-full-code');
+
+        // Hàm cập nhật giá trị cho input ẩn
+        function updateHiddenInput() {
+            let combinedValue = '';
+            inputs.forEach(input => {
+                combinedValue += input.value;
+            });
+            hiddenInput.value = combinedValue;
+        }
+
+        inputs.forEach((input, index) => {
+            // 1. Tự động nhảy sang ô kế tiếp khi nhập
+            input.addEventListener('input', function() {
+                // Chỉ cho phép số
+                this.value = this.value.replace(/[^0-9]/g, '');
+
+                if (this.value.length === 1 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+                updateHiddenInput();
+            });
+
+            // 2. Xử lý phím Backspace (quay lại ô trước)
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+
+            // 3. Xử lý Paste (dán mã)
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pasteData = (e.clipboardData || window.clipboardData)
+                                    .getData('text').trim().replace(/[^0-9]/g, '');
+
+                if (pasteData.length === 6) {
+                    inputs.forEach((input, idx) => {
+                        input.value = pasteData[idx] || '';
+                    });
+                    inputs[inputs.length - 1].focus(); // Focus ô cuối
+                    updateHiddenInput();
+                }
+            });
+
+            // 4. Tự động chọn (select) số khi focus (dễ dàng ghi đè)
+            input.addEventListener('focus', function() {
+                this.select();
+            });
+        });
+
+        // Tự động focus ô đầu tiên khi tải trang
+        inputs[0].focus();
+    });
+</script>
+>>>>>>> master

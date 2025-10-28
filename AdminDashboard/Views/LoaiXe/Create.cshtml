@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿@* //Tan Huy - GoSix// *@
 @model AdminDashboard.Models.LoaiXe
 
@@ -167,3 +168,20 @@
             margin-right: 8px;
         }
 </style>
+=======
+﻿@model AdminDashboard.Models.LoaiXe
+
+<h2>Thêm Loại Xe</h2>
+
+<form asp-action="Create">
+    
+    <div class="form-group">
+        <label asp-for="TenLoaiXe" class="control-label"></label>
+        <input asp-for="TenLoaiXe" class="form-control" />
+        <span asp-validation-for="TenLoaiXe" class="text-danger"></span>
+    </div>
+    
+    <button type="submit" class="btn btn-primary">Lưu</button> |
+    <a asp-action="Index">Quay lại</a>
+</form>
+>>>>>>> master

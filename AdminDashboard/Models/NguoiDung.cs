@@ -6,9 +6,15 @@ namespace AdminDashboard.Models
     public enum TrangThaiNguoiDung
     {
         HoatDong,
+<<<<<<< HEAD
         BiKhoa  
     }
 
+=======
+        BiKhoa
+       
+    }
+>>>>>>> master
     public class NguoiDung
     {
         [Key]
@@ -25,23 +31,35 @@ namespace AdminDashboard.Models
         public string Email { get; set; }
 
         [Required]
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
         [StringLength(255)] 
         public string MatKhau { get; set; }
 
         [StringLength(10)] 
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
         public string? SoDienThoai { get; set; }
 
         public DateTime? NgaySinh { get; set; }
 
         [Required]
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
         public TrangThaiNguoiDung TrangThai { get; set; } = TrangThaiNguoiDung.HoatDong; // Sử dụng Enum
 
         // Mối quan hệ nhiều-nhiều với VaiTro thông qua bảng UserRole
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     }
 }
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> master

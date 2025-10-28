@@ -24,9 +24,12 @@ namespace AdminDashboard.Models
         [Required, StringLength(50)]
         public string TrangThaiThanhToan { get; set; }
 
+<<<<<<< HEAD
         public DateTime ThoiGianHetHan { get; set; }
 
 
+=======
+>>>>>>> master
         [ForeignKey(nameof(IDKhachHang))]
         public NguoiDung nguoiDung { get; set; }
 

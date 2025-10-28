@@ -1,10 +1,15 @@
+<<<<<<< HEAD
 ﻿@* //Tan Huy - GoSix // *@
 @model IEnumerable<AdminDashboard.Models.Ghe>
+=======
+﻿@model IEnumerable<AdminDashboard.Models.Ghe>
+>>>>>>> master
 
 @{
     ViewData["Title"] = "Danh Sách Ghế";
 }
 
+<<<<<<< HEAD
 <div class="ghe-container">
     <div class="ghe-panel">
         <div class="panel-header">
@@ -36,6 +41,36 @@
             </div>
         </div>
     </div>
+=======
+<h1>Danh Sách Ghế</h1>
+<h4 class="text-muted">Xe: <strong>@ViewBag.BienSoXe</strong></h4>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <span class="badge badge-success">Trống: @Model.Count(g => g.TrangThai == "Trống")</span>
+        <span class="badge badge-danger ml-2">Đã đặt: @Model.Count(g => g.TrangThai == "Đã đặt")</span>
+        <span class="badge badge-secondary ml-2">Tổng: @Model.Count() ghế</span>
+    </div>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Quay lại danh sách xe
+    </a>
+</div>
+
+<div class="row">
+    @foreach (var ghe in Model.OrderBy(g => g.SoGhe))
+    {
+        <div class="col-md-2 mb-3">
+            <div class="card @GetCardClass(ghe.TrangThai)">
+                <div class="card-body text-center p-2">
+                    <h6 class="card-title mb-1">Ghế @ghe.SoGhe</h6>
+                    <span class="badge @GetBadgeClass(ghe.TrangThai)">
+                        @ghe.TrangThai
+                    </span>
+                </div>
+            </div>
+        </div>
+    }
+>>>>>>> master
 </div>
 
 @functions {
@@ -43,9 +78,15 @@
     {
         return trangThai switch
         {
+<<<<<<< HEAD
             "Trống" => "seat-available",
             "Đã đặt" => "seat-booked",
             _ => "seat-other"
+=======
+            "Trống" => "border-success",
+            "Đã đặt" => "border-danger",
+            _ => "border-secondary"
+>>>>>>> master
         };
     }
 
@@ -53,6 +94,7 @@
     {
         return trangThai switch
         {
+<<<<<<< HEAD
             "Trống" => "text-success",
             "Đã đặt" => "text-danger",
             _ => "text-muted"
@@ -221,3 +263,11 @@
         font-weight: 500;
     }
 </style>
+=======
+            "Trống" => "badge-success",
+            "Đã đặt" => "badge-danger",
+            _ => "badge-secondary"
+        };
+    }
+}
+>>>>>>> master

@@ -1,7 +1,12 @@
+<<<<<<< HEAD
 ﻿@model IEnumerable<AdminDashboard.Models.ChuyenXe>
 @using AdminDashboard.Models
 @using AdminDashboard.Models.TrangThai
 
+=======
+﻿﻿@* Vị trí: Views/ChuyenXe/Index.cshtml *@
+@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+>>>>>>> master
 
 @{
     ViewData["Title"] = "Danh sách Chuyến xe";
@@ -12,6 +17,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
+<<<<<<< HEAD
         html, body {
             margin: 0;
             padding: 0;
@@ -31,19 +37,32 @@
 
         h1 {
             text-align: center;
+=======
+        h1 {
+            text-align: center;
+            margin-top: 1em;
+>>>>>>> master
             font-size: 2.5em;
             font-weight: 700;
             color: #111827;
             text-transform: uppercase;
             margin-bottom: 0.5em;
         }
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
         p {
             text-align: center;
         }
 
+<<<<<<< HEAD
         .btn_add {
             font-weight: bold;
+=======
+        button {
+            position: relative;
+>>>>>>> master
             display: inline-block;
             margin: 15px;
             padding: 15px 30px;
@@ -51,6 +70,7 @@
             font-size: 18px;
             letter-spacing: 1px;
             text-decoration: none;
+<<<<<<< HEAD
             color: whitesmoke;
             background: transparent;
             cursor: pointer;
@@ -187,6 +207,34 @@
     <table class="table modern-table table-hover">
         <thead>
             <tr class="table">
+=======
+            color: #FF6600;
+            background: transparent;
+            cursor: pointer;
+            transition: ease-out 0.5s;
+            border: 2px solid #FF6600;
+            border-radius: 10px;
+            box-shadow: inset 0 0 0 0 #FF6600;
+        }
+
+            button:hover {
+                color: white;
+                box-shadow: inset 0 -100px 0 0 #725AC1;
+            }
+
+            button:active {
+                transform: scale(0.9);
+            }
+
+    </style>
+</head>
+<body>
+    <h1>@ViewData["Title"]</h1>
+
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr class="table-primary">
+>>>>>>> master
                 <th>Lộ Trình</th>
                 <th>Biển Số Xe</th>
                 <th>Ngày Đi</th>
@@ -199,6 +247,7 @@
             @foreach (var item in Model)
             {
                 <tr>
+<<<<<<< HEAD
                     <td class="fw-bold">
                         @(item.LoTrinh?.TramDiNavigation?.TenTram)
                         <i class="bi bi-arrow-right mx-1 text-muted"></i> @(item.LoTrinh?.TramToiNavigation?.TenTram)
@@ -207,6 +256,13 @@
                         <span class="badge bg-secondary-light">
                             @Html.DisplayFor(modelItem => item.Xe.BienSoXe)
                         </span>
+=======
+                    <td>
+                        @(item.LoTrinh?.TramDiNavigation?.TenTram) -> @(item.LoTrinh?.TramToiNavigation?.TenTram)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Xe.BienSoXe)
+>>>>>>> master
                     </td>
                     <td>
                         @item.NgayDi.ToString("dd/MM/yyyy")
@@ -215,6 +271,7 @@
                         @item.GioDi.ToString(@"hh\:mm")
                     </td>
                     <td>
+<<<<<<< HEAD
                            @if (item.TrangThai == TrangThaiChuyenXe.DaLenLich)
                         {
                             <form asp-action="MoBanVe" asp-route-id="@item.ChuyenId" method="post" onsubmit="return confirm('Bạn có chắc muốn mở bán vé cho chuyến xe này?');">
@@ -273,12 +330,21 @@
                             </svg>
                         </button>
 
+=======
+                        @Html.DisplayFor(modelItem => item.TrangThai)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-success">Sửa</a> |
+                        <a asp-action="Details" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-info">Chi tiết</a> |
+                        <a asp-action="Delete" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-danger">Xóa</a>
+>>>>>>> master
                     </td>
                 </tr>
             }
         </tbody>
     </table>
     <p>
+<<<<<<< HEAD
         <a asp-action="Create" class="btn_add">
             Thêm chuyến xe mới
         </a>
@@ -344,4 +410,10 @@
             }, 1500);
         </script>
     }
+=======
+        <a asp-action="Create">
+            <button>Thêm chuyến xe mới</button>
+        </a>
+    </p>
+>>>>>>> master
 </body>

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿@* //Tan Huy - GoSix // *@
 @model AdminDashboard.Models.Xe
 
@@ -204,3 +205,60 @@
             margin-right: 8px;
         }
 </style>
+=======
+﻿@model AdminDashboard.Models.Xe
+
+@{
+    ViewData["Title"] = "Xóa Xe";
+}
+
+<h1>Xóa Xe</h1>
+
+<h3>Bạn có chắc chắn muốn xóa xe này?</h3>
+<div>
+    <h4>Thông tin xe sẽ bị xóa</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.XeId)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.XeId)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.BienSoXe)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.BienSoXe)
+        </dd>
+        <dt class="col-sm-2">
+            Loại xe
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.LoaiXe.TenLoaiXe)
+        </dd>
+        <dt class="col-sm-2">
+            Số ghế
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.DanhSachGhe != null && Model.DanhSachGhe.Any())
+            {
+                <span class="badge badge-warning">@Model.DanhSachGhe.Count ghế sẽ bị xóa cùng</span>
+            }
+            else
+            {
+                <span class="text-muted">Không có ghế nào</span>
+            }
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="XeId" />
+        <div class="alert alert-danger">
+            <strong>Cảnh báo:</strong> Thao tác này không thể hoàn tác. Tất cả các ghế liên quan cũng sẽ bị xóa.
+        </div>
+        <input type="submit" value="Xóa" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+    </form>
+</div>
+>>>>>>> master

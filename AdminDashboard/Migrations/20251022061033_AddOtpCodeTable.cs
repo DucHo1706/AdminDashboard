@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 using System;
+=======
+﻿using System;
+>>>>>>> master
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -28,6 +32,7 @@ namespace AdminDashboard.Migrations
                 {
                     table.PrimaryKey("PK_OtpCode", x => x.Id);
                 });
+<<<<<<< HEAD
 
             migrationBuilder.CreateIndex(
                 name: "IX_ChuyenXe_TaiXeId",
@@ -40,11 +45,14 @@ namespace AdminDashboard.Migrations
                 column: "TaiXeId",
                 principalTable: "NguoiDung",
                 principalColumn: "UserId");
+=======
+>>>>>>> master
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+<<<<<<< HEAD
             migrationBuilder.DropForeignKey(
                 name: "FK_ChuyenXe_NguoiDung_TaiXeId",
                 table: "ChuyenXe");
@@ -55,6 +63,10 @@ namespace AdminDashboard.Migrations
             migrationBuilder.DropIndex(
                 name: "IX_ChuyenXe_TaiXeId",
                 table: "ChuyenXe");
+=======
+            migrationBuilder.DropTable(
+                name: "OtpCode");
+>>>>>>> master
         }
     }
 }

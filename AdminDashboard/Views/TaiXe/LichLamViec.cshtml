@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿@using AdminDashboard.Models.TrangThai
 @model IEnumerable<AdminDashboard.Models.ChuyenXe>
 @{
@@ -214,3 +215,47 @@
         }, 300000); // 5 phút
     </script>
 }
+=======
+﻿@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+
+@{
+    ViewData["Title"] = "Lịch làm việc của tôi";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>Đây là danh sách các chuyến xe sắp tới được phân công cho bạn.</p>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Ngày</th>
+                    <th>Thời gian</th>
+                    <th>Tuyến đường</th>
+                    <th>Biển số xe</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center">Bạn chưa có lịch trình nào sắp tới.</td>
+                    </tr>
+                }
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><strong>@item.NgayDi.ToString("dd/MM/yyyy")</strong></td>
+                        <td>@item.GioDi.ToString(@"hh\:mm") - @item.GioDenDuKien.ToString(@"hh\:mm")</td>
+                        <td>@item.LoTrinh?.TramDiNavigation?.TenTram → @item.LoTrinh?.TramToiNavigation?.TenTram</td>
+                        <td><span class="badge bg-secondary">@item.Xe?.BienSoXe</span></td>
+                        <td>@Html.DisplayFor(modelItem => item.TrangThai)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+>>>>>>> master

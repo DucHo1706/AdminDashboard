@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿@* //BAOLONG// *@
 @model AdminDashboard.Models.LoTrinh
 
@@ -54,6 +55,40 @@
                 <button type="submit" class="btn btn-primary-custom">
                     <i class="fas fa-save"></i> Lưu Thay Đổi
                 </button>
+=======
+﻿@model AdminDashboard.Models.LoTrinh
+
+@{
+    ViewData["Title"] = "Sửa Lộ Trình";
+}
+
+<h2>Sửa Lộ Trình</h2>
+
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="LoTrinhId" />
+            <div class="form-group">
+                <label asp-for="TramDi" class="control-label"></label>
+                <select asp-for="TramDi" class="form-control" asp-items="ViewBag.TramDi"></select>
+                <span asp-validation-for="TramDi" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TramToi" class="control-label"></label>
+                <select asp-for="TramToi" class="form-control" asp-items="ViewBag.TramToi"></select>
+                <span asp-validation-for="TramToi" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="GiaVeCoDinh" class="control-label"></label>
+                <input asp-for="GiaVeCoDinh" class="form-control" />
+                <span asp-validation-for="GiaVeCoDinh" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Cập nhật" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+>>>>>>> master
             </div>
         </form>
     </div>
@@ -63,6 +98,7 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+<<<<<<< HEAD
 }
 
 <style>
@@ -188,3 +224,6 @@
             margin-right: 8px;
         }
 </style>
+=======
+}
+>>>>>>> master
