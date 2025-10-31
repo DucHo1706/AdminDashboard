@@ -125,3 +125,38 @@
         </a>
     </div>
 </div>
+
+<select id="taiXeSelect" class="form-control" name="taiXeId">
+    <option value="">-- Chọn tài xế --</option>
+    @foreach (var tx in (SelectList)ViewBag.TaiXes)
+{
+    <option value="@tx.Value">@tx.Text</option>
+}
+
+</select>
+
+<div id="lichTaiXeContainer" class="mt-3"></div>
+
+@section Scripts {
+    <script>
+        document.getElementById("taiXeSelect").addEventListener("change", function() {
+            var taiXeId = this.value;
+            var container = document.getElementById("lichTaiXeContainer");
+            container.innerHTML = "<div class='text-info'>Đang tải lịch làm việc...</div>";
+
+            if (taiXeId) {
+                fetch(`/TaiXe/XemLichTaiXe?taiXeId=${taiXeId}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        container.innerHTML = html;
+                    })
+                    .catch(error => {
+                        container.innerHTML = "<div class='alert alert-danger'>Lỗi khi tải dữ liệu.</div>";
+                        console.error(error);
+                    });
+            } else {
+                container.innerHTML = "";
+            }
+        });
+    </script>
+}

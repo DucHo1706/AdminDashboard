@@ -707,6 +707,55 @@ namespace AdminDashboard.Controllers
 
 
         }
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> XemLichTaiXe(string taiXeId)
+        {
+            if (string.IsNullOrEmpty(taiXeId))
+            {
+                return Content("<div class='alert alert-danger'>Không tìm thấy thông tin tài xế.</div>");
+            }
+
+            try
+            {
+                var lichTaiXe = await _context.ChuyenXe
+                    .Where(c => c.TaiXeId == taiXeId && c.TrangThai != TrangThaiChuyenXe.DaHuy)
+                    .Include(c => c.LoTrinh.TramDiNavigation)
+                    .Include(c => c.LoTrinh.TramToiNavigation)
+                    .Include(c => c.Xe)
+                    .OrderBy(c => c.NgayDi)
+                    .ThenBy(c => c.GioDi)
+                    .ToListAsync();
+
+                if (!lichTaiXe.Any())
+                {
+                    return Content("<div class='alert alert-info'>Tài xế chưa có chuyến xe nào được phân công.</div>");
+                }
+
+                var html = "<table class='table table-bordered table-sm'>";
+                html += "<thead><tr><th>Ngày đi</th><th>Giờ đi</th><th>Giờ đến</th><th>Điểm đi</th><th>Điểm đến</th><th>Xe</th><th>Trạng thái</th></tr></thead><tbody>";
+
+                foreach (var c in lichTaiXe)
+                {
+                    html += $"<tr>" +
+                            $"<td>{c.NgayDi:dd/MM/yyyy}</td>" +
+                            $"<td>{c.GioDi:hh\\:mm}</td>" +
+                            $"<td>{c.GioDenDuKien:hh\\:mm}</td>" +
+                            $"<td>{c.LoTrinh?.TramDiNavigation?.TenTram ?? "N/A"}</td>" +
+                            $"<td>{c.LoTrinh?.TramToiNavigation?.TenTram ?? "N/A"}</td>" +
+                            $"<td>{c.Xe?.BienSoXe ?? "N/A"}</td>" +
+                            $"<td>{c.TrangThai}</td>" +
+                            $"</tr>";
+                }
+
+                html += "</tbody></table>";
+                return Content(html);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi xem lịch tài xế");
+                return Content("<div class='alert alert-danger'>Có lỗi xảy ra khi tải lịch tài xế.</div>");
+            }
+        }
 
 
     }

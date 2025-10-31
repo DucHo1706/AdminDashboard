@@ -1,83 +1,278 @@
 ﻿@model IEnumerable<AdminDashboard.Models.TaiXe>
 
 @{
-    ViewData["Title"] = "Quản lý tài xế";
+    ViewData["Title"] = "Danh sách Tài xế";
 }
 
-<div class="container mt-4">
-    <div class="card shadow border-0">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0"><i class="fas fa-users me-2"></i> Danh sách tài xế</h4>
-            <a asp-action="Create" class="btn btn-light text-primary fw-semibold">
-                <i class="fas fa-plus-circle me-1"></i> Thêm tài xế mới
-            </a>
-        </div>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            min-height: 100vh;
+        }
 
-        <div class="card-body">
-            @if (TempData["SuccessMessage"] != null)
-            {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
-                </div>
+        body {
+            background-color: #f0f4f8;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+            h1,
+            h1 a {
+                color: #28a745 !important;
+                text-decoration: none;
+                text-align: center;
+                font-size: 1.7em;
+                font-weight: 700;
+                text-transform: uppercase;
+                margin: 20px;
             }
 
-            @if (!Model.Any())
-            {
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i> Hiện chưa có tài xế nào được đăng ký.
-                </div>
+        hr {
+            max-width: 900px;
+            height: 3px;
+            background-color: #990000;
+            border: none;
+            border-radius: 3px;
+            margin: 0 auto 50px;
+        }
+
+        /* Nút thêm tài xế */
+        .btn_add {
+            font-weight: bold;
+            display: inline-block;
+            margin: 15px;
+            padding: 15px 30px;
+            font-size: 18px;
+            letter-spacing: 1px;
+            text-decoration: none;
+            color: #00CC00;
+            background: transparent;
+            cursor: pointer;
+            transition: ease-out 0.5s;
+            border: 2px solid #33CC33;
+            border-radius: 10px;
+            box-shadow: inset 0 0 0 0 #33CC33;
+        }
+
+            .btn_add:hover {
+                color: white;
+                box-shadow: inset 0 -100px 0 0 #33CC66;
             }
-            else
-            {
-                <table class="table table-hover align-middle">
-                    <thead class="table-primary">
-                        <tr>
-                            <th>Mã tài xế</th>
-                            <th>Họ tên</th>
-                            <th>Email</th>
-                            <th>Bằng lái xe</th>
-                            <th>Ngày vào làm</th>
-                            <th>Trạng thái</th>
-                            <th class="text-center" style="width: 160px;">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td>@item.UserId</td>
-                                <td>@item.NguoiDung?.HoTen</td>
-                                <td>@item.NguoiDung?.Email</td>
-                                <td>@item.BangLaiXe</td>
-                                <td>@item.NgayVaoLam.ToString("dd/MM/yyyy")</td>
-                                <td>
-                                    @if (item.TrangThai == "Hoạt động")
-                                    {
-                                        <span class="badge bg-success">@item.TrangThai</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-danger">@item.TrangThai</span>
-                                    }
-                                </td>
-                                <td class="text-center">
-                                    <a asp-action="Details" asp-route-id="@item.UserId" class="btn btn-info btn-sm me-1">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a asp-action="Edit" asp-route-id="@item.UserId" class="btn btn-warning btn-sm me-1">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a asp-action="Delete" asp-route-id="@item.UserId" class="btn btn-danger btn-sm"
-                                       onclick="return confirm('Bạn có chắc muốn xóa tài xế này không?')">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+
+            .btn_add:active {
+                transform: scale(0.9);
             }
+
+        /* Bảng dữ liệu */
+        table.modern-table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            border-radius: 12px;
+            overflow: hidden;
+            font-size: 0.9em;
+            color: #333;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        }
+        .modern-table thead {
+            background-color: #28a745;
+            color: white;
+        }
+
+            .modern-table thead th {
+                padding: 15px;
+                font-weight: bold;
+                text-transform: uppercase;
+                font-size: 13px;
+                text-align: center;
+                border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            }
+
+        .modern-table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            color: #222;
+            text-align:start;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        tbody tr {
+            transition: background-color 0.25s ease;
+        }
+
+            tbody tr:hover {
+                background-color: rgba(0, 128, 0, 0.05);
+            }
+
+        .badge {
+            font-size: 12px;
+            padding: 6px 10px;
+            font-weight: 600;
+            border-radius: 6px;
+        }
+
+        .bg-success-light {
+            background-color: rgba(209, 231, 221, 0.8);
+            color: #0a3622;
+        }
+
+        .bg-danger-light {
+            background-color: rgba(248, 215, 218, 0.8);
+            color: #58151c;
+        }
+
+        .alert {
+            width: 70%;
+            margin: 0 auto 20px;
+            font-weight: 600;
+        }
+
+        /* 📏 Căn chỉnh độ rộng các cột */
+        table.modern-table th:first-child,
+        table.modern-table td:first-child {
+            width: 80px;
+            white-space: nowrap;
+        }
+
+        table.modern-table th:nth-child(2),
+        table.modern-table td:nth-child(2) {
+            width: 180px;
+        }
+
+        table.modern-table th:nth-child(3),
+        table.modern-table td:nth-child(3) {
+            width: 200px;
+        }
+
+        table.modern-table th:nth-child(4),
+        table.modern-table td:nth-child(4) {
+            width: 150px;
+        }
+
+        table.modern-table th:nth-child(5),
+        table.modern-table td:nth-child(5) {
+            width: 140px;
+        }
+
+        table.modern-table th:nth-child(6),
+        table.modern-table td:nth-child(6) {
+            width: 120px;
+        }
+
+        table.modern-table th:nth-child(7),
+        table.modern-table td:nth-child(7) {
+            width: 200px;
+        }
+
+        /* ⚙️ Căn đều các nút trong cột thao tác */
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .action-buttons a {
+                flex: 1;
+                text-align: center;
+            }
+    </style>
+</head>
+
+<body>
+    <h1><a href="~/TaiXe/Index" class="text-decoration-none">@ViewData["Title"]</a></h1>
+    <hr />
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center justify-content-between"
+             role="alert">
+            <span><i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]</span>
+            <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Đóng"></button>
         </div>
-    </div>
-</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            <i class="fas fa-info-circle me-2"></i> Hiện chưa có tài xế nào được đăng ký.
+        </div>
+    }
+    else
+    {
+        <table class="modern-table">
+            <thead>
+                <tr>
+                    <th>Mã tài xế</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Bằng lái xe</th>
+                    <th>Ngày vào làm</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.UserId</td>
+                        <td>@item.NguoiDung?.HoTen</td>
+                        <td>@item.NguoiDung?.Email</td>
+                        <td>@item.BangLaiXe</td>
+                        <td>@item.NgayVaoLam.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            @if (item.TrangThai == "Hoạt động")
+                            {
+                                <span class="badge bg-success-light">@item.TrangThai</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger-light">@item.TrangThai</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a asp-action="Edit" asp-route-id="@item.UserId" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a asp-action="Details" asp-route-id="@item.UserId" class="btn btn-sm btn-outline-info">
+                                    <i class="bi bi-card-text"></i>
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.UserId" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash3"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <p class="text-center">
+        <a asp-action="Create" class="btn_add">
+            <i class="fas fa-plus-circle me-2"></i> Thêm tài xế mới
+        </a>
+    </p>
+
+    @section Scripts {
+        <script>
+            // Tự động đóng alert sau 3 giây
+            setTimeout(() => {
+                const alerts = document.querySelectorAll('.alert.alert-dismissible');
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 3000);
+        </script>
+    }
+</body>
