@@ -1,0 +1,141 @@
+@model AdminDashboard.Areas.Admin.Pages.StatisticsModel
+
+@if (Model.DonHangs == null || !Model.DonHangs.Any())
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Không có dữ liệu đơn hàng.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table modern-table table-hover">
+            <thead>
+                <tr>
+                    <th>Mã Đơn Hàng</th>
+                    <th>Khách Hàng</th>
+                    <th>Mã Chuyến</th>
+                    <th>Ngày Đặt</th>
+                    <th>Tổng Tiền</th>
+                    <th>Trạng Thái Thanh Toán</th>
+                    <th>Thời Gian Hết Hạn</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var dh in Model.DonHangs)
+                {
+                    <tr>
+                        <td><span class="badge bg-primary">@dh.DonHangId</span></td>
+                        <td>
+                            <strong>@dh.KhachHangTen</strong>
+                            <br><small class="text-muted">@dh.KhachHangId</small>
+                        </td>
+                        <td><span class="badge bg-info">@dh.ChuyenId</span></td>
+                        <td>@dh.NgayDat.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td><strong class="text-success">@string.Format("{0:N0}", dh.TongTien) VNĐ</strong></td>
+                        <td>
+                            @if (dh.TrangThaiThanhToan == "Đã thanh toán")
+                            {
+                                <span class="badge-status badge-success">@dh.TrangThaiThanhToan</span>
+                            }
+                            else if (dh.TrangThaiThanhToan.Contains("Hết hạn") || dh.TrangThaiThanhToan.Contains("Hủy"))
+                            {
+                                <span class="badge-status badge-danger">@dh.TrangThaiThanhToan</span>
+                            }
+                            else
+                            {
+                                <span class="badge-status badge-warning">@dh.TrangThaiThanhToan</span>
+                            }
+                        </td>
+                        <td>
+                            @if (dh.ThoiGianHetHan < DateTime.Now && dh.TrangThaiThanhToan != "Đã thanh toán")
+                            {
+                                <span class="text-danger">@dh.ThoiGianHetHan.ToString("dd/MM/yyyy HH:mm")</span>
+                            }
+                            else
+                            {
+                                @dh.ThoiGianHetHan.ToString("dd/MM/yyyy HH:mm")
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (Model.DonHangs.TotalPages > 1)
+    {
+        <div class="pagination-wrapper">
+            <div class="page-info">
+                Trang @Model.DonHangs.PageIndex / @Model.DonHangs.TotalPages 
+                (Tổng: @Model.DonHangs.TotalCount đơn hàng)
+            </div>
+            <nav>
+                <ul class="pagination mb-0">
+                    @{
+                        var queryParams = new List<string>();
+                        queryParams.Add($"khachHangPage={Model.KhachHangPageIndex}");
+                        if (Model.FilterType != "all")
+                        {
+                            queryParams.Add($"filterType={Model.FilterType}");
+                            if (Model.FilterDate.HasValue)
+                            {
+                                queryParams.Add($"filterDate={Model.FilterDate.Value:yyyy-MM-dd}");
+                            }
+                            if (Model.FilterMonth.HasValue)
+                            {
+                                queryParams.Add($"filterMonth={Model.FilterMonth.Value}");
+                            }
+                            if (Model.FilterYear.HasValue)
+                            {
+                                queryParams.Add($"filterYear={Model.FilterYear.Value}");
+                            }
+                        }
+                        var baseQuery = string.Join("&", queryParams);
+                    }
+
+                    @if (Model.DonHangs.HasPreviousPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="?@baseQuery&donHangPage=@(Model.DonHangs.PageIndex - 1)#donhang">
+                                <i class="bi bi-chevron-left"></i> Trước
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="bi bi-chevron-left"></i> Trước</span>
+                        </li>
+                    }
+
+                    @for (int i = Math.Max(1, Model.DonHangs.PageIndex - 2); 
+                         i <= Math.Min(Model.DonHangs.TotalPages, Model.DonHangs.PageIndex + 2); 
+                         i++)
+                    {
+                        <li class="page-item @(i == Model.DonHangs.PageIndex ? "active" : "")">
+                            <a class="page-link" href="?@baseQuery&donHangPage=@i#donhang">@i</a>
+                        </li>
+                    }
+
+                    @if (Model.DonHangs.HasNextPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="?@baseQuery&donHangPage=@(Model.DonHangs.PageIndex + 1)#donhang">
+                                Sau <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link">Sau <i class="bi bi-chevron-right"></i></span>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
+}
+

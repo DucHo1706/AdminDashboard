@@ -79,13 +79,14 @@
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <form asp-action="Delete" method="post">
+            <form method="post" id="deleteForm">
+                @Html.AntiForgeryToken()
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title" id="deleteModalLabel"><i class="fas fa-exclamation-triangle"></i> Xác nhận Xóa</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" id="deleteTramId" name="IdTram" />
+                    <input type="hidden" id="deleteTramId" name="id" />
                     <p>Bạn có chắc chắn muốn xóa trạm này không?</p>
                     <dl class="row mt-3 bg-light p-2 rounded">
                         <dt class="col-sm-4">Tên Trạm</dt>
@@ -106,15 +107,36 @@
 @section Scripts {
     <script>
         const deleteModal = document.getElementById('deleteModal');
+        const deleteForm = document.getElementById('deleteForm');
+        
         deleteModal.addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
             const id = button.getAttribute('data-id');
             const tentram = button.getAttribute('data-tentram');
             const diachi = button.getAttribute('data-diachi');
+            
+            // Set giá trị vào form
             deleteModal.querySelector('#deleteTramId').value = id;
             deleteModal.querySelector('#deleteTenTram').textContent = tentram;
             deleteModal.querySelector('#deleteDiaChi').textContent = diachi;
+            
+            // Cập nhật action của form với id đúng
+            if (deleteForm && id) {
+                deleteForm.action = '/Admin/Tram/Delete/' + id;
+            }
         });
+        
+        // Xử lý submit form
+        if (deleteForm) {
+            deleteForm.addEventListener('submit', function(e) {
+                const id = document.getElementById('deleteTramId').value;
+                if (!id) {
+                    e.preventDefault();
+                    alert('Không tìm thấy ID trạm để xóa!');
+                    return false;
+                }
+            });
+        }
 
         setTimeout(() => {
             document.querySelectorAll('.alert').forEach(alert => {

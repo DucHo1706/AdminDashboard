@@ -1,0 +1,109 @@
+@model AdminDashboard.Areas.Admin.Pages.StatisticsModel
+
+@if (Model.KhachHangs == null || !Model.KhachHangs.Any())
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Không có dữ liệu khách hàng.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table modern-table table-hover">
+            <thead>
+                <tr>
+                    <th>Mã KH</th>
+                    <th>Tên Khách Hàng</th>
+                    <th>Email</th>
+                    <th>Số Điện Thoại</th>
+                    <th>Ngày Sinh</th>
+                    <th>Tuổi</th>
+                    <th>Trạng Thái</th>
+                    <th>Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var kh in Model.KhachHangs)
+                {
+                    <tr>
+                        <td><span class="badge bg-secondary">@kh.UserId</span></td>
+                        <td><strong>@kh.HoTen</strong></td>
+                        <td>@kh.Email</td>
+                        <td>@kh.SoDienThoai</td>
+                        <td>@(kh.NgaySinh?.ToString("dd/MM/yyyy") ?? "—")</td>
+                        <td>@(kh.Tuoi?.ToString() ?? "—")</td>
+                        <td>
+                            @if (kh.TrangThai == AdminDashboard.Models.TrangThaiNguoiDung.HoatDong)
+                            {
+                                <span class="badge-status badge-success">Hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge-status badge-danger">Bị khóa</span>
+                            }
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="xoaKhachHang('@kh.UserId', '@kh.HoTen')">
+                                <i class="bi bi-trash"></i> Xóa
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (Model.KhachHangs.TotalPages > 1)
+    {
+        <div class="pagination-wrapper">
+            <div class="page-info">
+                Trang @Model.KhachHangs.PageIndex / @Model.KhachHangs.TotalPages 
+                (Tổng: @Model.KhachHangs.TotalCount khách hàng)
+            </div>
+            <nav>
+                <ul class="pagination mb-0">
+                    @if (Model.KhachHangs.HasPreviousPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="?khachHangPage=@(Model.KhachHangs.PageIndex - 1)&donHangPage=@Model.DonHangPageIndex#khachhang">
+                                <i class="bi bi-chevron-left"></i> Trước
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="bi bi-chevron-left"></i> Trước</span>
+                        </li>
+                    }
+
+                    @for (int i = Math.Max(1, Model.KhachHangs.PageIndex - 2); 
+                         i <= Math.Min(Model.KhachHangs.TotalPages, Model.KhachHangs.PageIndex + 2); 
+                         i++)
+                    {
+                        <li class="page-item @(i == Model.KhachHangs.PageIndex ? "active" : "")">
+                            <a class="page-link" href="?khachHangPage=@i&donHangPage=@Model.DonHangPageIndex#khachhang">@i</a>
+                        </li>
+                    }
+
+                    @if (Model.KhachHangs.HasNextPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="?khachHangPage=@(Model.KhachHangs.PageIndex + 1)&donHangPage=@Model.DonHangPageIndex#khachhang">
+                                Sau <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link">Sau <i class="bi bi-chevron-right"></i></span>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
+}
+
