@@ -110,12 +110,50 @@ namespace AdminDashboard.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var tram = await _context.Tram.FindAsync(id);
-            if (tram != null)
+            if (string.IsNullOrEmpty(id))
             {
+                TempData["ErrorMessage"] = "ID trạm không hợp lệ.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            try
+            {
+                var tram = await _context.Tram.FindAsync(id);
+                if (tram == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy trạm cần xóa.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Kiểm tra xem có lộ trình nào đang sử dụng trạm này không
+                var coLoTrinhDi = await _context.LoTrinh.AnyAsync(lt => lt.TramDi == id);
+                var coLoTrinhDen = await _context.LoTrinh.AnyAsync(lt => lt.TramToi == id);
+                
+                if (coLoTrinhDi || coLoTrinhDen)
+                {
+                    TempData["ErrorMessage"] = "Không thể xóa trạm này vì có lộ trình đang sử dụng.";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 _context.Tram.Remove(tram);
                 await _context.SaveChangesAsync();
+                
+                TempData["SuccessMessage"] = "Đã xóa trạm thành công!";
             }
+            catch (DbUpdateException dbEx)
+            {
+                string errorMessage = "Không thể xóa trạm này vì có dữ liệu liên quan.";
+                if (dbEx.InnerException != null)
+                {
+                    errorMessage += " Chi tiết: " + dbEx.InnerException.Message;
+                }
+                TempData["ErrorMessage"] = errorMessage;
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Đã xảy ra lỗi: {ex.Message}";
+            }
+
             return RedirectToAction(nameof(Index));
         }
     }

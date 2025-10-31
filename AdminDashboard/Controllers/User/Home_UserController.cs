@@ -1,5 +1,6 @@
 ﻿using AdminDashboard.Models;
 using AdminDashboard.Models.TrangThai;
+using AdminDashboard.Models.ViewModels;
 using AdminDashboard.TransportDBContext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -34,12 +35,52 @@ namespace AdminDashboard.Controllers
                     .ThenInclude(lt => lt.TramToiNavigation)
                 .Include(c => c.Xe)
                     .ThenInclude(x => x.LoaiXe)
+                .Include(c => c.Images)
                 .Where(c => c.NgayDi.Date >= today &&
                             c.TrangThai == TrangThaiChuyenXe.DangMoBanVe) 
                 .OrderBy(c => c.NgayDi)
                 .ThenBy(c => c.GioDi)
-                .Take(10)
                 .ToList();
+
+            // Nhóm chuyến xe theo điểm đi (Tên trạm)
+            var routesByDeparture = upcomingTrips
+                .Where(c => c.LoTrinh?.TramDiNavigation != null)
+                .GroupBy(c => new { 
+                    TenTram = c.LoTrinh.TramDiNavigation.TenTram,
+                    Tinh = c.LoTrinh.TramDiNavigation.Tinh ?? "",
+                    ImageUrl = c.Images?.FirstOrDefault()?.ImageUrl ?? "/images/slider/hcm.png"
+                })
+                .Select(g => new TuyenXeViewModel
+                {
+                    Tinh = g.Key.Tinh,
+                    TenTram = g.Key.TenTram,
+                    ImageUrl = g.Key.ImageUrl,
+                    TuyenXe = g
+                        .Where(c => c.LoTrinh?.TramToiNavigation != null)
+                        .GroupBy(c => c.LoTrinh.TramToiNavigation.TenTram)
+                        .Select(group => group.OrderBy(c => c.NgayDi).ThenBy(c => c.GioDi).First())
+                        .Select(c => new TuyenXeItemViewModel
+                        {
+                            ChuyenId = c.ChuyenId,
+                            DiemDen = c.LoTrinh.TramToiNavigation.TenTram,
+                            NgayDi = c.NgayDi,
+                            GioDi = c.GioDi,
+                            GioDenDuKien = c.GioDenDuKien,
+                            ThoiGian = (c.GioDenDuKien - c.GioDi).TotalHours >= 1 
+                                ? $"{(int)(c.GioDenDuKien - c.GioDi).TotalHours} giờ" 
+                                : $"{(int)((c.GioDenDuKien - c.GioDi).TotalMinutes)} phút",
+                            GiaVe = c.LoTrinh.GiaVeCoDinh ?? 0,
+                            ImageUrl = c.Images?.FirstOrDefault()?.ImageUrl ?? g.Key.ImageUrl
+                        })
+                        .OrderBy(t => t.DiemDen)
+                        .Take(3) // Lấy tối đa 3 tuyến đầu tiên
+                        .ToList()
+                })
+                .Where(r => r.TuyenXe != null && r.TuyenXe.Any()) // Chỉ lấy những nhóm có tuyến
+                .Take(3) // Lấy tối đa 3 điểm đi
+                .ToList();
+
+            ViewBag.RoutesByDeparture = routesByDeparture;
 
             return View(upcomingTrips);
         }

@@ -16,6 +16,7 @@ builder.Services.AddDbContext<Db27524Context>(options =>
 
 // Add services to the container
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 
 // Đăng ký các dịch vụ
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -75,6 +76,8 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+
+app.MapRazorPages();
 
 app.MapControllerRoute(
     name: "Areas",

@@ -226,6 +226,120 @@
     100% { stroke-dashoffset: -659; }
 }
 
+        /* Style cho Route Cards (như hình 2) */
+        .route-card {
+            background: #ffffff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .route-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .route-card-header {
+            position: relative;
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .route-card-overlay {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.6));
+            color: white;
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .route-card-overlay h3 {
+            font-size: 14px;
+            font-weight: 500;
+            margin: 0 0 8px 0;
+            opacity: 0.9;
+        }
+
+        .route-card-overlay h4 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .route-card-body {
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .route-item-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: background-color 0.2s ease;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .route-item-link:hover {
+            background-color: #f8f9fa;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .route-item {
+            padding: 8px 0;
+        }
+
+        .route-item-main {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .route-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .route-destination {
+            color: #28a745;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .route-price-inline {
+            color: #212529;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .route-details {
+            color: #6c757d;
+            font-size: 13px;
+        }
+
+        .route-divider {
+            margin: 8px 0;
+            border: none;
+            border-top: 1px solid #e9ecef;
+        }
+
     </style>
 </head>
 <body>
@@ -237,22 +351,42 @@
     <div class="container my-5">
         <h2 class="text-center mb-4" style="color: white; font-weight:bold; text-shadow: 1px 1px 2px black;">Đặt Vé Xe Khách Nhanh Chóng</h2>
 
-        <form id="formTimChuyen" asp-action="TimKiem" asp-controller="ChuyenXe" method="get" class="search-box">
+        <form id="formTimChuyen" asp-page="/TimKiem" method="get" class="search-box">
             <div class="search-item">
                 <i class="bi bi-geo-alt-fill fs-4 me-3"></i>
-                <select name="diemDiId" class="form-select" asp-items="ViewBag.DanhSachTram">
+                <select name="DiemDiId" class="form-select" asp-items="ViewBag.DanhSachTram">
                     <option value="" disabled selected>Chọn điểm đi</option>
                 </select>
             </div>
             <div class="search-item">
                 <i class="bi bi-geo-alt fs-4 me-3"></i>
-                <select name="diemDenId" class="form-select" asp-items="ViewBag.DanhSachTram">
+                <select name="DiemDenId" class="form-select" asp-items="ViewBag.DanhSachTram">
                     <option value="" disabled selected>Chọn điểm đến</option>
                 </select>
             </div>
             <div class="search-item">
                 <i class="bi bi-calendar-event fs-4 me-3"></i>
-                <input type="date" name="ngayDi" id="ngayDiInput" class="form-control" placeholder="Chọn ngày đi" />
+                <input type="date" name="NgayDi" id="ngayDiInput" class="form-control" placeholder="Chọn ngày đi" />
+            </div>
+            <div class="search-item">
+                <i class="bi bi-clock fs-4 me-3"></i>
+                <select name="GioDi" class="form-select" id="gioDiSelect">
+                    <option value="">Chọn giờ đi</option>
+                    @for (int hour = 5; hour <= 23; hour++)
+                    {
+                        <option value="@hour.ToString("00"):00">@hour:00</option>
+                    }
+                </select>
+            </div>
+            <div class="search-item">
+                <i class="bi bi-clock-history fs-4 me-3"></i>
+                <select name="GioDenDuKien" class="form-select" id="gioDenSelect">
+                    <option value="">Giờ dự kiến</option>
+                    @for (int hour = 9; hour <= 23; hour++)
+                    {
+                        <option value="@hour.ToString("00"):00">@hour:00</option>
+                    }
+                </select>
             </div>
             <button type="submit" class="btn btn-search px-4 py-3">
                 <i class="bi bi-search me-1"></i> Tìm Kiếm
@@ -261,16 +395,89 @@
 
         <script>
             (function() {
-                const input = document.getElementById('ngayDiInput'); if (!input) return;
+                const input = document.getElementById('ngayDiInput');
+                if (!input) return;
                 const today = new Date();
                 input.value = today.toISOString().split('T')[0];
                 input.min = today.toISOString().split('T')[0];
-                const maxDate = new Date(); maxDate.setDate(today.getDate() + 60);
+                const maxDate = new Date();
+                maxDate.setDate(today.getDate() + 60);
                 input.max = maxDate.toISOString().split('T')[0];
             })();
+
+            // Tự động tính giờ đến khi chọn giờ đi (nếu người dùng chưa chọn giờ đến)
+            document.getElementById('gioDiSelect')?.addEventListener('change', function() {
+                const gioDiSelect = document.getElementById('gioDiSelect');
+                const gioDenSelect = document.getElementById('gioDenSelect');
+                
+                if (gioDiSelect.value && !gioDenSelect.value) {
+                    // Tự động tính +4 giờ (nhưng không set, chỉ để tham khảo)
+                    const [hour] = gioDiSelect.value.split(':').map(Number);
+                    const gioDenTuDong = (hour + 4) % 24;
+                    // Option "Tự động (+4 giờ)" đã có sẵn, không cần set giá trị
+                }
+            });
         </script>
 
-        <div id="DanhSachChuyenXe" class="mt-5">
+        <!-- Hiển thị tuyến xe theo điểm đi (dạng card như hình 2) -->
+        @if (ViewBag.RoutesByDeparture != null && ((List<AdminDashboard.Models.ViewModels.TuyenXeViewModel>)ViewBag.RoutesByDeparture).Any())
+        {
+            <div class="container mt-5">
+                <div class="text-center mb-4">
+                    <h2 style="color: white; font-weight: bold; text-shadow: 1px 1px 2px black;">Được khách hàng tin tưởng và lựa chọn</h2>
+                </div>
+                <div class="row g-4">
+                    @foreach (var tuyen in (List<AdminDashboard.Models.ViewModels.TuyenXeViewModel>)ViewBag.RoutesByDeparture)
+                    {
+                        <div class="col-lg-4 col-md-6">
+                            <div class="route-card">
+                                <div class="route-card-header" style="background-image: url('/images/slider/hcm.png');">
+                                    <div class="route-card-overlay">
+                                        <h3>Tuyến xe từ</h3>
+                                        <h4>@tuyen.TenTram</h4>
+                                    </div>
+                                </div>
+                                <div class="route-card-body">
+                                    @foreach (var item in tuyen.TuyenXe)
+                                    {
+                                        <a asp-action="ChonGhe" 
+                                           asp-controller="Booking" 
+                                           asp-route-chuyenId="@item.ChuyenId"
+                                           class="route-item-link">
+                                            <div class="route-item">
+                                                <div class="route-item-main">
+                                                    <div class="route-item-header">
+                                                        <span class="route-destination">@item.DiemDen</span>
+                                                        <span class="route-price-inline">@string.Format("{0:N0}", item.GiaVe)₫</span>
+                                                    </div>
+                                                    <div class="route-details">
+                                                        @{
+                                                            var totalHours = (item.GioDenDuKien - item.GioDi).TotalHours;
+                                                            var khoangCach = totalHours > 0 ? (int)(totalHours * 50) : 0; // Ước lượng: 50km/giờ
+                                                            var thoiGianText = totalHours >= 1 
+                                                                ? $"{(int)totalHours} giờ" 
+                                                                : $"{(int)((item.GioDenDuKien - item.GioDi).TotalMinutes)} phút";
+                                                        }
+                                                        @khoangCach km - @thoiGianText - @item.NgayDi.ToString("dd/MM/yyyy")
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                        @if (item != tuyen.TuyenXe.Last())
+                                        {
+                                            <hr class="route-divider" />
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Hiển thị danh sách chuyến xe đầy đủ (fallback nếu không có RoutesByDeparture) -->
+        <div id="DanhSachChuyenXe" class="mt-5" style="@(ViewBag.RoutesByDeparture != null && ((List<AdminDashboard.Models.ViewModels.TuyenXeViewModel>)ViewBag.RoutesByDeparture).Any() ? "display: none;" : "")">
             @if (Model != null && Model.Any())
             {
                 <div class="row">
@@ -278,7 +485,6 @@
                     {
                         <div class="col-md-4 mb-4">
                             <div class="card h-100 trip-result-card">
-
                                 @{
                                     var imageUrl = chuyen.Images?.FirstOrDefault()?.ImageUrl ?? "/images/default-bus-image.png";
                                 }

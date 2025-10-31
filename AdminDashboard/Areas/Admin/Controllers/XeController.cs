@@ -197,6 +197,12 @@ namespace AdminDashboard.Area.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                TempData["ErrorMessage"] = "ID xe không hợp lệ.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var strategy = _context.Database.CreateExecutionStrategy();
 
             try
@@ -210,17 +216,47 @@ namespace AdminDashboard.Area.Admin.Controllers
                             .Include(x => x.DanhSachGhe)
                             .FirstOrDefaultAsync(x => x.XeId == id);
 
-                        if (xe != null)
+                        if (xe == null)
                         {
-                            // Xóa tất cả ghế trước
-                            if (xe.DanhSachGhe != null && xe.DanhSachGhe.Any())
-                            {
-                                _context.Ghe.RemoveRange(xe.DanhSachGhe);
-                            }
-
-                            // Sau đó xóa xe
-                            _context.Xe.Remove(xe);
+                            TempData["ErrorMessage"] = "Không tìm thấy xe cần xóa.";
+                            await transaction.RollbackAsync();
+                            return;
                         }
+
+                        // Kiểm tra xem có chuyến xe nào đang sử dụng xe này không
+                        var coChuyenXe = await _context.ChuyenXe.AnyAsync(cx => cx.XeId == id);
+                        if (coChuyenXe)
+                        {
+                            TempData["ErrorMessage"] = "Không thể xóa xe này vì có chuyến xe đang sử dụng.";
+                            await transaction.RollbackAsync();
+                            return;
+                        }
+
+                        // Kiểm tra xem có ghế nào đang được đặt vé không (chỉ kiểm tra vé đã thanh toán)
+                        var danhSachGheId = xe.DanhSachGhe?.Select(g => g.GheID).ToList() ?? new List<string>();
+                        if (danhSachGheId.Any())
+                        {
+                            var coVe = await _context.Ve
+                                .Include(v => v.DonHang)
+                                .AnyAsync(v => danhSachGheId.Contains(v.GheID) && 
+                                             (v.DonHang.TrangThaiThanhToan == "Đã thanh toán" || 
+                                              v.DonHang.TrangThaiThanhToan == "Da thanh toan"));
+                            if (coVe)
+                            {
+                                TempData["ErrorMessage"] = "Không thể xóa xe này vì có vé đã được bán.";
+                                await transaction.RollbackAsync();
+                                return;
+                            }
+                        }
+
+                        // Xóa tất cả ghế trước
+                        if (xe.DanhSachGhe != null && xe.DanhSachGhe.Any())
+                        {
+                            _context.Ghe.RemoveRange(xe.DanhSachGhe);
+                        }
+
+                        // Sau đó xóa xe
+                        _context.Xe.Remove(xe);
 
                         await _context.SaveChangesAsync();
                         await transaction.CommitAsync();
@@ -234,10 +270,18 @@ namespace AdminDashboard.Area.Admin.Controllers
                     }
                 });
             }
+            catch (DbUpdateException dbEx)
+            {
+                string errorMessage = "Không thể xóa xe này vì có dữ liệu liên quan.";
+                if (dbEx.InnerException != null)
+                {
+                    errorMessage += " Chi tiết: " + dbEx.InnerException.Message;
+                }
+                TempData["ErrorMessage"] = errorMessage;
+            }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "Lỗi khi xóa: " + ex.Message;
-                return RedirectToAction(nameof(Delete), new { id });
             }
 
             return RedirectToAction(nameof(Index));

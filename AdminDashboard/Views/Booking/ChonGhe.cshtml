@@ -54,6 +54,13 @@
                     <h4><i class="bi bi-cart-check-fill"></i> Chi tiết vé của bạn</h4>
                 </div>
                 <div class="card-body">
+                    <!-- Thông báo giới hạn ghế -->
+                    <div id="seat-limit-notification" class="alert alert-warning alert-dismissible fade" role="alert" style="display: none;">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <span id="notification-message"></span>
+                        <button type="button" class="btn-close" aria-label="Close" onclick="closeNotification()"></button>
+                    </div>
+                    
                     <div class="mb-3">
                         <label class="form-label">Ghế đã chọn:</label>
                         <div id="selected-seats-text" class="fw-bold fs-5 text-success">Chưa chọn ghế</div>
@@ -89,21 +96,79 @@
         .booked { background-color: #f8f9fa; color: #adb5bd; border: 1px solid #dee2e6; cursor: not-allowed; }
         .selected { background-color: #28a745; color: white; border: 1px solid #1e7e34; }
         .seat-legend { display: inline-block; width: 20px; height: 20px; border-radius: 4px; vertical-align: middle; }
+        
+        /* Style cho thông báo */
+        #seat-limit-notification {
+            margin-bottom: 1rem;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        #seat-limit-notification.fade {
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+        }
+        
+        #seat-limit-notification.show {
+            opacity: 1;
+        }
+        
+        @@keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 }
 
 @section Scripts {
     <script>
+        // Hàm đóng thông báo (phải đặt ở scope global để có thể gọi từ onclick)
+        function closeNotification() {
+            const notification = document.getElementById('seat-limit-notification');
+            if (notification) {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 300); // Đợi animation fade out hoàn tất
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             // Lấy các element cần thiết
             const seats = document.querySelectorAll('.seat.available');
             const selectedSeatsText = document.getElementById('selected-seats-text');
             const selectedSeatsInput = document.getElementById('selected-seats-input');
             const totalPriceText = document.getElementById('total-price');
-            const giaVe = parseFloat(document.getElementById('giaVe').innerText.replace(/\./g, ''));
+            
+            // Parse giá vé: lấy số từ text, loại bỏ dấu phân cách hàng nghìn và text khác
+            const giaVeText = document.getElementById('giaVe').innerText.trim();
+            const giaVe = parseFloat(giaVeText.replace(/[^\d]/g, '')) || 0;
+            
             const btnContinue = document.getElementById('btn-continue');
+            const MAX_SEATS = 5; // Giới hạn tối đa 5 ghế
 
             let selectedSeats = []; // Mảng lưu các ghế đã chọn
+
+            // Hàm hiển thị thông báo
+            function showNotification(message) {
+                const notification = document.getElementById('seat-limit-notification');
+                const messageSpan = document.getElementById('notification-message');
+                if (notification && messageSpan) {
+                    messageSpan.textContent = message;
+                    notification.style.display = 'block';
+                    notification.classList.add('show');
+                    
+                    // Tự động ẩn sau 5 giây
+                    setTimeout(() => {
+                        closeNotification();
+                    }, 5000);
+                }
+            }
 
             // Xử lý sự kiện click vào ghế
             seats.forEach(seat => {
@@ -118,17 +183,26 @@
                         // Bỏ chọn ghế
                         selectedSeats.splice(seatIndex, 1);
                         this.classList.remove('selected');
+                        closeNotification(); // Ẩn thông báo khi bỏ chọn ghế
                     } else {
+                        // Kiểm tra giới hạn 5 ghế
+                        if (selectedSeats.length >= MAX_SEATS) {
+                            showNotification('Tối đa chỉ được chọn ' + MAX_SEATS + ' vé xe. Vui lòng bỏ chọn một ghế để chọn ghế khác.');
+                            return;
+                        }
                         // Chọn ghế
                         selectedSeats.push({ id: seatId, name: seatName });
                         this.classList.add('selected');
+                        // Ẩn thông báo khi chọn thành công
+                        closeNotification();
                     }
                     updateBookingInfo();
                 });
             });
 
             // Hàm cập nhật thông tin vé
-            function updateBookingInfo() {   // Cập nhật text hiển thị các ghế đã chọn
+            function updateBookingInfo() {
+                // Cập nhật text hiển thị các ghế đã chọn
                 if (selectedSeats.length === 0) {
                     selectedSeatsText.textContent = 'Chưa chọn ghế';
                     btnContinue.disabled = true;
