@@ -1,13 +1,16 @@
 ﻿using AdminDashboard.Models;
 using AdminDashboard.TransportDBContext;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AdminDashboard.Controllers
+namespace AdminDashboard.Areas.Admin.Controllers
 {
+    [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class LoTrinhController : Controller
     {
         private readonly Db27524Context _context;
@@ -26,7 +29,7 @@ namespace AdminDashboard.Controllers
             return View(loTrinhs);
         }
 
-         public async Task<IActionResult> Details(string id)
+        public async Task<IActionResult> Details(string id)
         {
             if (id == null)
             {
@@ -45,14 +48,14 @@ namespace AdminDashboard.Controllers
             return View(loTrinh);
         }
 
-         public IActionResult Create()
+        public IActionResult Create()
         {
             ViewData["TramDi"] = new SelectList(_context.Tram, "IdTram", "TenTram");
             ViewData["TramToi"] = new SelectList(_context.Tram, "IdTram", "TenTram");
             return View();
         }
 
-         [HttpPost]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("TramDi,TramToi,GiaVeCoDinh")] LoTrinh loTrinh)
         {
@@ -62,7 +65,7 @@ namespace AdminDashboard.Controllers
 
             if (ModelState.IsValid)
             {
-                 if (loTrinh.TramDi == loTrinh.TramToi)
+                if (loTrinh.TramDi == loTrinh.TramToi)
                 {
                     ModelState.AddModelError("TramToi", "Trạm đến không được trùng với trạm đi.");
                     ViewData["TramDi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramDi);
@@ -70,11 +73,11 @@ namespace AdminDashboard.Controllers
                     return View(loTrinh);
                 }
 
-            
-                
-                   
-                   var newId = Guid.NewGuid().ToString();
-                
+
+
+
+                var newId = Guid.NewGuid().ToString();
+
 
                 loTrinh.LoTrinhId = newId;
 
@@ -88,7 +91,7 @@ namespace AdminDashboard.Controllers
             return View(loTrinh);
         }
 
-         public async Task<IActionResult> Edit(string id)
+        public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
             {
@@ -106,7 +109,7 @@ namespace AdminDashboard.Controllers
             return View(loTrinh);
         }
 
-         [HttpPost]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("LoTrinhId,TramDi,TramToi,GiaVeCoDinh")] LoTrinh loTrinh)
         {
@@ -120,7 +123,7 @@ namespace AdminDashboard.Controllers
 
             if (ModelState.IsValid)
             {
-                 if (loTrinh.TramDi == loTrinh.TramToi)
+                if (loTrinh.TramDi == loTrinh.TramToi)
                 {
                     ModelState.AddModelError("TramToi", "Trạm đến không được trùng với trạm đi.");
                     ViewData["TramDi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramDi);
@@ -152,7 +155,7 @@ namespace AdminDashboard.Controllers
             return View(loTrinh);
         }
 
-         public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
             {
@@ -171,7 +174,7 @@ namespace AdminDashboard.Controllers
             return View(loTrinh);
         }
 
-         [HttpPost, ActionName("Delete")]
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {

@@ -21,7 +21,7 @@ namespace AdminDashboard.TransportDBContext
         public DbSet<Ve> Ve { get; set; }
         public DbSet<BaiViet> BaiViet { get; set; }
         public DbSet<OtpCode> OtpCodes { get; set; }
-        public DbSet<TaiXe> TaiXe { get; set; }
+        public DbSet<TaiXe> TaiXes { get; set; }
         public DbSet<ChuyenXeImage> ChuyenXeImage { get; set; }
         public DbSet<ChuyenXeImage> ChuyenXeImages { get; set; }
         public DbSet<ChuyenXe> ChuyenXes { get; set; }

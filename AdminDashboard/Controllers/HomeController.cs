@@ -1,12 +1,14 @@
 ﻿
 using AdminDashboard.Models;
 using AdminDashboard.TransportDBContext;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
 
 namespace AdminDashboard.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class HomeController : Controller
     {
         private readonly Db27524Context _context;

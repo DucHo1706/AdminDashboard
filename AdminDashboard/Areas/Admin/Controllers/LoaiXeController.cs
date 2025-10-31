@@ -1,10 +1,13 @@
 ﻿using AdminDashboard.Models;
 using AdminDashboard.TransportDBContext;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace AdminDashboard.Areas.Admin.Controllers
 {
+    [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class LoaiXeController : Controller
     {
         private readonly Db27524Context _context;

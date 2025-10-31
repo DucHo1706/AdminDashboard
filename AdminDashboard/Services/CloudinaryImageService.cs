@@ -111,24 +111,15 @@ namespace AdminDashboard.Services
             try
             {
                 var uri = new Uri(imageUrl);
-                var pathSegments = uri.Segments;
-
-                // Tìm phần public_id trong URL Cloudinary
-                for (int i = 0; i < pathSegments.Length; i++)
-                {
-                    if (pathSegments[i] == "chuyenxe_images/")
-                    {
-                        var publicId = string.Join("", pathSegments.Skip(i));
-                        return publicId.Replace("/", "").Split('.')[0]; // Loại bỏ extension
-                    }
-                }
-
-                // Fallback
+                // Lấy tên file không có phần mở rộng (ví dụ: "abcxyz123")
                 var fileName = Path.GetFileNameWithoutExtension(uri.AbsolutePath);
                 return $"chuyenxe_images/{fileName}";
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogWarning(ex, $"Không thể phân tích URL để lấy Public ID: {imageUrl}. Thử fallback.");
+
+                // Fallback nếu URL không hợp lệ (lấy phần cuối cùng)
                 var fileName = Path.GetFileNameWithoutExtension(imageUrl);
                 return $"chuyenxe_images/{fileName}";
             }
