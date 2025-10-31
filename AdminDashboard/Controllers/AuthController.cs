@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System; // Guid
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AdminDashboard.Controllers
 {
@@ -84,7 +85,7 @@ namespace AdminDashboard.Controllers
             if (roleName == "Admin")
                 return RedirectToAction("Index", "Home");
             else if (roleName == "TaiXe")
-                return RedirectToAction("LichLamViec", "TaiXe");
+                return RedirectToAction("LichLamViec", "TaiXe", new { area = "TaiXe" });
             else
                 return RedirectToAction("Index", "Home");
         }
@@ -294,9 +295,29 @@ namespace AdminDashboard.Controllers
         {
             return View();
         }
-        public IActionResult History()
+        [Authorize] // Đảm bảo người dùng phải đăng nhập
+        [HttpGet]
+        public async Task<IActionResult> History()
         {
-            return View();
+          
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login");
+            }  
+            var tatCaDonHangCuaNguoiDung = await _context.DonHang
+                .Where(d => d.IDKhachHang == userId) 
+                .Include(d => d.ChuyenXe)               
+                    .ThenInclude(cx => cx.LoTrinh)       
+                        .ThenInclude(lt => lt.TramDiNavigation) 
+                .Include(d => d.ChuyenXe)               
+                    .ThenInclude(cx => cx.LoTrinh)        
+                        .ThenInclude(lt => lt.TramToiNavigation) 
+                .OrderByDescending(d => d.NgayDat) 
+                .ToListAsync();
+
+    
+            return View(tatCaDonHangCuaNguoiDung);
         }
         [HttpPost]
         public async Task<IActionResult> ForgotPass(ForgotPasswordRequest model)
@@ -465,6 +486,12 @@ namespace AdminDashboard.Controllers
                 ModelState.AddModelError("", "Đã xảy ra lỗi khi đặt lại mật khẩu. Vui lòng thử lại sau.");
                 return View(model);
             }
+        }
+
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

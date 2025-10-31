@@ -8,9 +8,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
-namespace AdminDashboard.Controllers
+namespace AdminDashboard.Areas.TaiXe.Controllers
 {
     [Authorize(Roles = "Admin,TaiXe")]
+    [Area("TaiXe")]
     public class TaiXeController : Controller
     {
         private readonly Db27524Context _context;
@@ -35,7 +36,7 @@ namespace AdminDashboard.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var taiXes = await _context.TaiXe
+            var taiXes = await _context.TaiXes
                 .Include(t => t.NguoiDung)
                 .Include(t => t.Admin)
           .Where(t => t.AdminId == admin.UserId)
@@ -116,7 +117,7 @@ namespace AdminDashboard.Controllers
 
                 _logger.LogInformation("Đã gán vai trò tài xế");
 
-                var taiXe = new TaiXe
+                var taiXe = new Models.TaiXe
                 {
                     UserId = userId,
 
@@ -132,7 +133,7 @@ namespace AdminDashboard.Controllers
 
                 _logger.LogInformation($"Tạo tài xế: UserId={userId}, AdminId={admin.UserId}");
 
-                _context.TaiXe.Add(taiXe);
+                _context.TaiXes.Add(taiXe);
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Đăng ký tài xế thành công");
@@ -297,7 +298,7 @@ namespace AdminDashboard.Controllers
                 return Content("<div class='alert alert-danger'>Không tìm thấy chuyến xe.</div>");
             }
 
-            var taiXeInfo = await _context.TaiXe
+            var taiXeInfo = await _context.TaiXes
                .FirstOrDefaultAsync(t => t.UserId == chuyenXe.TaiXeId);
 
             var soGhe = 0;
@@ -321,7 +322,7 @@ namespace AdminDashboard.Controllers
                 <h6>Thông tin lộ trình</h6>
                 <p><strong>Điểm đi:</strong> {chuyenXe.LoTrinh?.TramDiNavigation?.TenTram ?? "N/A"}</p>
                 <p><strong>Điểm đến:</strong> {chuyenXe.LoTrinh?.TramToiNavigation?.TenTram ?? "N/A"}</p>
-                <p><strong>Giá vé:</strong> {(chuyenXe.LoTrinh?.GiaVeCoDinh?.ToString("C0") ?? "N/A")}</p>
+                <p><strong>Giá vé:</strong> {chuyenXe.LoTrinh?.GiaVeCoDinh?.ToString("C0") ?? "N/A"}</p>
             </div>
         </div>
         <div class='row mt-3'>
@@ -376,7 +377,7 @@ namespace AdminDashboard.Controllers
                .ToListAsync();
 
             // Lấy danh sách tài xế thuộc quản lý của admin
-            var taiXes = await _context.TaiXe
+            var taiXes = await _context.TaiXes
                 .Where(t => t.AdminId == admin.UserId && t.TrangThai == "Hoạt động")
                 .Include(t => t.NguoiDung)
                 .ToListAsync();
@@ -435,12 +436,12 @@ namespace AdminDashboard.Controllers
 
                 _logger.LogInformation($"Chuyến xe tìm thấy: {chuyenXe.ChuyenId}, Trạng thái: {chuyenXe.TrangThai}");
 
-                var taiXe = await _context.TaiXe
+                var taiXe = await _context.TaiXes
                    .FirstOrDefaultAsync(t => t.UserId == taiXeId && t.AdminId == admin.UserId && t.TrangThai == "Hoạt động");
 
                 if (taiXe == null)
                 {
-                    var allTaiXe = await _context.TaiXe
+                    var allTaiXe = await _context.TaiXes
                        .Where(t => t.AdminId == admin.UserId)
                        .ToListAsync();
 
@@ -489,7 +490,7 @@ namespace AdminDashboard.Controllers
         }
 
 
-        public async Task<IActionResult> LichSuPhanCong()
+        public async Task<IActionResult> DanhSachPhanCong(DateTime? startDate)
         {
             var adminUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var admin = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == adminUserId);
@@ -498,19 +499,36 @@ namespace AdminDashboard.Controllers
             {
                 TempData["ErrorMessage"] = "Không tìm thấy thông tin admin.";
                 return RedirectToAction("Login", "Account");
-            }
+            }         
+            // 1. Xác định ngày để tính toán tuần
+            // Nếu không có startDate (lần đầu vào trang), dùng ngày hôm nay
+            var dateToCalculate = startDate ?? DateTime.Today;
+
+            // 2. Tính ngày Thứ 2 (đầu tuần) của tuần được chọn
+            int diff = (7 + (int)dateToCalculate.DayOfWeek - (int)DayOfWeek.Monday) % 7;
+            DateTime actualStartDate = dateToCalculate.AddDays(-1 * diff).Date;
+            DateTime actualEndDate = actualStartDate.AddDays(6).Date; // Chủ Nhật (cuối tuần)
+
+            // 3. Gửi các thông tin này ra View để tạo nút bấm
+            ViewBag.StartDate = actualStartDate;
+            ViewBag.EndDate = actualEndDate;
+            ViewBag.PreviousWeekDate = actualStartDate.AddDays(-7); // Ngày bắt đầu của tuần trước
+            ViewBag.NextWeekDate = actualStartDate.AddDays(7); // Ngày bắt đầu của tuần sau
+            ViewBag.IsCurrentWeek = (actualStartDate == DateTime.Today.AddDays(-1 * ((7 + (int)DateTime.Today.DayOfWeek - (int)DayOfWeek.Monday) % 7)).Date);
+
+         
 
             var chuyenXeDaPhanCong = await _context.ChuyenXe
                 .Where(c => c.TaiXeId != null &&
-                           c.NgayDi >= DateTime.Today.AddMonths(-1))
+                            c.NgayDi >= actualStartDate && c.NgayDi <= actualEndDate) // Lọc theo tuần đã chọn
                 .Include(c => c.LoTrinh)
                     .ThenInclude(lt => lt.TramDiNavigation)
                 .Include(c => c.LoTrinh)
                     .ThenInclude(lt => lt.TramToiNavigation)
                 .Include(c => c.Xe)
                 .Include(c => c.TaiXe)
-                .OrderByDescending(c => c.NgayDi)
-                .ThenByDescending(c => c.GioDi)
+                .OrderBy(c => c.NgayDi) // Sắp xếp theo ngày
+                .ThenBy(c => c.GioDi) // Rồi sắp xếp theo giờ
                 .ToListAsync();
 
             return View(chuyenXeDaPhanCong);
@@ -523,7 +541,7 @@ namespace AdminDashboard.Controllers
             if (string.IsNullOrEmpty(chuyenId))
             {
                 TempData["ErrorMessage"] = "Thông tin không hợp lệ.";
-                return RedirectToAction(nameof(LichSuPhanCong));
+                return RedirectToAction(nameof(DanhSachPhanCong));
             }
 
             try
@@ -534,7 +552,7 @@ namespace AdminDashboard.Controllers
                 if (admin == null)
                 {
                     TempData["ErrorMessage"] = "Không tìm thấy thông tin admin.";
-                    return RedirectToAction(nameof(LichSuPhanCong));
+                    return RedirectToAction(nameof(DanhSachPhanCong));
                 }
 
                 var chuyenXe = await _context.ChuyenXe
@@ -543,22 +561,22 @@ namespace AdminDashboard.Controllers
                 if (chuyenXe == null)
                 {
                     TempData["ErrorMessage"] = "Chuyến xe không tồn tại hoặc chưa được phân công.";
-                    return RedirectToAction(nameof(LichSuPhanCong));
+                    return RedirectToAction(nameof(DanhSachPhanCong));
                 }
 
-                var taiXe = await _context.TaiXe
+                var taiXe = await _context.TaiXes
                     .FirstOrDefaultAsync(t => t.UserId == chuyenXe.TaiXeId && t.AdminId == admin.UserId);
 
                 if (taiXe == null)
                 {
                     TempData["ErrorMessage"] = "Bạn không có quyền hủy phân công chuyến xe này.";
-                    return RedirectToAction(nameof(LichSuPhanCong));
+                    return RedirectToAction(nameof(DanhSachPhanCong));
                 }
                 if (chuyenXe.TrangThai == TrangThaiChuyenXe.DangDiChuyen ||
                     chuyenXe.TrangThai == TrangThaiChuyenXe.DaHoanThanh)
                 {
                     TempData["ErrorMessage"] = "Không thể hủy phân công chuyến xe đã khởi hành hoặc hoàn thành.";
-                    return RedirectToAction(nameof(LichSuPhanCong));
+                    return RedirectToAction(nameof(DanhSachPhanCong));
                 }
 
                 var oldTaiXeId = chuyenXe.TaiXeId;
@@ -580,7 +598,7 @@ namespace AdminDashboard.Controllers
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi hủy phân công. Vui lòng thử lại.";
             }
 
-            return RedirectToAction(nameof(LichSuPhanCong));
+            return RedirectToAction(nameof(DanhSachPhanCong));
         }
         // GET: /TaiXe/ChinhSuaPhanCong
         [Authorize(Roles = "Admin")]
@@ -589,7 +607,7 @@ namespace AdminDashboard.Controllers
             if (string.IsNullOrEmpty(chuyenId))
             {
                 TempData["ErrorMessage"] = "Không tìm thấy chuyến xe.";
-                return RedirectToAction(nameof(LichSuPhanCong));
+                return RedirectToAction(nameof(DanhSachPhanCong));
             }
 
             var adminUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -598,7 +616,7 @@ namespace AdminDashboard.Controllers
             if (admin == null)
             {
                 TempData["ErrorMessage"] = "Không tìm thấy thông tin admin.";
-                return RedirectToAction(nameof(LichSuPhanCong));
+                return RedirectToAction(nameof(DanhSachPhanCong));
             }
 
             var chuyenXe = await _context.ChuyenXe
@@ -613,11 +631,11 @@ namespace AdminDashboard.Controllers
             if (chuyenXe == null)
             {
                 TempData["ErrorMessage"] = "Không tìm thấy chuyến xe.";
-                return RedirectToAction(nameof(LichSuPhanCong));
+                return RedirectToAction(nameof(DanhSachPhanCong));
             }
 
             // Lấy danh sách tài xế thuộc admin
-            var taiXes = await _context.TaiXe
+            var taiXes = await _context.TaiXes
                 .Where(t => t.AdminId == admin.UserId && t.TrangThai == "Hoạt động")
                 .ToListAsync();
 
@@ -635,7 +653,7 @@ namespace AdminDashboard.Controllers
             if (string.IsNullOrEmpty(chuyenId) || string.IsNullOrEmpty(taiXeId))
             {
                 TempData["ErrorMessage"] = "Thông tin không hợp lệ.";
-                return RedirectToAction(nameof(LichSuPhanCong));
+                return RedirectToAction(nameof(DanhSachPhanCong));
             }
 
             try
@@ -644,7 +662,7 @@ namespace AdminDashboard.Controllers
                 if (chuyenXe == null)
                 {
                     TempData["ErrorMessage"] = "Không tìm thấy chuyến xe.";
-                    return RedirectToAction(nameof(LichSuPhanCong));
+                    return RedirectToAction(nameof(DanhSachPhanCong));
                 }
 
                 var isTrungLich = await KiemTraTrungLich(taiXeId, chuyenXe.NgayDi, chuyenXe.GioDi, chuyenXe.GioDenDuKien);
@@ -666,48 +684,52 @@ namespace AdminDashboard.Controllers
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi chỉnh sửa phân công.";
             }
 
-            return RedirectToAction(nameof(LichSuPhanCong));
+            return RedirectToAction(nameof(DanhSachPhanCong));
         }
 
-        private async Task<bool> KiemTraTrungLich(string taiXeId, DateTime ngayDi, TimeSpan gioDi, TimeSpan gioDenDuKien)
+        private async Task<bool> KiemTraTrungLich(string taiXeId, DateTime ngayDi, TimeSpan gioDi, TimeSpan gioDenDuKien, string chuyenIdDangSua = null)
         {
-            try
+            // 1. Xác định thời gian bắt đầu và kết thúc của chuyến MỚI
+            var thoiDiemBatDauMoi = ngayDi.Date + gioDi;
+            var thoiDiemKetThucMoi = ngayDi.Date + gioDenDuKien;
+
+            // 2. Tìm tất cả chuyến xe KHÁC của tài xế đó trong CÙNG NGÀY
+            var query = _context.ChuyenXe
+                .Where(c => c.TaiXeId == taiXeId &&
+                            c.NgayDi.Date == ngayDi.Date && 
+                            c.TrangThai != TrangThaiChuyenXe.DaHuy &&
+                            c.TrangThai != TrangThaiChuyenXe.DaHoanThanh);
+
+            // 3. Nếu đang "Chỉnh sửa",
+            if (chuyenIdDangSua != null)
             {
-                _logger.LogInformation($"Kiểm tra trùng lịch đơn giản: taiXeId={taiXeId}, ngayDi={ngayDi:dd/MM/yyyy}");
+                query = query.Where(c => c.ChuyenId != chuyenIdDangSua);
+            }
 
-                var coChuyenTrongNgay = await _context.ChuyenXe
-                    .AnyAsync(c => c.TaiXeId == taiXeId &&
-                                  c.NgayDi.Date == ngayDi.Date &&
-                                  c.TrangThai != TrangThaiChuyenXe.DaHuy &&
-                                  c.TrangThai != TrangThaiChuyenXe.DaHoanThanh);
+            var cacChuyenKhacCuaTaiXe = await query.ToListAsync();
 
-                if (coChuyenTrongNgay)
+            if (!cacChuyenKhacCuaTaiXe.Any())
+            {
+                return false; 
+            }
+
+            // 4. Kiểm tra sự chồng chéo về THỜI GIAN
+            foreach (var chuyenCu in cacChuyenKhacCuaTaiXe)
+            {
+                var thoiDiemBatDauCu = chuyenCu.NgayDi.Date + chuyenCu.GioDi;
+                var thoiDiemKetThucCu = chuyenCu.NgayDi.Date + chuyenCu.GioDenDuKien;
+
+               
+                // (StartA < EndB) VÀ (EndA > StartB)
+                if (thoiDiemBatDauMoi < thoiDiemKetThucCu && thoiDiemKetThucMoi > thoiDiemBatDauCu)
                 {
-                    _logger.LogWarning($"Tài xế {taiXeId} đã có chuyến trong ngày {ngayDi:dd/MM/yyyy}");
-
-                    var chuyenTrongNgay = await _context.ChuyenXe
-                        .Where(c => c.TaiXeId == taiXeId && c.NgayDi.Date == ngayDi.Date)
-                        .Select(c => new { c.ChuyenId, c.NgayDi, c.GioDi, c.GioDenDuKien })
-                        .FirstOrDefaultAsync();
-
-                    if (chuyenTrongNgay != null)
-                    {
-                        _logger.LogWarning($"Chuyến trùng: {chuyenTrongNgay.ChuyenId} - {chuyenTrongNgay.NgayDi:dd/MM/yyyy} {chuyenTrongNgay.GioDi}->{chuyenTrongNgay.GioDenDuKien}");
-                    }
+                    _logger.LogWarning($"TRÙNG LỊCH: Chuyến {chuyenIdDangSua ?? "MỚI"} bị trùng với chuyến {chuyenCu.ChuyenId} của tài xế {taiXeId}");
+                    return true; // Bị trùng
                 }
-
-                return coChuyenTrongNgay;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Lỗi khi kiểm tra trùng lịch đơn giản");
-                return false;
             }
 
-
-
+            return false; 
         }
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> XemLichTaiXe(string taiXeId)
         {
             if (string.IsNullOrEmpty(taiXeId))

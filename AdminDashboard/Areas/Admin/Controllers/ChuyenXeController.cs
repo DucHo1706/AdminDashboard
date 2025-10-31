@@ -2,12 +2,15 @@
 using AdminDashboard.Models.TrangThai;
 using AdminDashboard.Services;
 using AdminDashboard.TransportDBContext;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore; // Cần có thư viện này để dùng DbUpdateException
 
-namespace AdminDashboard.Controllers
+namespace AdminDashboard.Areas.Admin.Controllers
 {
+    [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class ChuyenXeController : Controller
     {
         private readonly Db27524Context _context; // Thay Db27524Context bằng tên DbContext của bạn nếu khác
@@ -19,7 +22,6 @@ namespace AdminDashboard.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            // 1. Tải danh sách chuyến xe ban đầu (có thể tải tất cả hoặc 100 chuyến gần nhất)
             var chuyenXes = await _context.ChuyenXe
                 .Include(c => c.LoTrinh)
                     .ThenInclude(lt => lt.TramDiNavigation)
@@ -27,13 +29,13 @@ namespace AdminDashboard.Controllers
                     .ThenInclude(lt => lt.TramToiNavigation)
                 .Include(c => c.Xe)
                 .Include(c => c.TaiXe)
-                .OrderByDescending(c => c.NgayDi) // Sắp xếp cho hợp lý
+                .Include(c => c.Images) 
+                .OrderByDescending(c => c.NgayDi)
                 .ToListAsync();
 
-            // 2. Nạp dropdown danh sách trạm (QUAN TRỌNG)
             await PopulateTramDropdowns();
 
-            // 3. Trả về View với danh sách chuyến xe ban đầu
+           
             return View(chuyenXes);
         }
 
@@ -54,7 +56,6 @@ namespace AdminDashboard.Controllers
         {
             try
             {
-                // 'diemDi' và 'diemDen' bây giờ là IdTram (ví dụ: "T001")
                 Console.WriteLine($"🔹 TimKiemAjax => ID Trạm Đi={diemDi}, ID Trạm Đến={diemDen}");
 
                 var query = _context.ChuyenXe
@@ -63,35 +64,31 @@ namespace AdminDashboard.Controllers
                     .Include(c => c.LoTrinh)
                         .ThenInclude(lt => lt.TramToiNavigation)
                     .Include(c => c.Xe)
+                    .Include(c => c.Images) // <-- THÊM DÒNG NÀY ĐỂ TẢI ẢNH
                     .AsQueryable();
 
-                // 3. Áp dụng bộ lọc (SO SÁNH BẰNG ID CỦA LỘ TRÌNH)
                 if (!string.IsNullOrEmpty(diemDi))
                 {
-                    // So sánh khóa ngoại LoTrinh.TramDi với IdTram nhận về
                     query = query.Where(c => c.LoTrinh.TramDi == diemDi);
                 }
 
                 if (!string.IsNullOrEmpty(diemDen))
                 {
-                    // So sánh khóa ngoại LoTrinh.TramToi với IdTram nhận về
                     query = query.Where(c => c.LoTrinh.TramToi == diemDen);
                 }
 
-                // Nếu không chọn gì cả, trả về 0 kết quả
                 if (string.IsNullOrEmpty(diemDi) && string.IsNullOrEmpty(diemDen))
                 {
-                    query = query.Where(c => 1 == 0); // Trả về rỗng
+                    query = query.Where(c => 1 == 0);
                 }
 
                 var ketQua = await query.OrderBy(c => c.NgayDi).ThenBy(c => c.GioDi).ToListAsync();
 
-                // 4. Trả về Partial View chứa bảng kết quả
                 return PartialView("_BangChuyenXe", ketQua);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Lỗi server: {ex.Message}");
+                Console.WriteLine($" Lỗi server: {ex.Message}");
                 return Content($"<div class='alert alert-danger mt-3'>Đã xảy ra lỗi: {ex.Message}</div>");
             }
         }
@@ -167,25 +164,53 @@ namespace AdminDashboard.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteImage(int imageId)
         {
-            var image = await _context.ChuyenXeImages.FindAsync(imageId);
+            // BƯỚC 1: Tìm ảnh trong CSDL
+            var image = await _context.ChuyenXeImage.FindAsync(imageId);
             if (image == null)
             {
-                return Json(new { success = false, message = "Không thể xóa ảnh." });
+                return Json(new { success = false, message = "Không tìm thấy ảnh." });
             }
+
+            // Lưu lại URL để dùng sau khi CSDL đã xóa
+            string imageUrlToDelete = image.ImageUrl;
 
             try
             {
-                _context.ChuyenXeImages.Remove(image);
+                // BƯỚC 2: Đánh dấu bản ghi ảnh để xóa
+                _context.ChuyenXeImage.Remove(image);
+
+                // BƯỚC 3: Lưu thay đổi vào CSDL
+                // ⭐️ NẾU CÓ LỖI, NÓ SẼ BỊ VĂNG RA Ở DÒNG NÀY ⭐️
                 await _context.SaveChangesAsync();
+
+                // BƯỚC 4: Xóa file vật lý (Cloudinary/Local)
+                // Chỉ xóa file vật lý SAU KHI đã xóa CSDL thành công
+                await _imageService.DeleteImageAsync(imageUrlToDelete);
+
                 return Json(new { success = true, message = "Xóa ảnh thành công!" });
             }
-            catch (Exception ex)
+            catch (DbUpdateException dbEx) // BƯỚC 5: BẮT LỖI RÀNG BUỘC CSDL
             {
-                Console.WriteLine($"❌ Lỗi khi xóa ảnh: {ex.Message}");
-                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa ảnh." });
+                // Lấy thông báo lỗi chi tiết
+                string errorMessage = dbEx.InnerException?.Message ?? dbEx.Message;
+
+                // Ghi log lỗi ra Console Server (Đây là thứ chúng ta cần)
+                Console.WriteLine($"❌ LỖI RÀNG BUỘC DB KHI XÓA ẢNH: {errorMessage}");
+
+                // Trả lỗi về cho client
+                return Json(new
+                {
+                    success = false,
+                    message = "Lỗi CSDL: Không thể xóa do có ràng buộc khóa ngoại.",
+                    errorDetail = errorMessage // Gửi kèm chi tiết lỗi
+                });
+            }
+            catch (Exception ex) // Bắt các lỗi chung khác
+            {
+                Console.WriteLine($"❌ LỖI KHÁC KHI XÓA ẢNH: {ex.Message}");
+                return Json(new { success = false, message = "Có lỗi không xác định xảy ra." });
             }
         }
-
         public async Task<IActionResult> Details(string id)
         {
             if (string.IsNullOrEmpty(id)) return NotFound();
@@ -227,62 +252,81 @@ namespace AdminDashboard.Controllers
             PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
             return View(chuyenXe);
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(ChuyenXe chuyenXe, string deletedImages, List<IFormFile> newImages)
+        public async Task<IActionResult> Edit(ChuyenXe chuyenXe, string deletedImages, IFormFileCollection newImages)
         {
-            var existing = await _context.ChuyenXes
+            var existing = await _context.ChuyenXe
                 .Include(c => c.Images)
                 .FirstOrDefaultAsync(c => c.ChuyenId == chuyenXe.ChuyenId);
 
-            if (existing == null)
-                return NotFound();
+            if (existing == null) return NotFound();
 
-            // Cập nhật thông tin cơ bản
-            existing.LoTrinhId = chuyenXe.LoTrinhId;
-            existing.XeId = chuyenXe.XeId;
-            existing.NgayDi = chuyenXe.NgayDi;
-            existing.GioDi = chuyenXe.GioDi;
-            existing.GioDenDuKien = chuyenXe.GioDenDuKien;
-            existing.TrangThai = chuyenXe.TrangThai;
+            var strategy = _context.Database.CreateExecutionStrategy();
 
-            // Xóa hình ảnh nếu có
-            if (!string.IsNullOrEmpty(deletedImages))
+            List<string> urlsToDelete = new List<string>();
+
+            try
             {
-                var ids = deletedImages.Split(',').Select(int.Parse).ToList();
-                var toRemove = existing.Images.Where(i => ids.Contains(i.ImageId)).ToList();
-
-                _context.ChuyenXeImages.RemoveRange(toRemove);
-            }
-
-            // Upload hình mới (nếu có)
-            if (newImages != null && newImages.Any())
-            {
-                foreach (var file in newImages)
+                await strategy.ExecuteAsync(async () =>
                 {
-                    var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
-                    var path = Path.Combine("wwwroot/uploads/chuyenxe", fileName);
+                    existing.LoTrinhId = chuyenXe.LoTrinhId;
+                    existing.XeId = chuyenXe.XeId;
+                    existing.NgayDi = chuyenXe.NgayDi;
+                    existing.GioDi = chuyenXe.GioDi;
+                    existing.GioDenDuKien = chuyenXe.GioDenDuKien;
+                    existing.TrangThai = chuyenXe.TrangThai;
 
-                    using (var stream = new FileStream(path, FileMode.Create))
+                    if (newImages != null && newImages.Any())
                     {
-                        await file.CopyToAsync(stream);
+                        var imageUrls = await _imageService.UploadImagesAsync(newImages);
+                        foreach (var url in imageUrls)
+                        {
+                            existing.Images.Add(new ChuyenXeImage { ChuyenId = existing.ChuyenId, ImageUrl = url });
+                        }
                     }
 
-                    existing.Images.Add(new ChuyenXeImage
+                    if (!string.IsNullOrEmpty(deletedImages))
                     {
-                        ChuyenId = existing.ChuyenId,
-                        ImageUrl = "/uploads/chuyenxe/" + fileName
-                    });
+                        var ids = deletedImages.Split(',').Select(int.Parse).ToList();
+                        var toRemove = existing.Images.Where(i => ids.Contains(i.ImageId)).ToList();
+
+                        foreach (var image in toRemove)
+                        {
+                            urlsToDelete.Add(image.ImageUrl);
+                            existing.Images.Remove(image);
+                        }
+                    }
+
+                    await _context.SaveChangesAsync();
+                });
+
+                foreach (var url in urlsToDelete)
+                {
+                    await _imageService.DeleteImageAsync(url);
                 }
+
+                TempData["SuccessMessage"] = "Cập nhật chuyến xe thành công!";
+                return RedirectToAction(nameof(Index));
             }
+            catch (DbUpdateException dbEx)
+            {
+                string errorMessage = dbEx.InnerException?.Message ?? dbEx.Message;
+                Console.WriteLine($"LỖI CSDL KHI EDIT: {errorMessage}");
+                TempData["ErrorMessage"] = $"Lỗi CSDL khi xóa ảnh: {errorMessage}";
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
+                return View(chuyenXe);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"LỖI KHÁC KHI EDIT: {ex.Message}");
+                TempData["ErrorMessage"] = $"Lỗi không xác định: {ex.Message}";
+
+                PopulateDropdownLists(chuyenXe.LoTrinhId, chuyenXe.XeId);
+                return View(chuyenXe);
+            }
         }
-
-
-        // (GET) PHIÊN BẢN CỦA BẠN (GIỮ NGUYÊN)
         public async Task<IActionResult> Delete(string id)
         {
             if (string.IsNullOrEmpty(id)) return NotFound();
@@ -298,48 +342,56 @@ namespace AdminDashboard.Controllers
         }
 
 
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var chuyenXe = await _context.ChuyenXe.FindAsync(id);
-            if (chuyenXe == null)
+            var chuyenXe = await _context.ChuyenXe
+                .Include(c => c.Images)
+                .FirstOrDefaultAsync(c => c.ChuyenId == id);
+
+            if (chuyenXe == null) return NotFound();
+
+            if (chuyenXe.TrangThai != TrangThaiChuyenXe.DaLenLich)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = $"Lỗi: Chỉ có thể xóa chuyến xe 'Đã Lên Lịch'.";
+                return RedirectToAction(nameof(Index));
             }
 
-            // --- KIỂM TRA TRẠNG THÁI ---
-            // Chỉ cho phép xóa nếu trạng thái là "Đã Lên Lịch"
-            if (chuyenXe.TrangThai == TrangThaiChuyenXe.DaLenLich) // 🟢 [ĐÃ SỬA] Chỉ giữ lại DaLenLich
+            var strategy = _context.Database.CreateExecutionStrategy();
+
+            List<string> urlsToDelete = chuyenXe.Images.Select(i => i.ImageUrl).ToList();
+
+            try
             {
-                // Trạng thái hợp lệ, TIẾP TỤC thử xóa
-                try
+                await strategy.ExecuteAsync(async () =>
                 {
+                    chuyenXe.Images.Clear();
                     _context.ChuyenXe.Remove(chuyenXe);
                     await _context.SaveChangesAsync();
-                    TempData["SuccessMessage"] = "🗑️ Đã xóa chuyến xe thành công!";
-                }
-                catch (DbUpdateException ex)
+                });
+
+                foreach (var url in urlsToDelete)
                 {
-                    Console.WriteLine($"LỖI KHÔNG THỂ XÓA (DB): {ex.Message}");
-                    TempData["ErrorMessage"] = "❌ Lỗi: Không thể xóa chuyến xe này do có ràng buộc dữ liệu.";
+                    await _imageService.DeleteImageAsync(url);
                 }
-                catch (Exception ex)
-                {
-                    TempData["ErrorMessage"] = $"❌ Đã xảy ra lỗi không xác định: {ex.Message}";
-                }
+
+                TempData["SuccessMessage"] = "Đã xóa chuyến xe và các ảnh liên quan thành công!";
             }
-            else // Ngược lại, nếu trạng thái KHÔNG phải là "Đã Lên Lịch"
+            catch (DbUpdateException dbEx)
             {
-                // Báo lỗi ngay lập tức, KHÔNG thử xóa
-                // 🟢 [ĐÃ SỬA] Cập nhật thông báo lỗi
-                TempData["ErrorMessage"] = $"❌ Lỗi: Không thể xóa chuyến xe đang ở trạng thái '{chuyenXe.TrangThai}'. Chỉ có thể xóa chuyến xe 'Đã Lên Lịch'.";
+                string errorMessage = dbEx.InnerException?.Message ?? dbEx.Message;
+                Console.WriteLine($"LỖI KHÔNG THỂ XÓA (DB): {errorMessage}");
+                TempData["ErrorMessage"] = $"Lỗi: Không thể xóa, có ràng buộc dữ liệu. ({errorMessage})";
             }
-            // --- KẾT THÚC KIỂM TRA TRẠNG THÁI ---
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Đã xảy ra lỗi không xác định: {ex.Message}";
+            }
 
-            return RedirectToAction(nameof(Index)); // Luôn quay về trang Index
+            return RedirectToAction(nameof(Index));
         }
-
         // Hàm hỗ trợ để lấy dữ liệu cho dropdown, tránh lặp code
         private void PopulateDropdownLists(object selectedLoTrinh = null, object selectedXe = null)
         {
@@ -350,7 +402,7 @@ namespace AdminDashboard.Controllers
 
             var loTrinhDisplay = loTrinhs.Select(lt => new
             {
-                LoTrinhId = lt.LoTrinhId,
+                lt.LoTrinhId,
                 Name = lt.TramDiNavigation.TenTram + " - " + lt.TramToiNavigation.TenTram
             }).ToList();
 

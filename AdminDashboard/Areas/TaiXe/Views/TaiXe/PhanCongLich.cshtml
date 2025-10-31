@@ -1,6 +1,7 @@
 ﻿@using AdminDashboard.Models.TrangThai
 @model IEnumerable<AdminDashboard.Models.ChuyenXe>
 @{
+    Layout = "_Layout";
     ViewData["Title"] = "Phân Công Lịch Tài Xế";
     var taiXes = ViewBag.TaiXes as SelectList;
 }
@@ -117,7 +118,7 @@
     </div>
 
     <div class="text-center">
-        <a asp-action="LichSuPhanCong" class="btn btn-info">
+        <a asp-action="DanhSachPhanCong" class="btn btn-info">
             <i class="fas fa-history"></i> Xem Lịch Sử Phân Công
         </a>
         <a asp-action="Index" class="btn btn-secondary">

@@ -34,7 +34,8 @@ namespace AdminDashboard.Controllers
                     .ThenInclude(lt => lt.TramToiNavigation)
                 .Include(c => c.Xe)
                     .ThenInclude(x => x.LoaiXe)
-                .Where(c => c.NgayDi.Date >= today)
+                .Where(c => c.NgayDi.Date >= today &&
+                            c.TrangThai == TrangThaiChuyenXe.DangMoBanVe) 
                 .OrderBy(c => c.NgayDi)
                 .ThenBy(c => c.GioDi)
                 .Take(10)

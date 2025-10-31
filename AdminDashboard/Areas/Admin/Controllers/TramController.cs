@@ -2,9 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using AdminDashboard.Models;
 using AdminDashboard.TransportDBContext;
+using Microsoft.AspNetCore.Authorization;
 
-namespace AdminDashboard.Controllers
+namespace AdminDashboard.Areas.Admin.Controllers
 {
+    [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class TramController : Controller
     {
         private readonly Db27524Context _context;
@@ -14,12 +17,12 @@ namespace AdminDashboard.Controllers
             _context = context;
         }
 
-         public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             return View(await _context.Tram.ToListAsync());
         }
 
-         public async Task<IActionResult> Details(string id)
+        public async Task<IActionResult> Details(string id)
         {
             if (id == null) return NotFound();
 
@@ -29,7 +32,7 @@ namespace AdminDashboard.Controllers
             return View(tram);
         }
 
-         public IActionResult Create()
+        public IActionResult Create()
         {
             return View();
         }
@@ -45,7 +48,7 @@ namespace AdminDashboard.Controllers
                 string newId;
                 do
                 {
-                    newId =  Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(); 
+                    newId = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
                 } while (await _context.Tram.AnyAsync(t => t.IdTram == newId));
 
                 tram.IdTram = newId;
@@ -68,7 +71,7 @@ namespace AdminDashboard.Controllers
             return View(tram);
         }
 
-         [HttpPost]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("IdTram,TenTram,DiaChiTram,Tinh,Huyen,Xa")] Tram tram)
         {
@@ -93,7 +96,7 @@ namespace AdminDashboard.Controllers
             return View(tram);
         }
 
-         public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(string id)
         {
             if (id == null) return NotFound();
 
@@ -103,7 +106,7 @@ namespace AdminDashboard.Controllers
             return View(tram);
         }
 
-         [HttpPost, ActionName("Delete")]
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {

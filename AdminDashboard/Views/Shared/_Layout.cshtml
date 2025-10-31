@@ -226,15 +226,15 @@
             </div>
 
             <ul class="nav flex-column">
-                <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index"><i class="bi bi-house"></i><span>Trang chủ</span></a></li>
-                <li class="nav-item"><a class="nav-link" asp-controller="Home_User" asp-action="Home_User"><i class="bi bi-lock"></i><span>Bảo mật</span></a></li>
-                <li class="nav-item"><a class="nav-link" asp-controller="Tram" asp-action="Index"><i class="bi bi-geo-alt"></i><span>Trạm</span></a></li>
-                <li class="nav-item"><a class="nav-link" asp-controller="ChuyenXe" asp-action="Index"><i class="bi bi-bus-front"></i><span>Chuyến Xe</span></a></li>
-                <li class="nav-item"><a class="nav-link" asp-controller="LoaiXe" asp-action="Index"><i class="bi bi-car-front"></i><span>Loại Xe</span></a></li>
-                <li class="nav-item"><a class="nav-link" asp-controller="Xe" asp-action="Index"><i class="bi bi-truck"></i><span>Xe</span></a></li>
-                <li class="nav-item"><a class="nav-link" asp-controller="LoTrinh" asp-action="Index"><i class="bi bi-map"></i><span>Lộ Trình</span></a></li>
-                <li class="nav-item"><a class="nav-link" asp-controller="TaiXe" asp-action="Index"><i class="bi bi-person"></i><span>Danh Sách Tài Xế</span></a></li>
-                <li class="nav-item"><a class="nav-link" asp-controller="TaiXe" asp-action="PhanCongLich"><i class="bi bi-map"></i><span>Phân Lịch</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index"><i class="bi bi-bar-chart-line-fill"></i><span>Thống kê</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home_User" asp-action="Home_User"><i class="bi bi-house"></i><span>Trang chủ </span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-area="Admin" asp-controller="Tram" asp-action="Index"><i class="bi bi-geo-alt"></i><span>Trạm</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-area="Admin" asp-controller="ChuyenXe" asp-action="Index"><i class="bi bi-bus-front"></i><span>Chuyến Xe</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-area="Admin" asp-controller="LoaiXe" asp-action="Index"><i class="bi bi-car-front"></i><span>Loại Xe</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-area="Admin" asp-controller="Xe" asp-action="Index"><i class="bi bi-truck"></i><span>Xe</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-area="Admin" asp-controller="LoTrinh" asp-action="Index"><i class="bi bi-map"></i><span>Lộ Trình</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-area="TaiXe" asp-controller="TaiXe" asp-action="Index"><i class="bi bi-person"></i><span>Danh Sách Tài Xế</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-area="TaiXe" asp-controller="TaiXe" asp-action="PhanCongLich"><i class="bi bi-calendar-check"></i><span>Phân Lịch</span></a></li>
             </ul>
 
             <hr class="mx-3">
@@ -247,8 +247,8 @@
                             @User.Identity.Name
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" asp-controller="Auth" asp-action="Account">Thông tin tài khoản</a></li>
-                            <li><a class="dropdown-item" asp-controller="Auth" asp-action="Logout">Đăng xuất</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-controller="Auth" asp-action="Account">Thông tin tài khoản</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-controller="Auth" asp-action="Logout">Đăng xuất</a></li>
                         </ul>
                     </div>
                     <div class="user-icon">

@@ -1,18 +1,18 @@
-@using AdminDashboard.Models.TrangThai
+﻿@using AdminDashboard.Models.TrangThai
 @model AdminDashboard.Models.ChuyenXe
 
 @{
-    ViewData["Title"] = "Chỉnh sửa Chuyến xe";
+    ViewData["Title"] = "Tạo Chuyến Xe Mới";
 }
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
     <style>
-        /* CSS ĐƯỢC LẤY TỪ GIAO DIỆN CREATE */
+        /* (Giữ nguyên toàn bộ CSS của bạn) */
         body {
             background: url('https://images.unsplash.com/photo-1583417319070-4a69db38a482?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1740') no-repeat center center fixed;
             background-size: cover;
@@ -22,34 +22,34 @@
 
         h2 {
             text-align: center;
-            font-size: 38px; /* Đã điều chỉnh để khớp với Create */
+            font-size: 38px;
             font-weight: 700;
             color: #111827;
             text-transform: uppercase;
-            margin-bottom: 15px; /* Đã điều chỉnh để khớp với Create */
+            margin-bottom: 15px;
         }
 
         .form {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 85vh; /* Đã điều chỉnh để khớp với Create */
+            /* Bỏ height: 85vh để form tự co dãn */
+            min-height: 85vh;
+            padding: 40px 0; /* Thêm padding cho đẹp */
         }
 
         .form-container {
-            background: rgba(255, 255, 255, 0.9); /* Đã điều chỉnh để khớp với Create */
-            padding: 50px 60px; /* Đã điều chỉnh để khớp với Create */
-            border-radius: 16px; /* Đã điều chỉnh để khớp với Create */
+            background: rgba(255, 255, 255, 0.9);
+            padding: 50px 60px;
+            border-radius: 16px;
             box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
             width: 95%;
-            max-width: 700px; /* Đã điều chỉnh để khớp với Create */
+            max-width: 700px;
         }
 
-        .form-group-custom { /* Đổi tên class form-group cũ thành form-group-custom */
-            margin-bottom: 22px; /* Đã điều chỉnh để khớp với Create */
+        .form-group-custom {
+            margin-bottom: 22px;
         }
-
-        /* Cần thêm class row và col-md-6 cho Bootstrap grid system. Đảm bảo Bootstrap CSS đã được import. */
 
         .control-label {
             font-weight: 600;
@@ -65,7 +65,7 @@
             }
 
         .form-control,
-        .form-select { /* Thêm .form-select cho Select Box */
+        .form-select {
             height: 45px;
             border-radius: 8px;
             border: 1px solid #ccc;
@@ -74,23 +74,27 @@
             transition: 0.2s ease;
         }
 
-            .form-control:focus,
-            .form-select:focus {
-                border-color: #ff9800;
-                box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.2);
-                outline: none;
-            }
+        /* Thêm style cho input file */
+        input[type="file"].form-control {
+            padding: 10px 14px;
+        }
 
-        /* Nút Lưu/Tạo (giữ nguyên hiệu ứng giống Create) */
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #ff9800;
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.2);
+            outline: none;
+        }
+
         button {
             position: relative;
-            padding: 12px 24px; /* Đã điều chỉnh để khớp với Create */
-            border-radius: 8px; /* Đã điều chỉnh để khớp với Create */
+            padding: 12px 24px;
+            border-radius: 8px;
             border: 1px solid #FF6633;
-            font-size: 15px; /* Đã điều chỉnh để khớp với Create */
+            font-size: 15px;
             text-transform: uppercase;
             font-weight: 600;
-            letter-spacing: 1px; /* Đã điều chỉnh để khớp với Create */
+            letter-spacing: 1px;
             background: transparent;
             color: black;
             overflow: hidden;
@@ -103,10 +107,6 @@
                 color: white;
             }
 
-        /* Xóa keyframes sh02 và button::before nếu không dùng hiệu ứng lấp lánh để đơn giản,
-                       nhưng tôi giữ lại các quy tắc CSS gốc để đảm bảo giao diện KHỚP. */
-
-        /* Nút quay lại (Giữ nguyên style out và đổi tên class out thành text-decoration-none để khớp CSS Create) */
         a.text-decoration-none {
             color: #ff6633;
             transition: transform 0.2s ease;
@@ -127,7 +127,6 @@
             text-align: center;
         }
 
-        /* Header Bar (Giống Create) */
         .header-bar {
             display: flex;
             justify-content: space-between;
@@ -146,108 +145,17 @@
                 width: 130px;
                 height: 38px;
             }
-
-        /* Toast Message Styles (Giữ nguyên) */
-        .toast-message {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: #00c21a;
-            color: white;
-            display: flex;
-            align-items: center;
-            border-radius: 8px;
-            padding: 14px 18px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            z-index: 1050;
-            min-width: 250px;
-            font-size: 15px;
-            font-weight: 500;
-            animation: slideIn 0.4s ease;
-        }
-
-        .toast-icon {
-            font-size: 20px;
-            margin-right: 10px;
-        }
-
-        .toast-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            margin-left: auto;
-            cursor: pointer;
-        }
-
-        .toast-progress {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.7);
-            width: 100%;
-            animation: progress 3s linear forwards;
-            border-radius: 0 0 8px 8px;
-        }
-
-        @@keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(100%);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @@keyframes slideOut {
-            to {
-                opacity: 0;
-                transform: translateX(100%);
-            }
-        }
-
-        @@keyframes progress {
-            from {
-                width: 100%;
-            }
-
-            to {
-                width: 0%;
-            }
-        }
-
-        /* Giữ lại Keyframes sh02 mặc dù nút Edit không có ::before */
-        @@keyframes sh02 {
-            from {
-                opacity: 0;
-                left: 0%;
-            }
-
-            50% {
-                opacity: 1;
-            }
-
-            to {
-                opacity: 0;
-                left: 100%;
-            }
-        }
     </style>
 </head>
 
 <body>
-    <h2>@ViewData["Title"]</h2>
+    <h2>Tạo Chuyến Xe Mới</h2>
     <hr />
     <div class="form">
         <div class="form-container">
-            <form asp-action="Edit" method="post">
+
+            <form asp-action="Create" class="form-submit-once" enctype="multipart/form-data">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="ChuyenId" />
 
                 <div class="header-bar mb-3">
                     <a asp-action="Index" class="text-decoration-none">
@@ -275,19 +183,18 @@
                                 <i class="fas fa-route"></i> Lộ trình
                             </label>
                             <select asp-for="LoTrinhId" class="form-select" asp-items="ViewBag.LoTrinhId">
-                                <option value="">-- Chọn Lộ Trình --</option>
+                                <option value="">-- Chọn lộ trình --</option>
                             </select>
                             <span asp-validation-for="LoTrinhId" class="text-danger"></span>
                         </div>
                     </div>
-
                     <div class="col-md-6">
                         <div class="form-group-custom">
                             <label asp-for="XeId" class="control-label">
                                 <i class="fas fa-bus"></i> Xe
                             </label>
                             <select asp-for="XeId" class="form-select" asp-items="ViewBag.XeId">
-                                <option value="">-- Chọn Xe --</option>
+                                <option value="">-- Chọn xe --</option>
                             </select>
                             <span asp-validation-for="XeId" class="text-danger"></span>
                         </div>
@@ -304,7 +211,6 @@
                             <span asp-validation-for="NgayDi" class="text-danger"></span>
                         </div>
                     </div>
-
                     <div class="col-md-6">
                         <div class="form-group-custom">
                             <label asp-for="GioDi" class="control-label">
@@ -326,7 +232,6 @@
                             <span asp-validation-for="GioDenDuKien" class="text-danger"></span>
                         </div>
                     </div>
-
                     <div class="col-md-6">
                         <div class="form-group-custom">
                             <label asp-for="TrangThai" class="control-label">
@@ -338,88 +243,26 @@
                             <span asp-validation-for="TrangThai" class="text-danger"></span>
                         </div>
                     </div>
-
                 </div>
 
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group-custom">
+                            <label class="control-label">
+                                <i class="fas fa-images"></i> Hình ảnh
+                            </label>
+                            <input type="file" name="images" class="form-control" multiple />
+                        </div>
+                    </div>
+                </div>
                 <div class="text-center mt-4">
-                    <button type="submit">Lưu thay đổi</button>
+                    <button type="submit">Tạo mới</button>
                 </div>
             </form>
         </div>
     </div>
 
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div id="success-toast" class="toast-message">
-            <div class="toast-icon">✔</div>
-            <div class="toast-text">@TempData["SuccessMessage"]</div>
-            <button class="toast-close" onclick="closeToast()">×</button>
-            <div class="toast-progress"></div>
-        </div>
-    }
-
     @section Scripts {
-        @{
-            await Html.RenderPartialAsync("_ValidationScriptsPartial");
-        }
-    }
-    <script>
-        function closeToast() {
-            const toast = document.getElementById("success-toast");
-            if (toast) {
-                toast.style.animation = "slideOut 0.5s forwards";
-                setTimeout(() => toast.remove(), 500);
-            }
-        }
-
-        // Tự động đóng sau 3 giây
-        window.addEventListener("DOMContentLoaded", () => {
-            const toast = document.getElementById("success-toast");
-            if (toast) {
-                setTimeout(() => closeToast(), 3000);
-            }
-        });
-    </script>
-
-    <script>
-        $(document).ready(function () {
-            var deletedIds = [];
-            var formChanged = false;
-
-            // Khi nhấn "Xóa" hình (ẩn tạm và đánh dấu thay đổi)
-            $('.delete-temp').on('click', function () {
-                var imageCard = $(this).closest('.image-item');
-                var imageId = imageCard.data('image-id');
-
-                if (confirm("Bạn có chắc muốn xóa tạm ảnh này?")) {
-                    imageCard.hide();
-                    deletedIds.push(imageId);
-                    $('#deletedImages').val(deletedIds.join(','));
-                    formChanged = true; // đánh dấu form đã thay đổi
-                }
-            });
-
-            // Khi người dùng thay đổi bất kỳ input nào trong form
-            $('input, select, textarea').on('change input', function () {
-                formChanged = true;
-            });
-
-            // Khi nhấn “Hủy”
-            $('.btn-secondary-custom').on('click', function (e) {
-                e.preventDefault();
-
-                if (!formChanged) {
-                    // Nếu không có thay đổi => quay về trang trước (Index)
-                    window.location.href = '@Url.Action("Index", "ChuyenXe")';
-                } else {
-                    // Nếu có thay đổi => hỏi xác nhận
-                    if (confirm("Bạn có chắc muốn hủy các thay đổi và hoàn tác?")) {
-                        location.reload(); // reload lại trang để hoàn tác
-                    }
-                }
-            });
-        });
-    </script>
-
+        @await Html.PartialAsync("_ValidationScriptsPartial")
     }
 </body>

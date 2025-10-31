@@ -17,7 +17,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Areas\Admin\Controllers\" />
     <Folder Include="Views\KhachHang\" />
     <Folder Include="wwwroot\css\Images\" />
   </ItemGroup>

@@ -248,15 +248,35 @@
 
                 <div class="collapse navbar-collapse text-center" id="navbarContent">
 
-                    <ul class="navbar-nav mx-auto gap-4">
-                        <li class="nav-item"><a class="nav-link nav-glow" asp-controller="Home_User" asp-action="Home_User">Trang chủ</a></li>
-                        <li class="nav-item"><a class="nav-link nav-glow" asp-controller="Auth" asp-action="History">Lịch sử</a></li>
-                        <li class="nav-item"><a class="nav-link nav-glow" asp-controller="Home_User" asp-action="ChuyenXe_User">Lịch trình</a></li>
-                        <li class="nav-item"><a class="nav-link nav-glow" asp-controller="Tram" asp-action="Index">Trạm</a></li>
-                        <li class="nav-item"><a class="nav-link nav-glow" asp-controller="Home_User" asp-action="About">Về chúng tôi</a></li>
-                        <li class="nav-item"><a class="nav-link nav-glow" asp-controller="Home_User" asp-action="About">Về chúng tôi</a></li>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <ul class="navbar-nav mx-auto gap-4">
+                                <li class="nav-item"><a class="nav-link nav-glow"asp-area="" asp-controller="Home" asp-action="Index">Thống kê</a></li>
+                                <li class="nav-item"><a class="nav-link nav-glow" asp-controller="Home_User" asp-action="ChuyenXe_User">Lịch trình</a></li>
+                                <li class="nav-item"><a class="nav-link nav-glow" asp-area="" asp-controller="Home_User" asp-action="About">Về chúng tôi</a></li>
+                            </ul>
+                        }
+                        else if (User.IsInRole("KhachHang"))
+                        {
+                            <ul class="navbar-nav mx-auto gap-4">
+                                <li class="nav-item"><a class="nav-link nav-glow" asp-area="" asp-controller="Home_User" asp-action="Home_User">Trang chủ</a></li>
+                                <li class="nav-item"><a class="nav-link nav-glow" asp-area="" asp-controller="Auth" asp-action="History">Lịch sử</a></li>
+                                <li class="nav-item"><a class="nav-link nav-glow" asp-area="" asp-controller="Home_User" asp-action="ChuyenXe_User">Lịch trình</a></li>
+                                <li class="nav-item"><a class="nav-link nav-glow" asp-area="" asp-controller="Tram" asp-action="Index">Trạm</a></li>
+                                <li class="nav-item"><a class="nav-link nav-glow" asp-area="" asp-controller="Home_User" asp-action="About">Về chúng tôi</a></li>
+                            </ul>
+                        }
+                    }
+                    else
+                    {
+                        <ul class="navbar-nav mx-auto gap-4">
+                            <li class="nav-item"><a class="nav-link nav-glow" asp-controller="Home_User" asp-action="Home_User">Trang chủ</a></li>
+                            <li class="nav-item"><a class="nav-link nav-glow" asp-controller="Home_User" asp-action="About">Về chúng tôi</a></li>
+                        </ul>
+                    }
 
-                    </ul>
 
                     <ul class="navbar-nav ms-auto">
                         @if (User.Identity.IsAuthenticated)
@@ -265,7 +285,7 @@
                                 <a class="nav-link dropdown-toggle user-name" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                                     <i class="bi bi-person-circle user-icon"></i> Xin chào @User.Identity.Name
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end dropdown-glow">
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-glow text-center">
                                     <li><a class="dropdown-item" asp-controller="Auth" asp-action="Account">Thông tin tài khoản</a></li>
                                     <li><a class="dropdown-item" asp-controller="Auth" asp-action="Logout">Đăng xuất</a></li>
                                 </ul>

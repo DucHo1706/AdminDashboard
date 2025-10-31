@@ -6,12 +6,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AdminDashboard.Migrations
 {
     /// <inheritdoc />
-    public partial class AddThoiGianHetHanToDonHang : Migration
+    public partial class Added_ThoiGianHetHan : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-          
+           
         }
 
         /// <inheritdoc />

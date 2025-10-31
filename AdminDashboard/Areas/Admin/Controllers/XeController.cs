@@ -1,11 +1,14 @@
 ﻿using AdminDashboard.Models;
 using AdminDashboard.TransportDBContext;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace AdminDashboard.Area.Admin.Controllers
 {
+    [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class XeController : Controller
     {
         private readonly Db27524Context _context;

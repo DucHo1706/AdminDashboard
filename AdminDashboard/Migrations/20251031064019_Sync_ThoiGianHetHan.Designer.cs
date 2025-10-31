@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AdminDashboard.Migrations
 {
     [DbContext(typeof(Db27524Context))]
-    [Migration("20251022064952_CreateOtpCodeTable")]
-    partial class CreateOtpCodeTable
+    [Migration("20251031064019_Sync_ThoiGianHetHan")]
+    partial class Sync_ThoiGianHetHan
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -126,7 +126,7 @@ namespace AdminDashboard.Migrations
 
                     b.HasIndex("ChuyenId");
 
-                    b.ToTable("ChuyenXeImages");
+                    b.ToTable("ChuyenXeImage");
                 });
 
             modelBuilder.Entity("AdminDashboard.Models.DonHang", b =>
@@ -291,7 +291,8 @@ namespace AdminDashboard.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("datetime2");
@@ -301,7 +302,8 @@ namespace AdminDashboard.Migrations
 
                     b.Property<string>("Purpose")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
