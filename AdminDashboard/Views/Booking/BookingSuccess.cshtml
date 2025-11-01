@@ -1,10 +1,10 @@
 ﻿@model AdminDashboard.Models.DonHang
 
 @{
-
-    var isPaid = string.Equals(Model.TrangThaiThanhToan, "Đã thanh toán", StringComparison.OrdinalIgnoreCase);
+    
+    var isPaid = string.Equals(Model.TrangThaiThanhToan, "Da thanh toan", StringComparison.OrdinalIgnoreCase) || string.Equals(Model.TrangThaiThanhToan, "Đã thanh toán", StringComparison.OrdinalIgnoreCase);
     var isPending = string.Equals(Model.TrangThaiThanhToan, "DangChoThanhToan", StringComparison.OrdinalIgnoreCase);
-    var isFailed = string.Equals(Model.TrangThaiThanhToan, "Giao dịch thất bại", StringComparison.OrdinalIgnoreCase) || string.Equals(Model.TrangThaiThanhToan, "Đã hủy", StringComparison.OrdinalIgnoreCase);
+    var isFailed = string.Equals(Model.TrangThaiThanhToan, "Giao dịch thất bại", StringComparison.OrdinalIgnoreCase) || string.Equals(Model.TrangThaiThanhToan, "Đã hủy", StringComparison.OrdinalIgnoreCase) || string.Equals(Model.TrangThaiThanhToan, "Da huy", StringComparison.OrdinalIgnoreCase);
     ViewData["Title"] = isPaid ? "Thanh toán thành công" : (isPending ? "Chưa thanh toán" : "Giao dịch thất bại");
     var danhSachVe = ViewBag.DanhSachVe as List<Ve>;
 }
