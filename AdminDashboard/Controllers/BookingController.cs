@@ -43,6 +43,7 @@ namespace AdminDashboard.Controllers
                     .ThenInclude(lt => lt.TramDiNavigation)
                 .Include(c => c.LoTrinh)
                     .ThenInclude(lt => lt.TramToiNavigation)
+                .Include(c => c.Images)
                 .FirstOrDefaultAsync(c => c.ChuyenId == chuyenId);
 
             if (chuyenXe == null)

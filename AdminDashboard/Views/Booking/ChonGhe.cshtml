@@ -12,9 +12,39 @@
             <h4><i class="bi bi-info-circle-fill"></i> Thông tin hành trình của bạn</h4>
         </div>
         <div class="card-body">
-            <p><strong>Tuyến đường:</strong> @Model.LoTrinh.TramDiNavigation.TenTram → @Model.LoTrinh.TramToiNavigation.TenTram</p>
-            <p><strong>Ngày đi:</strong> @Model.NgayDi.ToString("dd/MM/yyyy") - <strong>Giờ khởi hành:</strong> @Model.GioDi.ToString(@"hh\:mm")</p>
-            <p><strong>Giá vé:</strong> <span id="giaVe" class="fw-bold">@Model.LoTrinh.GiaVeCoDinh?.ToString("N0")</span> VNĐ/ghế</p>
+            <div class="row align-items-center">
+                @if (Model.Images != null && Model.Images.Any())
+                {
+                    var firstImage = Model.Images.FirstOrDefault();
+                    if (firstImage != null)
+                    {
+                        <div class="col-md-3 text-center">
+                            <img src="@firstImage.ImageUrl" alt="Hình ảnh xe" style="width: 100%; max-width: 200px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+                        </div>
+                        <div class="col-md-9">
+                            <p><strong>Tuyến đường:</strong> @Model.LoTrinh.TramDiNavigation.TenTram → @Model.LoTrinh.TramToiNavigation.TenTram</p>
+                            <p><strong>Ngày đi:</strong> @Model.NgayDi.ToString("dd/MM/yyyy") - <strong>Giờ khởi hành:</strong> @Model.GioDi.ToString(@"hh\:mm")</p>
+                            <p><strong>Giá vé:</strong> <span id="giaVe" class="fw-bold">@Model.LoTrinh.GiaVeCoDinh?.ToString("N0")</span> VNĐ/ghế</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-12">
+                            <p><strong>Tuyến đường:</strong> @Model.LoTrinh.TramDiNavigation.TenTram → @Model.LoTrinh.TramToiNavigation.TenTram</p>
+                            <p><strong>Ngày đi:</strong> @Model.NgayDi.ToString("dd/MM/yyyy") - <strong>Giờ khởi hành:</strong> @Model.GioDi.ToString(@"hh\:mm")</p>
+                            <p><strong>Giá vé:</strong> <span id="giaVe" class="fw-bold">@Model.LoTrinh.GiaVeCoDinh?.ToString("N0")</span> VNĐ/ghế</p>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12">
+                        <p><strong>Tuyến đường:</strong> @Model.LoTrinh.TramDiNavigation.TenTram → @Model.LoTrinh.TramToiNavigation.TenTram</p>
+                        <p><strong>Ngày đi:</strong> @Model.NgayDi.ToString("dd/MM/yyyy") - <strong>Giờ khởi hành:</strong> @Model.GioDi.ToString(@"hh\:mm")</p>
+                        <p><strong>Giá vé:</strong> <span id="giaVe" class="fw-bold">@Model.LoTrinh.GiaVeCoDinh?.ToString("N0")</span> VNĐ/ghế</p>
+                    </div>
+                }
+            </div>
         </div>
     </div>
 
@@ -25,7 +55,7 @@
                     <h5 class="card-title text-center mb-4">Sơ đồ ghế trên xe</h5>
                     <div class="seat-map-container">
                         <div class="bus-layout">
-                            @foreach (var ghe in Model.Xe.DanhSachGhe.OrderBy(g => int.Parse(g.SoGhe)))
+                            @foreach (var ghe in (Model.Xe?.DanhSachGhe ?? Enumerable.Empty<AdminDashboard.Models.Ghe>()).OrderBy(g => int.Parse(g.SoGhe)))
                             {
                                 bool daDat = danhSachGheDaDat.Contains(ghe.GheID);
                                 if (daDat)

@@ -8,6 +8,7 @@
             <tr class="table">
                 <th>Lộ Trình</th>
                 <th>Biển Số Xe</th>
+                <th>Hình Ảnh Xe</th>
                 <th>Ngày Đi</th>
                 <th>Giờ Đi</th>
                 <th>Trạng Thái</th>
@@ -27,6 +28,17 @@
                         <span class="badge bg-secondary-light">
                             @item.Xe?.BienSoXe
                         </span>
+                    </td>
+                    <td>
+                        @if (item.Images != null && item.Images.Any())
+                        {
+                            var firstImage = item.Images.FirstOrDefault();
+                            <img src="@firstImage.ImageUrl" alt="Hình ảnh xe" style="width: 80px; height: 60px; object-fit: cover; border-radius: 5px;" />
+                        }
+                        else
+                        {
+                            <span class="text-muted">Chưa có ảnh</span>
+                        }
                     </td>
                     <td>@item.NgayDi.ToString("dd/MM/yyyy")</td>
                     <td>@item.GioDi.ToString(@"hh\:mm")</td>
