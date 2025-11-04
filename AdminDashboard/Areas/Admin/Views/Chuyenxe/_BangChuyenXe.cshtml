@@ -1,6 +1,6 @@
 ﻿@model IEnumerable<AdminDashboard.Models.ChuyenXe>
 @using AdminDashboard.Models.TrangThai
-
+@using AdminDashboard.Helpers
 @if (Model.Any())
 {
     <table class="table modern-table table-hover">
@@ -31,26 +31,14 @@
                     <td>@item.NgayDi.ToString("dd/MM/yyyy")</td>
                     <td>@item.GioDi.ToString(@"hh\:mm")</td>
                     <td>
-                        @if (item.TrangThai == TrangThaiChuyenXe.DangMoBanVe)
-                        {
-                            <span class="badge bg-success-light">Đang Mở Bán Vé</span>
-                        }
-                        else if (item.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh)
-                        {
-                            <span class="badge bg-info-light">Chờ Khởi Hành</span>
-                        }
-                        else if (item.TrangThai == TrangThaiChuyenXe.DaHuy)
-                        {
-                            <span class="badge bg-danger-light">Đã Hủy</span>
-                        }
-                        else if (item.TrangThai == TrangThaiChuyenXe.DangDiChuyen)
-                        {
-                            <span class="badge bg-warning-light">Đang Di Chuyển</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-secondary-light">@item.TrangThai.ToString()</span>
-                        }
+                        <span class="badge
+                        @(item.TrangThai == TrangThaiChuyenXe.DaHoanThanh ? "bg-secondary-light" :
+                          item.TrangThai == TrangThaiChuyenXe.DangMoBanVe ? "bg-success-light" :
+                          item.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh ? "bg-info-light" :
+                          item.TrangThai == TrangThaiChuyenXe.DaHuy ? "bg-danger" :
+                          "bg-warning-light")">
+                            @item.TrangThai.GetDisplayName()
+                        </span>
                     </td>
                     <td>
                         <a asp-action="Edit" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-success">

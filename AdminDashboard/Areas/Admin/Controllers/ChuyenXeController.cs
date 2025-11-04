@@ -497,11 +497,6 @@ namespace AdminDashboard.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
-
-
-
-
         public IActionResult TimKiem(string diemDiId, string diemDenId, DateTime ngayDi)
         {// Truy vấn CSDL để lấy các chuyến xe phù hợp
             var ketQua = _context.ChuyenXe
