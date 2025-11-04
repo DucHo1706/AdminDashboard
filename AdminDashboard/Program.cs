@@ -22,6 +22,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped< IVnpayService,VnpayService>();
+builder.Services.AddScoped<IPaginationService, PaginationService>();
 
 builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", options =>

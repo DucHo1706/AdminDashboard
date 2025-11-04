@@ -1,4 +1,5 @@
 ﻿using AdminDashboard.Models;
+using AdminDashboard.Services;
 using AdminDashboard.TransportDBContext;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,12 +13,14 @@ namespace AdminDashboard.Areas.Admin.Pages
     public class StatisticsModel : PageModel
     {
         private readonly Db27524Context _context;
-        private const int PAGE_SIZE = 10;
+        private readonly IPaginationService _paginationService;
+        private const int PAGE_SIZE = 5;
         private const string KHACH_HANG_ROLE = "KhachHang";
 
-        public StatisticsModel(Db27524Context context)
+        public StatisticsModel(Db27524Context context, IPaginationService paginationService)
         {
             _context = context;
+            _paginationService = paginationService;
         }
 
         // Tổng quan thống kê
@@ -104,16 +107,16 @@ namespace AdminDashboard.Areas.Admin.Pages
 
                 var today = DateTime.Today;
                 DoanhThuHomNay = await _context.DonHang
-                    .Where(d => d.NgayDat.Date == today && d.TrangThaiThanhToan == "Đã thanh toán")
+                    .Where(d => d.NgayDat.Date == today && (d.TrangThaiThanhToan == "Da thanh toan" || d.TrangThaiThanhToan == "Đã thanh toán"))
                     .SumAsync(d => (decimal?)d.TongTien) ?? 0;
 
                 var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
                 DoanhThuThangNay = await _context.DonHang
-                    .Where(d => d.NgayDat >= firstDayOfMonth && d.TrangThaiThanhToan == "Đã thanh toán")
+                    .Where(d => d.NgayDat >= firstDayOfMonth && (d.TrangThaiThanhToan == "Da thanh toan" || d.TrangThaiThanhToan == "Đã thanh toán"))
                     .SumAsync(d => (decimal?)d.TongTien) ?? 0;
 
                 DoanhThuTong = await _context.DonHang
-                    .Where(d => d.TrangThaiThanhToan == "Đã thanh toán")
+                    .Where(d => d.TrangThaiThanhToan == "Da thanh toan" || d.TrangThaiThanhToan == "Đã thanh toán")
                     .SumAsync(d => (decimal?)d.TongTien) ?? 0;
             }
             catch (Exception ex)
@@ -192,7 +195,7 @@ namespace AdminDashboard.Areas.Admin.Pages
 
                 if (khachHangRoleId == null)
                 {
-                    KhachHangs = new PaginatedList<NguoiDungViewModel>(new List<NguoiDungViewModel>(), 0, pageIndex, PAGE_SIZE);
+                    KhachHangs = PaginatedList<NguoiDungViewModel>.Empty(pageIndex, PAGE_SIZE);
                     return;
                 }
 
@@ -216,13 +219,7 @@ namespace AdminDashboard.Areas.Admin.Pages
                     })
                     .OrderBy(nd => nd.HoTen);
 
-                var count = await query.CountAsync();
-                var items = await query
-                    .Skip((pageIndex - 1) * PAGE_SIZE)
-                    .Take(PAGE_SIZE)
-                    .ToListAsync();
-
-                KhachHangs = new PaginatedList<NguoiDungViewModel>(items, count, pageIndex, PAGE_SIZE);
+                KhachHangs = await _paginationService.CreatePagedListAsync(query, pageIndex, PAGE_SIZE);
             }
             catch (Exception ex)
             {
@@ -245,7 +242,7 @@ namespace AdminDashboard.Areas.Admin.Pages
                     .Where(d => d.NgayDat.Date == today)
                     .CountAsync();
                 var doanhThuHomNay = await _context.DonHang
-                    .Where(d => d.NgayDat.Date == today && d.TrangThaiThanhToan == "Đã thanh toán")
+                    .Where(d => d.NgayDat.Date == today && (d.TrangThaiThanhToan == "Da thanh toan" || d.TrangThaiThanhToan == "Đã thanh toán"))
                     .SumAsync(d => (decimal?)d.TongTien) ?? 0;
 
                 // Thống kê tháng này
@@ -253,7 +250,7 @@ namespace AdminDashboard.Areas.Admin.Pages
                     .Where(d => d.NgayDat >= firstDayOfMonth && d.NgayDat <= lastDayOfMonth)
                     .CountAsync();
                 var doanhThuThangNay = await _context.DonHang
-                    .Where(d => d.NgayDat >= firstDayOfMonth && d.NgayDat <= lastDayOfMonth && d.TrangThaiThanhToan == "Đã thanh toán")
+                    .Where(d => d.NgayDat >= firstDayOfMonth && d.NgayDat <= lastDayOfMonth && (d.TrangThaiThanhToan == "Da thanh toan" || d.TrangThaiThanhToan == "Đã thanh toán"))
                     .SumAsync(d => (decimal?)d.TongTien) ?? 0;
 
                 // Thống kê năm nay
@@ -261,7 +258,7 @@ namespace AdminDashboard.Areas.Admin.Pages
                     .Where(d => d.NgayDat >= firstDayOfYear && d.NgayDat <= lastDayOfYear)
                     .CountAsync();
                 var doanhThuNamNay = await _context.DonHang
-                    .Where(d => d.NgayDat >= firstDayOfYear && d.NgayDat <= lastDayOfYear && d.TrangThaiThanhToan == "Đã thanh toán")
+                    .Where(d => d.NgayDat >= firstDayOfYear && d.NgayDat <= lastDayOfYear && (d.TrangThaiThanhToan == "Da thanh toan" || d.TrangThaiThanhToan == "Đã thanh toán"))
                     .SumAsync(d => (decimal?)d.TongTien) ?? 0;
 
                 // Thống kê theo filter
@@ -286,12 +283,12 @@ namespace AdminDashboard.Areas.Admin.Pages
 
                 var donHangFiltered = await filteredQuery.CountAsync();
                 var doanhThuFiltered = await filteredQuery
-                    .Where(d => d.TrangThaiThanhToan == "Đã thanh toán")
+                    .Where(d => d.TrangThaiThanhToan == "Da thanh toan" || d.TrangThaiThanhToan == "Đã thanh toán")
                     .SumAsync(d => (decimal?)d.TongTien) ?? 0;
 
                 // Thống kê theo trạng thái hôm nay
                 var daThanhToanHomNay = await _context.DonHang
-                    .Where(d => d.NgayDat.Date == today && d.TrangThaiThanhToan == "Đã thanh toán")
+                    .Where(d => d.NgayDat.Date == today && (d.TrangThaiThanhToan == "Da thanh toan" || d.TrangThaiThanhToan == "Đã thanh toán"))
                     .CountAsync();
                 var choThanhToanHomNay = await _context.DonHang
                     .Where(d => d.NgayDat.Date == today && d.TrangThaiThanhToan == "DangChoThanhToan")
@@ -362,13 +359,7 @@ namespace AdminDashboard.Areas.Admin.Pages
                     })
                     .OrderByDescending(d => d.NgayDat);
 
-                var count = await donHangQuery.CountAsync();
-                var items = await donHangQuery
-                    .Skip((pageIndex - 1) * PAGE_SIZE)
-                    .Take(PAGE_SIZE)
-                    .ToListAsync();
-
-                DonHangs = new PaginatedList<DonHangViewModel>(items, count, pageIndex, PAGE_SIZE);
+                DonHangs = await _paginationService.CreatePagedListAsync(donHangQuery, pageIndex, PAGE_SIZE);
             }
             catch (Exception ex)
             {
@@ -492,22 +483,4 @@ namespace AdminDashboard.Areas.Admin.Pages
         public int DaHuyHomNay { get; set; }
     }
 
-    // PaginatedList helper
-    public class PaginatedList<T> : List<T>
-    {
-        public int PageIndex { get; private set; }
-        public int TotalPages { get; private set; }
-        public int TotalCount { get; private set; }
-
-        public PaginatedList(List<T> items, int count, int pageIndex, int pageSize)
-        {
-            PageIndex = pageIndex;
-            TotalPages = (int)Math.Ceiling(count / (double)pageSize);
-            TotalCount = count;
-            AddRange(items);
-        }
-
-        public bool HasPreviousPage => PageIndex > 1;
-        public bool HasNextPage => PageIndex < TotalPages;
-    }
 }
