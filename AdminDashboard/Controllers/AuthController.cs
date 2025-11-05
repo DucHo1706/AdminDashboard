@@ -87,7 +87,7 @@ namespace AdminDashboard.Controllers
             else if (roleName == "TaiXe")
                 return RedirectToAction("LichLamViec", "TaiXe", new { area = "TaiXe" });
             else
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Home_User", "Home_User");
         }
 
         [HttpGet]

@@ -20,26 +20,7 @@ namespace AdminDashboard.Controllers
 
         public IActionResult Index()
         {
-            return RedirectToAction("Dashboard");
-        }
-
-        public IActionResult Dashboard()
-        {
-            var tongKhachHang = _context.NguoiDung.Count();
-            var tongDonHang = _context.DonHang.Count();
-            var danhSachKhachHang = _context.NguoiDung.ToList();
-
-            // Tính doanh thu hôm nay dựa trên TongTien
-            var doanhThuHomNay = _context.DonHang
-                .Where(d => d.NgayDat.Date == DateTime.Today)
-                .Sum(d => (decimal?)d.TongTien) ?? 0;
-
-            ViewBag.TongKhachHang = tongKhachHang;
-            ViewBag.TongDonHang = tongDonHang;
-            ViewBag.DoanhThuHomNay = doanhThuHomNay;
-            ViewBag.DanhSachKhachHang = danhSachKhachHang;
-
-            return View();
+            return RedirectToPage("/Statistics", new { area = "Admin" });
         }
 
     }
