@@ -1,39 +1,32 @@
 using AdminDashboard.TransportDBContext;
 using AdminDashboard.Services;
+using AdminDashboard.Hubs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using CloudinaryDotNet;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Đăng ký DbContext TRƯỚC khi build
+// ===================== ĐĂNG KÝ DATABASE =====================
 builder.Services.AddDbContext<Db27524Context>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlOptions => sqlOptions.EnableRetryOnFailure() // Thêm retry
+        sqlOptions => sqlOptions.EnableRetryOnFailure()
     )
 );
 
-// Add services to the container
+// ===================== ĐĂNG KÝ MVC, RAZOR, SIGNALR =====================
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddSignalR();
 
-// Đăng ký các dịch vụ
+// ===================== ĐĂNG KÝ SERVICE =====================
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IOtpService, OtpService>();
-builder.Services.AddScoped< IVnpayService,VnpayService>();
+builder.Services.AddScoped<IVnpayService, VnpayService>();
 builder.Services.AddScoped<IPaginationService, PaginationService>();
 
-builder.Services.AddAuthentication("CookieAuth")
-    .AddCookie("CookieAuth", options =>
-    {
-        options.LoginPath = "/Auth/Login";        // Trang login
-        options.LogoutPath = "/Auth/Logout";      // Trang logout
-        options.AccessDeniedPath = "/Auth/AccessDenied"; // Khi bị từ chối
-        options.ExpireTimeSpan = TimeSpan.FromHours(2);  // Cookie sống 2h
-    });
-
-// ĐĂNG KÝ CLOUDINARY SERVICE - ƯU TIÊN DÙNG CLOUDINARY
+// ===================== CLOUDINARY / LOCAL IMAGE SERVICE =====================
 var cloudinaryConfig = builder.Configuration.GetSection("Cloudinary");
 var cloudName = cloudinaryConfig["CloudName"];
 var apiKey = cloudinaryConfig["ApiKey"];
@@ -43,25 +36,32 @@ if (!string.IsNullOrEmpty(cloudName) &&
     !string.IsNullOrEmpty(apiKey) &&
     !string.IsNullOrEmpty(apiSecret))
 {
-    // SỬ DỤNG CLOUDINARY - TỐT NHẤT CHO PRODUCTION
     var account = new Account(cloudName, apiKey, apiSecret);
     var cloudinary = new Cloudinary(account);
-
     builder.Services.AddSingleton(cloudinary);
     builder.Services.AddScoped<IImageService, CloudinaryImageService>();
-
-    Console.WriteLine($" Đã đăng ký Cloudinary service: {cloudName}");
+    Console.WriteLine($"✅ Đã đăng ký Cloudinary service: {cloudName}");
 }
 else
 {
-    // FALLBACK: Dùng LocalImageService nếu không có cấu hình Cloudinary
     builder.Services.AddScoped<IImageService, LocalImageService>();
-    Console.WriteLine(" Đang dùng LocalImageService - Chỉ nên dùng cho development");
+    Console.WriteLine("⚠️ Đang dùng LocalImageService - chỉ nên dùng cho development");
 }
 
+// ===================== COOKIE AUTHENTICATION =====================
+builder.Services.AddAuthentication("CookieAuth")
+    .AddCookie("CookieAuth", options =>
+    {
+        options.LoginPath = "/Auth/Login";
+        options.LogoutPath = "/Auth/Logout";
+        options.AccessDeniedPath = "/Auth/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromHours(2);
+    });
+
+// ===================== XÂY DỰNG APP =====================
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// ===================== MIDDLEWARE PIPELINE =====================
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -73,10 +73,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-//  Bắt buộc: Authentication phải trước Authorization
+// ⚠️ Authentication phải trước Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
+// ===================== MAP HUB & ROUTES =====================
+app.MapHub<ChatHub>("/chathub"); // ChatHub realtime
 
 app.MapRazorPages();
 
@@ -84,22 +86,19 @@ app.MapControllerRoute(
     name: "Areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
 );
+
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home_User}/{action=Home_User}/{id?}");
-
-
-
-
+    pattern: "{controller=Home_User}/{action=Home_User}/{id?}"
+);
 
 app.Run();
 
-
-/*  Giải thích
-
-builder.Services.AddAuthentication(...).AddCookie(...) → đăng ký Cookie Authentication.
-
-app.UseAuthentication();  middleware kiểm tra cookie, bắt buộc trước UseAuthorization().
-
-Sau khi login, ASP.NET Core sẽ tự tạo cookie lưu session đăng nhập. 
+/*
+─────────────────────────────────────────────
+🧩 Ghi chú:
+- Có đầy đủ: DbContext, SignalR, Cloudinary, LocalImage, Authentication, RazorPages, Area routing.
+- Không còn trùng lặp AddControllersWithViews() hay AddRazorPages().
+- ChatHub hoạt động qua endpoint /chathub.
+─────────────────────────────────────────────
 */

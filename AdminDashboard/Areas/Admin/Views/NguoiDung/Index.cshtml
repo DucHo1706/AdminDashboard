@@ -1,0 +1,43 @@
+﻿@model IEnumerable<AdminDashboard.Models.NguoiDung>
+
+@{
+    ViewData["Title"] = "Danh sách Người dùng";
+}
+
+<h2>Danh sách Người dùng</h2>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Họ tên</th>
+            <th>Email</th>
+            <th>Số điện thoại</th>
+            <th>Ngày sinh</th>
+            <th>Trạng thái</th>
+            <th>Vai trò</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.HoTen</td>
+                <td>@user.Email</td>
+                <td>@user.SoDienThoai</td>
+                <td>@user.NgaySinh?.ToString("dd/MM/yyyy")</td>
+                <td>@user.TrangThai</td>
+                <td>
+                    @{
+                        // Lấy tên các vai trò từ tập hợp UserRoles
+                        var roleNames = user.UserRoles
+                        .Where(ur => ur.VaiTro != null)
+                        // Truy cập Navigation Property VaiTro và lấy TenVaiTro
+                        .Select(ur => ur.VaiTro.TenVaiTro)
+                        .ToList();
+                    }
+                    **@string.Join(", ", roleNames)**
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
