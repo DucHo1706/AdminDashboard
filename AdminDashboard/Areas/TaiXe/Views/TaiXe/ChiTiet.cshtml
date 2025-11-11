@@ -1,0 +1,157 @@
+﻿@model AdminDashboard.Models.TaiXe
+
+@{
+    ViewData["Title"] = "Thông Tin Chi Tiết Tài Xế";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">Thông Tin Chi Tiết Tài Xế</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Thông tin cá nhân</h5>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <td><strong>Họ tên:</strong></td>
+                                    <td>@Model.HoTen</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Bằng lái xe:</strong></td>
+                                    <td>@Model.BangLaiXe</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Ngày vào làm:</strong></td>
+                                    <td>@Model.NgayVaoLam.ToString("dd/MM/yyyy")</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Trạng thái:</strong></td>
+                                    <td>
+                                        @if (Model.TrangThai == "Hoạt động")
+                                        {
+                                            <span class="badge badge-success">@Model.TrangThai</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-danger">@Model.TrangThai</span>
+                                        }
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Thông tin tài khoản</h5>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <td><strong>Email:</strong></td>
+                                    <td>@Model.NguoiDung?.Email</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Số điện thoại:</strong></td>
+                                    <td>@Model.NguoiDung?.SoDienThoai</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Ngày sinh:</strong></td>
+                                    <td>@(Model.NguoiDung?.NgaySinh?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Trạng thái tài khoản:</strong></td>
+                                    <td>
+                                        @if (Model.NguoiDung?.TrangThai == AdminDashboard.Models.TrangThaiNguoiDung.HoatDong)
+                                        {
+                                            <span class="badge badge-success">Hoạt động</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-danger">Không hoạt động</span>
+                                        }
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a asp-action="Index" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Quay lại
+                                </a>
+                                <div>
+                                    @if (Model.TrangThai == "Hoạt động")
+                                    {
+                                        <form asp-action="DinhChi" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@Model.UserId" />
+                                            <button type="submit" class="btn btn-warning" onclick="return confirm('Bạn có chắc chắn muốn đình chỉ tài xế này?')">
+                                                <i class="fas fa-pause"></i> Đình chỉ
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="BoDinhChi" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@Model.UserId" />
+                                            <button type="submit" class="btn btn-success" onclick="return confirm('Bạn có chắc chắn muốn bỏ đình chỉ tài xế này?')">
+                                                <i class="fas fa-play"></i> Bỏ đình chỉ
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Lịch sử chuyến xe gần đây</h5>
+                    @if (ViewBag.LichSuChuyenXe != null && ViewBag.LichSuChuyenXe.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Ngày</th>
+                                        <th>Tuyến</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var chuyen in ViewBag.LichSuChuyenXe)
+                                    {
+                                        <tr>
+                                            <td>@chuyen.NgayDi.ToString("dd/MM")</td>
+                                            <td>@chuyen.LoTrinh.TramDiNavigation.TenTram - @chuyen.LoTrinh.TramToiNavigation.TenTram</td>
+                                            <td>
+                                                <span class="badge badge-primary">@chuyen.TrangThai</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Chưa có chuyến xe nào</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
