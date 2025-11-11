@@ -1,43 +1,393 @@
 ﻿@model IEnumerable<AdminDashboard.Models.NguoiDung>
-
+@using AdminDashboard.Models.TrangThai
+@using AdminDashboard.Helpers
 @{
+    // Yêu cầu sử dụng Layout nếu có
+    Layout = "_Layout";
     ViewData["Title"] = "Danh sách Người dùng";
 }
 
-<h2>Danh sách Người dùng</h2>
-
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Họ tên</th>
-            <th>Email</th>
-            <th>Số điện thoại</th>
-            <th>Ngày sinh</th>
-            <th>Trạng thái</th>
-            <th>Vai trò</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model)
-        {
-            <tr>
-                <td>@user.HoTen</td>
-                <td>@user.Email</td>
-                <td>@user.SoDienThoai</td>
-                <td>@user.NgaySinh?.ToString("dd/MM/yyyy")</td>
-                <td>@user.TrangThai</td>
-                <td>
-                    @{
-                        // Lấy tên các vai trò từ tập hợp UserRoles
-                        var roleNames = user.UserRoles
-                        .Where(ur => ur.VaiTro != null)
-                        // Truy cập Navigation Property VaiTro và lấy TenVaiTro
-                        .Select(ur => ur.VaiTro.TenVaiTro)
-                        .ToList();
-                    }
-                    **@string.Join(", ", roleNames)**
-                </td>
-            </tr>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Thư viện Icon Bootstrap (Nếu chưa có trong Layout) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        /* CSS MỚI - Tông màu Đỏ Chủ đạo */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            min-height: 100vh;
         }
-    </tbody>
-</table>
+
+        body {
+            background-color: #f0f4f8;
+            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+        }
+
+        h1, h1 a {
+            color: #FF0000 !important;
+            text-decoration: none;
+            text-align: center;
+            font-size: 1.7em;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin: 20px;
+        }
+
+        hr {
+            max-width: 900px;
+            height: 3px;
+            background-color: #990000;
+            border: none;
+            border-radius: 3px;
+            margin: 0 auto 50px;
+        }
+
+        /* Nút thêm Người dùng */
+        .btn_add {
+            font-weight: bold;
+            display: inline-block;
+            margin: 15px;
+            padding: 15px 30px;
+            font-size: 18px;
+            letter-spacing: 1px;
+            text-decoration: none;
+            color: #FF0000;
+            background: transparent;
+            cursor: pointer;
+            transition: ease-out 0.5s;
+            border: 2px solid #FF0000;
+            border-radius: 10px;
+            box-shadow: inset 0 0 0 0 #FF0000;
+        }
+
+            .btn_add:hover {
+                color: white;
+                box-shadow: inset 0 -100px 0 0 #CC0000;
+            }
+
+            .btn_add:active {
+                transform: scale(0.9);
+            }
+
+        /* Bảng dữ liệu hiện đại */
+        table.modern-table {
+            width: 95%; /* Tăng độ rộng cho nhiều cột hơn */
+            margin: 20px auto;
+            border-collapse: collapse;
+            border-radius: 12px;
+            overflow: hidden;
+            font-size: 0.9em;
+            color: #333;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .modern-table thead {
+            background-color: #FF0000;
+            color: white;
+        }
+
+            .modern-table thead th {
+                padding: 15px;
+                font-weight: bold;
+                text-transform: uppercase;
+                font-size: 13px;
+                text-align: center;
+                border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            }
+
+        .modern-table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            color: #222;
+            text-align: center; /* Căn giữa nội dung cột */
+            font-weight: 500;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        tbody tr {
+            transition: background-color 0.25s ease;
+        }
+
+            tbody tr:hover {
+                background-color: rgba(255, 0, 0, 0.05);
+            }
+
+        /* Badges cho Trạng thái */
+        .badge {
+            font-size: 12px;
+            padding: 6px 10px;
+            font-weight: 600;
+            border-radius: 6px;
+            min-width: 90px;
+            display: inline-block;
+        }
+
+        /* Màu Badge cho trạng thái Hoạt động */
+        .bg-active {
+            background-color: rgba(255, 0, 0, 0.15);
+            color: #990000;
+        }
+
+        /* Màu Badge cho trạng thái Bị Khóa */
+        .bg-locked {
+            background-color: rgba(52, 58, 64, 0.15);
+            color: #343a40;
+        }
+
+        .alert-message {
+            width: 70%;
+            margin: 0 auto 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* Căn đều các nút trong cột thao tác */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            min-width: 120px;
+        }
+
+            .action-buttons a {
+                color: #FF0000;
+                border: 1px solid #FF0000;
+                border-radius: 6px;
+                padding: 6px 10px;
+                transition: background-color 0.2s ease, color 0.2s ease;
+            }
+
+            .action-buttons a:hover {
+                background-color: #FF0000;
+                color: white;
+            }
+
+            /* Responsive table adjustments */
+            @@media screen and (max-width: 768px) {
+                table.modern-table {
+                    display: block;
+                    width: 100%;
+                }
+                .modern-table thead {
+                    display: none; /* Ẩn header trên mobile */
+                }
+                .modern-table tbody, .modern-table tr, .modern-table td {
+                    display: block;
+                    width: 100%;
+                }
+                .modern-table tr {
+                    margin-bottom: 10px;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    overflow: hidden;
+                }
+                .modern-table td {
+                    text-align: right;
+                    padding-left: 50%;
+                    position: relative;
+                }
+                .modern-table td::before {
+                    content: attr(data-label);
+                    position: absolute;
+                    left: 0;
+                    width: 50%;
+                    padding-left: 15px;
+                    font-weight: bold;
+                    text-align: left;
+                    color: #555;
+                }
+                /* Căn chỉnh nút thao tác */
+                .modern-table td:last-child {
+                    text-align: center;
+                    padding-left: 15px;
+                }
+            }
+
+        .pagination {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 50px;
+            padding: 8px 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-item {
+            margin: 0 4px;
+        }
+
+            .page-item .page-link {
+                color: #FF6600;
+                border: none;
+                font-weight: 600;
+                border-radius: 30px;
+                padding: 8px 14px;
+                background: transparent;
+                transition: all 0.25s ease-in-out;
+            }
+
+                .page-item .page-link:hover {
+                    background-color: rgba(255, 153, 0, 0.15);
+                    color: #CC5200;
+                    transform: translateY(-1px);
+                }
+
+            .page-item.active .page-link {
+                background: linear-gradient(135deg, #FF6600, #FF944D);
+                color: white;
+                box-shadow: 0 3px 8px rgba(255, 102, 0, 0.4);
+            }
+
+            .page-item.disabled .page-link {
+                color: #aaa;
+                background: rgba(240, 240, 240, 0.7);
+                pointer-events: none;
+            }
+
+        /* Căn giữa phần phân trang */
+        nav[aria-label="Page navigation"] {
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+    </style>
+</head>
+
+<body>
+    @if(Model.Any())
+    {
+        
+    <h1><a href="~/Admin/NguoiDung/Index" class="text-decoration-none">@ViewData["Title"]</a></h1>
+    <hr />
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert-message alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert-message alert-info">
+            <i class="bi bi-info-circle-fill me-2"></i> Hiện chưa có người dùng nào được đăng ký.
+        </div>
+    }
+    else
+    {
+        <table class="modern-table">
+            <thead>
+                <tr>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Số điện thoại</th>
+                    <th>Ngày sinh</th>
+                    <th>Trạng thái</th>
+                    <th>Vai trò</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td data-label="Họ tên">@user.HoTen</td>
+                        <td data-label="Email">@user.Email</td>
+                        <td data-label="Số ĐT">@user.SoDienThoai</td>
+                        <td data-label="Ngày sinh">@user.NgaySinh?.ToString("dd/MM/yyyy")</td>
+
+                        <td data-label="Trạng thái">
+                            @{
+                                // Lấy tên trạng thái từ Enum
+                                var statusName = user.TrangThai.ToString();
+                                var badgeClass = user.TrangThai == AdminDashboard.Models.TrangThaiNguoiDung.HoatDong ? "bg-active" : "bg-locked";
+                            }
+                            <span class="badge @badgeClass">@statusName</span>
+                        </td>
+
+                        <td data-label="Vai trò">
+                            @{
+                                // Logic hiển thị Vai trò (giữ nguyên từ code cũ)
+                                var roleNames = user.UserRoles
+                                .Where(ur => ur.VaiTro != null)
+                                .Select(ur => ur.VaiTro.TenVaiTro)
+                                .ToList();
+                            }
+                            @string.Join(", ", roleNames)
+                        </td>
+
+                     </tr>
+                }
+            </tbody>
+        </table>
+        @if (ViewBag.TotalPages > 1)
+        {
+            <div class="d-flex justify-content-center">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination pagination-sm">
+                        @{
+                            var currentPage = ViewBag.CurrentPage;
+                            var totalPages = ViewBag.TotalPages;
+                        }
+
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = currentPage - 1 })" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+                                </li>
+                        }
+
+                        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = currentPage + 1 })" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                            </a>
+                            </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    }
+    }
+    else
+    {
+        <div class="alert-message alert-info">
+            <i class="bi bi-info-circle-fill me-2"></i> Hiện chưa có người dùng nào được đăng ký.
+        </div>
+    }
+    <!-- Thêm script để tự động đóng alert (giả sử Bootstrap JS đã được load) -->
+    @section Scripts {
+        <script>
+            // Tự động đóng alert sau 3 giây
+            setTimeout(() => {
+                const alerts = document.querySelectorAll('.alert-message.alert-success');
+                alerts.forEach(alert => {
+                    alert.style.opacity = '0';
+                    alert.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => alert.remove(), 500);
+                });
+            }, 3000);
+        </script>
+    }
+</body>

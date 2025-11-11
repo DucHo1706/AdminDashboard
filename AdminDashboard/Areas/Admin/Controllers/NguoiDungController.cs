@@ -22,19 +22,28 @@ namespace AdminDashboard.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
-            // Logic tải dữ liệu: Đã đúng và tận dụng Navigation Property 'VaiTro'
+            const int pageSize = 5;
+
+            // Đếm tổng số bản ghi trong bảng Người dùng
+            var totalRecords = await _context.NguoiDung.CountAsync();
+
+            // Lấy danh sách người dùng cho trang hiện tại
             var nguoiDungs = await _context.NguoiDung
                 .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.VaiTro)
                 .OrderBy(u => u.HoTen)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
-            // Trả về View và truyền danh sách vào
+            // Tính tổng số trang
+            ViewBag.TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
+            ViewBag.CurrentPage = page;
+
             return View(nguoiDungs);
         }
 
-        // Bạn có thể thêm các action khác như Create, Edit, Delete vào đây
     }
 }
