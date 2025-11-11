@@ -254,6 +254,23 @@
             justify-content: center;
         }
 
+        .route-card-header-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        .route-card-header-link:hover {
+            opacity: 0.9;
+            text-decoration: none;
+        }
+
+        .route-card-header-link:hover .route-card-overlay {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7));
+        }
+
         .route-card-overlay {
             background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.6));
             color: white;
@@ -290,19 +307,24 @@
             text-decoration: none;
             color: inherit;
             display: block;
-            transition: background-color 0.2s ease;
+            transition: all 0.2s ease;
             border-radius: 8px;
-            padding: 4px;
+            padding: 12px;
+            cursor: pointer;
+            width: 100%;
+            position: relative;
         }
 
         .route-item-link:hover {
             background-color: #f8f9fa;
             text-decoration: none;
             color: inherit;
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .route-item {
-            padding: 8px 0;
+            padding: 0;
         }
 
         .route-item-main {
@@ -368,27 +390,7 @@
                 <i class="bi bi-calendar-event fs-4 me-3"></i>
                 <input type="date" name="NgayDi" id="ngayDiInput" class="form-control" placeholder="Chọn ngày đi" />
             </div>
-            <div class="search-item">
-                <i class="bi bi-clock fs-4 me-3"></i>
-                <select name="GioDi" class="form-select" id="gioDiSelect">
-                    <option value="">Chọn giờ đi</option>
-                    @for (int hour = 5; hour <= 23; hour++)
-                    {
-                        <option value="@hour.ToString("00"):00">@hour:00</option>
-                    }
-                </select>
-            </div>
-            <div class="search-item">
-                <i class="bi bi-clock-history fs-4 me-3"></i>
-                <select name="GioDenDuKien" class="form-select" id="gioDenSelect">
-                    <option value="">Giờ dự kiến</option>
-                    @for (int hour = 9; hour <= 23; hour++)
-                    {
-                        <option value="@hour.ToString("00"):00">@hour:00</option>
-                    }
-                </select>
-            </div>
-            <button type="submit" class="btn btn-search px-4 py-3">
+                        <button type="submit" class="btn btn-search px-4 py-3">
                 <i class="bi bi-search me-1"></i> Tìm Kiếm
             </button>
         </form>
@@ -431,12 +433,30 @@
                     {
                         <div class="col-lg-4 col-md-6">
                             <div class="route-card">
-                                <div class="route-card-header" style="background-image: url('/images/slider/hcm.png');">
-                                    <div class="route-card-overlay">
-                                        <h3>Tuyến xe từ</h3>
-                                        <h4>@tuyen.TenTram</h4>
+                                @if (tuyen.TuyenXe != null && tuyen.TuyenXe.Any())
+                                {
+                                    var firstItem = tuyen.TuyenXe.First();
+                                    <a asp-action="ChonGhe" 
+                                       asp-controller="Booking" 
+                                       asp-route-chuyenId="@firstItem.ChuyenId"
+                                       class="route-card-header-link">
+                                        <div class="route-card-header" style="background-image: url('/images/slider/hcm.png');">
+                                            <div class="route-card-overlay">
+                                                <h3>Tuyến xe từ</h3>
+                                                <h4>@tuyen.TenTram</h4>
+                                            </div>
+                                        </div>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <div class="route-card-header" style="background-image: url('/images/slider/hcm.png');">
+                                        <div class="route-card-overlay">
+                                            <h3>Tuyến xe từ</h3>
+                                            <h4>@tuyen.TenTram</h4>
+                                        </div>
                                     </div>
-                                </div>
+                                }
                                 <div class="route-card-body">
                                     @foreach (var item in tuyen.TuyenXe)
                                     {

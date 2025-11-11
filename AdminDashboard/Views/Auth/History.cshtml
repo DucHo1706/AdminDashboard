@@ -217,7 +217,7 @@
                                 .Where(d => d.ChuyenXe != null)
                               
                                 .Where(d => d.TrangThaiThanhToan == "Da thanh toan")
-                                .Where(d => d.ChuyenXe.TrangThai == AdminDashboard.Models.TrangThai.TrangThaiChuyenXe.DaHoanThanh || d.ChuyenXe.NgayDi < DateTime.Today)
+                                .Where(d => d.ChuyenXe.TrangThai == AdminDashboard.Models.TrangThai.TrangThaiChuyenXe.DaHoanThanh || d.ChuyenXe.NgayDi <= DateTime.Today)
                                 .OrderByDescending(d => d.ChuyenXe.NgayDi);
 
                              
@@ -312,7 +312,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="card-footer d-flex justify-content-end gap-2">
-                                                            <a asp-controller="Booking" asp-action="BookingSuccess" asp-route-id="@d.DonHangId" class="btn btn-outline-primary btn-sm">Xem vé điện</a>
+                                                            <a asp-controller="Booking" asp-action="BookingSuccess" asp-route-id="@d.DonHangId" class="btn btn-outline-primary btn-sm">Xem hóa đơn</a>
                                                             <a asp-controller="Home_User" asp-action="Home_User" class="btn btn-primary btn-sm">Đặt chuyến</a>
                                                         </div>
                                                     </div>

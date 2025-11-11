@@ -7,41 +7,91 @@
 }
 
 <div class="container my-5">
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h4><i class="bi bi-info-circle-fill"></i> Thông tin hành trình của bạn</h4>
+    <div class="card mb-4 shadow-lg border-0 trip-info-card">
+        <div class="card-header trip-info-header">
+            <h4 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i> Thông tin hành trình của bạn</h4>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
             <div class="row align-items-center">
                 @if (Model.Images != null && Model.Images.Any())
                 {
                     var firstImage = Model.Images.FirstOrDefault();
                     if (firstImage != null)
                     {
-                        <div class="col-md-3 text-center">
-                            <img src="@firstImage.ImageUrl" alt="Hình ảnh xe" style="width: 100%; max-width: 200px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+                        <div class="col-md-3 text-center mb-3 mb-md-0">
+                            <div class="bus-image-wrapper">
+                                <img src="@firstImage.ImageUrl" alt="Hình ảnh xe" class="bus-image" />
+                            </div>
                         </div>
                         <div class="col-md-9">
-                            <p><strong>Tuyến đường:</strong> @Model.LoTrinh.TramDiNavigation.TenTram → @Model.LoTrinh.TramToiNavigation.TenTram</p>
-                            <p><strong>Ngày đi:</strong> @Model.NgayDi.ToString("dd/MM/yyyy") - <strong>Giờ khởi hành:</strong> @Model.GioDi.ToString(@"hh\:mm")</p>
-                            <p><strong>Giá vé:</strong> <span id="giaVe" class="fw-bold">@Model.LoTrinh.GiaVeCoDinh?.ToString("N0")</span> VNĐ/ghế</p>
+                            <div class="trip-info-content">
+                                <div class="info-item">
+                                    <i class="bi bi-route me-2 text-primary"></i>
+                                    <span class="info-label">Tuyến đường:</span>
+                                    <span class="info-value">@Model.LoTrinh.TramDiNavigation.TenTram <i class="bi bi-arrow-right mx-2"></i> @Model.LoTrinh.TramToiNavigation.TenTram</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="bi bi-calendar3 me-2 text-primary"></i>
+                                    <span class="info-label">Ngày đi:</span>
+                                    <span class="info-value">@Model.NgayDi.ToString("dd/MM/yyyy")</span>
+                                    <span class="info-label ms-3">Giờ khởi hành:</span>
+                                    <span class="info-value">@Model.GioDi.ToString(@"hh\:mm")</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="bi bi-tag-fill me-2 text-primary"></i>
+                                    <span class="info-label">Giá vé:</span>
+                                    <span id="giaVe" class="price-highlight">@Model.LoTrinh.GiaVeCoDinh?.ToString("N0") VNĐ/ghế</span>
+                                </div>
+                            </div>
                         </div>
                     }
                     else
                     {
                         <div class="col-12">
-                            <p><strong>Tuyến đường:</strong> @Model.LoTrinh.TramDiNavigation.TenTram → @Model.LoTrinh.TramToiNavigation.TenTram</p>
-                            <p><strong>Ngày đi:</strong> @Model.NgayDi.ToString("dd/MM/yyyy") - <strong>Giờ khởi hành:</strong> @Model.GioDi.ToString(@"hh\:mm")</p>
-                            <p><strong>Giá vé:</strong> <span id="giaVe" class="fw-bold">@Model.LoTrinh.GiaVeCoDinh?.ToString("N0")</span> VNĐ/ghế</p>
+                            <div class="trip-info-content">
+                                <div class="info-item">
+                                    <i class="bi bi-route me-2 text-primary"></i>
+                                    <span class="info-label">Tuyến đường:</span>
+                                    <span class="info-value">@Model.LoTrinh.TramDiNavigation.TenTram <i class="bi bi-arrow-right mx-2"></i> @Model.LoTrinh.TramToiNavigation.TenTram</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="bi bi-calendar3 me-2 text-primary"></i>
+                                    <span class="info-label">Ngày đi:</span>
+                                    <span class="info-value">@Model.NgayDi.ToString("dd/MM/yyyy")</span>
+                                    <span class="info-label ms-3">Giờ khởi hành:</span>
+                                    <span class="info-value">@Model.GioDi.ToString(@"hh\:mm")</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="bi bi-tag-fill me-2 text-primary"></i>
+                                    <span class="info-label">Giá vé:</span>
+                                    <span id="giaVe" class="price-highlight">@Model.LoTrinh.GiaVeCoDinh?.ToString("N0") VNĐ/ghế</span>
+                                </div>
+                            </div>
                         </div>
                     }
                 }
                 else
                 {
                     <div class="col-12">
-                        <p><strong>Tuyến đường:</strong> @Model.LoTrinh.TramDiNavigation.TenTram → @Model.LoTrinh.TramToiNavigation.TenTram</p>
-                        <p><strong>Ngày đi:</strong> @Model.NgayDi.ToString("dd/MM/yyyy") - <strong>Giờ khởi hành:</strong> @Model.GioDi.ToString(@"hh\:mm")</p>
-                        <p><strong>Giá vé:</strong> <span id="giaVe" class="fw-bold">@Model.LoTrinh.GiaVeCoDinh?.ToString("N0")</span> VNĐ/ghế</p>
+                        <div class="trip-info-content">
+                            <div class="info-item">
+                                <i class="bi bi-route me-2 text-primary"></i>
+                                <span class="info-label">Tuyến đường:</span>
+                                <span class="info-value">@Model.LoTrinh.TramDiNavigation.TenTram <i class="bi bi-arrow-right mx-2"></i> @Model.LoTrinh.TramToiNavigation.TenTram</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="bi bi-calendar3 me-2 text-primary"></i>
+                                <span class="info-label">Ngày đi:</span>
+                                <span class="info-value">@Model.NgayDi.ToString("dd/MM/yyyy")</span>
+                                <span class="info-label ms-3">Giờ khởi hành:</span>
+                                <span class="info-value">@Model.GioDi.ToString(@"hh\:mm")</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="bi bi-tag-fill me-2 text-primary"></i>
+                                <span class="info-label">Giá vé:</span>
+                                <span id="giaVe" class="price-highlight">@Model.LoTrinh.GiaVeCoDinh?.ToString("N0") VNĐ/ghế</span>
+                            </div>
+                        </div>
                     </div>
                 }
             </div>
@@ -50,9 +100,11 @@
 
     <div class="row">
         <div class="col-lg-7">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title text-center mb-4">Sơ đồ ghế trên xe</h5>
+            <div class="card shadow-lg border-0 seat-map-card">
+                <div class="card-body p-4">
+                    <h5 class="card-title text-center mb-4 seat-map-title">
+                        <i class="bi bi-grid-3x3-gap me-2"></i>Sơ đồ ghế trên xe
+                    </h5>
                     <div class="seat-map-container">
                         <div class="bus-layout">
                             @foreach (var ghe in (Model.Xe?.DanhSachGhe ?? Enumerable.Empty<AdminDashboard.Models.Ghe>()).OrderBy(g => int.Parse(g.SoGhe)))
@@ -69,45 +121,57 @@
                             }
                         </div>
                     </div>
-                    <div class="d-flex justify-content-center mt-4 border-top pt-3">
-                        <div class="me-4 d-flex align-items-center"><span class="seat-legend available"></span> &nbsp;Còn trống</div>
-                        <div class="me-4 d-flex align-items-center"><span class="seat-legend selected"></span> &nbsp;Đang chọn</div>
-                        <div class="d-flex align-items-center"><span class="seat-legend booked"></span> &nbsp;Đã đặt</div>
+                    <div class="seat-legend-container">
+                        <div class="legend-item">
+                            <span class="seat-legend available"></span>
+                            <span class="legend-text">Còn trống</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="seat-legend selected"></span>
+                            <span class="legend-text">Đang chọn</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="seat-legend booked"></span>
+                            <span class="legend-text">Đã đặt</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="col-lg-5 mt-4 mt-lg-0">
-            <div class="card shadow-sm">
-                <div class="card-header bg-success text-white">
-                    <h4><i class="bi bi-cart-check-fill"></i> Chi tiết vé của bạn</h4>
+            <div class="card shadow-lg border-0 ticket-details-card">
+                <div class="card-header ticket-details-header">
+                    <h4 class="mb-0"><i class="bi bi-cart-check-fill me-2"></i> Chi tiết vé của bạn</h4>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <!-- Thông báo giới hạn ghế -->
-                    <div id="seat-limit-notification" class="alert alert-warning alert-dismissible fade" role="alert" style="display: none;">
+                    <div id="seat-limit-notification" class="alert alert-warning alert-dismissible fade custom-alert" role="alert" style="display: none;">
                         <i class="bi bi-exclamation-triangle-fill me-2"></i>
                         <span id="notification-message"></span>
                         <button type="button" class="btn-close" aria-label="Close" onclick="closeNotification()"></button>
                     </div>
                     
-                    <div class="mb-3">
-                        <label class="form-label">Ghế đã chọn:</label>
-                        <div id="selected-seats-text" class="fw-bold fs-5 text-success">Chưa chọn ghế</div>
+                    <div class="selected-seats-section mb-4">
+                        <label class="form-label fw-semibold mb-2">
+                            <i class="bi bi-seat me-2"></i>Ghế đã chọn:
+                        </label>
+                        <div id="selected-seats-text" class="selected-seats-display">Chưa chọn ghế</div>
                     </div>
-                    <hr />
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="fs-4">Tổng tiền:</span>
-                        <span id="total-price" class="fw-bold fs-2 text-danger">0 VNĐ</span>
+                    
+                    <div class="total-price-section">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="total-label">Tổng tiền:</span>
+                            <span id="total-price" class="total-price">0 VNĐ</span>
+                        </div>
                     </div>
-                    <hr />
 
                     <form asp-action="XacNhanBooking" asp-controller="Booking" method="post">
                         <input type="hidden" name="chuyenId" value="@Model.ChuyenId" />
                         <input type="hidden" name="danhSachGheId" id="selected-seats-input" />
 
-                        <button type="submit" class="btn btn-primary w-100 btn-lg" disabled id="btn-continue">
-                            Tiếp tục
+                        <button type="submit" class="btn btn-continue w-100" disabled id="btn-continue">
+                            <i class="bi bi-arrow-right-circle me-2"></i>Tiếp tục
                         </button>
                     </form>
                 </div>
@@ -118,30 +182,292 @@
 
 @section Styles {
     <style>
-        .bus-layout { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; max-width: 400px; margin: auto; }
-        .bus-layout > div:nth-child(5n+3) { grid-column-start: 4; } /* Tạo lối đi ở giữa */
-        .seat { aspect-ratio: 1 / 1; display: flex; justify-content: center; align-items: center; border-radius: 8px; font-weight: bold; }
-        .available { background-color: #e9f5ff; border: 1px solid #a3d1ff; color: #007bff; cursor: pointer; transition: background-color 0.2s; }
-        .available:hover { background-color: #cce5ff; }
-        .booked { background-color: #f8f9fa; color: #adb5bd; border: 1px solid #dee2e6; cursor: not-allowed; }
-        .selected { background-color: #28a745; color: white; border: 1px solid #1e7e34; }
-        .seat-legend { display: inline-block; width: 20px; height: 20px; border-radius: 4px; vertical-align: middle; }
-        
-        /* Style cho thông báo */
-        #seat-limit-notification {
+        /* Trip Info Card Styles */
+        .trip-info-card {
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .trip-info-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 24px;
+            border: none;
+            font-weight: 600;
+        }
+
+        .bus-image-wrapper {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: inline-block;
+        }
+
+        .bus-image {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .trip-info-content {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            font-size: 16px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+            margin-right: 8px;
+        }
+
+        .info-value {
+            color: #212529;
+            font-weight: 500;
+        }
+
+        .price-highlight {
+            font-weight: 700;
+            font-size: 18px;
+            color: #e74c3c;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            padding: 4px 12px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        /* Seat Map Card Styles */
+        .seat-map-card {
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .seat-map-title {
+            font-weight: 700;
+            font-size: 22px;
+            color: #2d3748;
+            margin-bottom: 24px !important;
+        }
+
+        .bus-layout {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            max-width: 420px;
+            margin: auto;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .bus-layout > div:nth-child(5n+3) {
+            grid-column-start: 4;
+        }
+
+        .seat {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .available {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border: 2px solid #2196f3;
+            color: #1976d2;
+            cursor: pointer;
+        }
+
+        .available:hover {
+            background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+        }
+
+        .available:active {
+            transform: translateY(0);
+        }
+
+        .booked {
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            color: #9e9e9e;
+            border: 2px solid #bdbdbd;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .selected {
+            background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+            color: white;
+            border: 2px solid #2e7d32;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+            transform: scale(1.05);
+        }
+
+        .seat-legend-container {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .seat-legend {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            vertical-align: middle;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .seat-legend.available {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border: 2px solid #2196f3;
+        }
+
+        .seat-legend.selected {
+            background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+            border: 2px solid #2e7d32;
+        }
+
+        .seat-legend.booked {
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            border: 2px solid #bdbdbd;
+        }
+
+        .legend-text {
+            font-weight: 500;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        /* Ticket Details Card Styles */
+        .ticket-details-card {
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .ticket-details-header {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 20px 24px;
+            border: none;
+            font-weight: 600;
+        }
+
+        .custom-alert {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
             margin-bottom: 1rem;
             animation: slideDown 0.3s ease-out;
         }
-        
-        #seat-limit-notification.fade {
+
+        .custom-alert.fade {
             opacity: 0;
             transition: opacity 0.3s ease-out;
         }
-        
-        #seat-limit-notification.show {
+
+        .custom-alert.show {
             opacity: 1;
         }
-        
+
+        .selected-seats-section {
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            border-left: 4px solid #28a745;
+        }
+
+        .selected-seats-display {
+            font-weight: 700;
+            font-size: 20px;
+            color: #28a745;
+            margin-top: 8px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+        }
+
+        .total-price-section {
+            padding: 20px;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+            border-radius: 12px;
+            border-left: 4px solid #e74c3c;
+            margin-bottom: 24px;
+        }
+
+        .total-label {
+            font-size: 20px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .total-price {
+            font-weight: 800;
+            font-size: 28px;
+            color: #e74c3c;
+            text-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
+        }
+
+        .btn-continue {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-continue:hover:not(:disabled) {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+            color: white;
+        }
+
+        .btn-continue:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-continue:disabled {
+            background: #e9ecef;
+            color: #adb5bd;
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        /* Animations */
         @@keyframes slideDown {
             from {
                 opacity: 0;
@@ -150,6 +476,32 @@
             to {
                 opacity: 1;
                 transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .bus-layout {
+                grid-template-columns: repeat(4, 1fr);
+                max-width: 100%;
+            }
+
+            .bus-layout > div:nth-child(5n+3) {
+                grid-column-start: auto;
+            }
+
+            .seat-legend-container {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .info-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .info-label {
+                margin-bottom: 4px;
             }
         }
     </style>
@@ -235,9 +587,11 @@
                 // Cập nhật text hiển thị các ghế đã chọn
                 if (selectedSeats.length === 0) {
                     selectedSeatsText.textContent = 'Chưa chọn ghế';
+                    selectedSeatsText.style.color = '#6c757d';
                     btnContinue.disabled = true;
                 } else {
                     selectedSeatsText.textContent = selectedSeats.map(s => s.name).join(', ');
+                    selectedSeatsText.style.color = '#28a745';
                     btnContinue.disabled = false;
                 }
 

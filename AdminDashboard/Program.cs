@@ -92,10 +92,13 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home_User}/{action=Home_User}/{id?}"
 );
+<<<<<<< HEAD
 app.MapControllerRoute(
     name: "chat_user",
     pattern: "{controller=ChatUser}/{action=Index}/{id?}"
 );
+=======
+>>>>>>> e6d1d97944459fdc017f584230850266d2cec681
 
 app.Run();
 
@@ -106,4 +109,8 @@ app.Run();
 - Không còn trùng lặp AddControllersWithViews() hay AddRazorPages().
 - ChatHub hoạt động qua endpoint /chathub.
 ─────────────────────────────────────────────
+<<<<<<< HEAD
 */
+=======
+*/
+>>>>>>> e6d1d97944459fdc017f584230850266d2cec681

@@ -20,22 +20,29 @@ namespace AdminDashboard.Areas.Admin.Controllers
             _context = context;
             _imageService = imageService;
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
+            const int pageSize = 5;
+
             var chuyenXes = await _context.ChuyenXe
-                .Include(c => c.LoTrinh)
-                    .ThenInclude(lt => lt.TramDiNavigation)
-                .Include(c => c.LoTrinh)
-                    .ThenInclude(lt => lt.TramToiNavigation)
+                .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramDiNavigation)
+                .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramToiNavigation)
                 .Include(c => c.Xe)
                 .Include(c => c.TaiXe)
-                .Include(c => c.Images) 
+                .Include(c => c.Images)
                 .OrderByDescending(c => c.NgayDi)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
-            await PopulateTramDropdowns();
+            var totalRecords = await _context.ChuyenXe.CountAsync();
 
-           
+            ViewBag.TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
+            ViewBag.CurrentPage = page;
+            ViewBag.DiemDi = "";
+            ViewBag.DiemDen = "";
+
+            await PopulateTramDropdowns();
             return View(chuyenXes);
         }
 
@@ -52,44 +59,42 @@ namespace AdminDashboard.Areas.Admin.Controllers
 
         //  ACTION TÌM KIẾM AJAX BẰNG ID
         [HttpGet]
-        public async Task<IActionResult> TimKiemAjax(string diemDi, string diemDen)
+        public async Task<IActionResult> TimKiemAjax(string diemDi, string diemDen, int page = 1)
         {
             try
             {
-                Console.WriteLine($"🔹 TimKiemAjax => ID Trạm Đi={diemDi}, ID Trạm Đến={diemDen}");
+                const int pageSize = 5;
 
                 var query = _context.ChuyenXe
-                    .Include(c => c.LoTrinh)
-                        .ThenInclude(lt => lt.TramDiNavigation)
-                    .Include(c => c.LoTrinh)
-                        .ThenInclude(lt => lt.TramToiNavigation)
+                    .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramDiNavigation)
+                    .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramToiNavigation)
                     .Include(c => c.Xe)
-                    .Include(c => c.Images) // <-- THÊM DÒNG NÀY ĐỂ TẢI ẢNH
+                    .Include(c => c.Images)
                     .AsQueryable();
 
                 if (!string.IsNullOrEmpty(diemDi))
-                {
                     query = query.Where(c => c.LoTrinh.TramDi == diemDi);
-                }
-
                 if (!string.IsNullOrEmpty(diemDen))
-                {
                     query = query.Where(c => c.LoTrinh.TramToi == diemDen);
-                }
 
-                if (string.IsNullOrEmpty(diemDi) && string.IsNullOrEmpty(diemDen))
-                {
-                    query = query.Where(c => 1 == 0);
-                }
+                var totalRecords = await query.CountAsync();
+                var ketQua = await query
+                    .OrderBy(c => c.NgayDi).ThenBy(c => c.GioDi)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
 
-                var ketQua = await query.OrderBy(c => c.NgayDi).ThenBy(c => c.GioDi).ToListAsync();
+                // GÁN ViewBag ĐỂ PartialView DÙNG
+                ViewBag.TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
+                ViewBag.CurrentPage = page;
+                ViewBag.DiemDi = diemDi;
+                ViewBag.DiemDen = diemDen;
 
                 return PartialView("_BangChuyenXe", ketQua);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($" Lỗi server: {ex.Message}");
-                return Content($"<div class='alert alert-danger mt-3'>Đã xảy ra lỗi: {ex.Message}</div>");
+                return Content($"<div class='alert alert-danger'>Lỗi: {ex.Message}</div>");
             }
         }
         //// GET: ChuyenXe/Details/5
@@ -496,11 +501,6 @@ namespace AdminDashboard.Areas.Admin.Controllers
             TempData["SuccessMessage"] = "Đã phân công tài xế thành công!";
             return RedirectToAction(nameof(Index));
         }
-
-
-
-
-
 
         public IActionResult TimKiem(string diemDiId, string diemDenId, DateTime ngayDi)
         {// Truy vấn CSDL để lấy các chuyến xe phù hợp

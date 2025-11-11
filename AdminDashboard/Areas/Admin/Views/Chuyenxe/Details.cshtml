@@ -10,14 +10,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <style>
-        /* (Giữ nguyên toàn bộ CSS của bạn) */
         body {
-            background: url('https://images.unsplash.com/photo-1583417319070-4a69db38a482?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1740') no-repeat center center fixed;
+            background-color: #f0f4f8;
             background-size: cover;
+            background-position: center;
             font-family: 'Segoe UI', Roboto, sans-serif;
-            min-height: 100vh;
-            color: #111827;
-            padding-bottom: 40px; /* Thêm padding dưới */
         }
 
         h2 {
@@ -138,25 +135,57 @@
             border-radius: 3px;
             margin: 0 auto 30px;
         }
+
+        .logo-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+
+            .logo-wrapper img {
+                width: 130px;
+                height: 38px;
+            }
+
+        .button {
+            position: relative;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 1px solid #3366CC;
+            font-size: 15px;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
+            background: transparent;
+            color: black;
+            overflow: hidden;
+            transition: all 0.25s ease;
+        }
+
+            .button:hover {
+                background: #0099FF;
+                box-shadow: 0 0 20px 5px #0099FF;
+                color: white;
+            }
     </style>
 </head>
 
 <body>
-    <div class="top-bar">
-        <a asp-action="Index" class="back-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"
-                 class="bi bi-box-arrow-left" viewBox="0 0 16 16">
-                <path fill-rule="evenodd"
-                      d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0z" />
-                <path fill-rule="evenodd"
-                      d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708z" />
-            </svg>
-        </a>
-    </div>
-
-    <h2>Chi tiết Chuyến Xe</h2>
+    <h2 class="text-primary">Chi tiết Chuyến Xe</h2>
     <hr class="custom-hr" />
     <div class="details-card">
+        <div class="header-bar mb-3">
+            <a asp-action="Index" class="text-decoration-none">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-box-arrow-left" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0z" /><path fill-rule="evenodd" d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708z" /></svg>
+            </a>
+            <div style="width:18px;"></div>
+        </div>
+        <div class="logo-wrapper">
+            <img src="~/css/Images/logo_web.png" alt="Logo" />
+        </div>
+        <hr class="custom-hr" />
         <div class="detail-item">
             <div class="detail-label">Xe</div>
             <div class="detail-value">@Html.DisplayFor(model => model.Xe.BienSoXe)</div>
@@ -198,8 +227,8 @@
                 </div>
             </div>
         }
-        <div class="text-center mt-4">
-            <a asp-action="Edit" asp-route-id="@Model.ChuyenId" class="btn btn-primary me-2 px-4">Chỉnh sửa</a>
+        <div class="text-center mt-5">
+            <a asp-action="Edit" asp-route-id="@Model.ChuyenId" class="button me-2 px-4 text-decoration-none">Chỉnh sửa</a>
         </div>
     </div>
 </body>
