@@ -19,7 +19,7 @@
             text-align: center;
             font-size: 38px;
             font-weight: 700;
-            color: #00CC00;
+            color: #FF6600;
             text-transform: uppercase;
             margin-bottom: 15px;
         }
@@ -46,7 +46,7 @@
 
         .control-label {
             font-weight: 600;
-            color: #4a5568;
+            color: #FF6600;
             margin-bottom: 6px;
             display: flex;
             align-items: center;
@@ -76,7 +76,7 @@
             position: relative;
             padding: 12px 24px;
             border-radius: 8px;
-            border: 1px solid #33CC00;
+            border: 1px solid #FF6600;
             font-size: 15px;
             text-transform: uppercase;
             font-weight: 600;
@@ -88,8 +88,8 @@
         }
 
             button:hover {
-                background: #33CC00;
-                box-shadow: 0 0 20px 5px #33CC66;
+                background: #FF6633;
+                box-shadow: 0 0 20px 5px #FF6600;
                 color: white;
             }
 
@@ -98,7 +98,7 @@
         }
 
         a.text-decoration-none {
-            color: #00CC00;
+            color: #FF6600;
             transition: transform 0.2s ease;
         }
 
@@ -109,7 +109,7 @@
         hr {
             border: none;
             height: 1px;
-            background-color: #ccc;
+            background-color: #FF3300;
             margin-bottom: 20px;
         }
 
@@ -144,7 +144,6 @@
 
     <div class="form">
         <div class="form-container">
-            <!-- Hiển thị thông báo -->
             @if (TempData["SuccessMessage"] != null)
             {
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -174,7 +173,6 @@
                               d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708z" />
                     </svg>
                 </a>
-                <!-- để trống bên phải cho cân đối -->
                 <div style="width:18px;"></div>
             </div>
 

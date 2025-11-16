@@ -267,6 +267,49 @@
             margin-top: 20px;
         }
 
+
+        /* Loader overlay */
+        /* Loader chỉ nằm trong khu vực bảng */
+.table-loader-wrapper {
+    position: relative;
+}
+
+.table-loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50; /* chỉ nổi trên bảng */
+}
+
+.lds-dual-ring {
+    display: inline-block;
+    width: 60px;
+    height: 60px;
+}
+
+.lds-dual-ring:after {
+    content: " ";
+    display: block;
+    width: 48px;
+    height: 48px;
+    margin: 6px;
+    border-radius: 50%;
+    border: 6px solid #FF0000;
+    border-color: #FF0000 transparent #FF0000 transparent;
+    animation: lds-dual-ring 1.2s linear infinite;
+}
+
+@@keyframes lds-dual-ring {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
     </style>
 </head>
 
@@ -292,7 +335,13 @@
     }
     else
     {
-        <table class="modern-table">
+           <div class="table-loader-wrapper">
+    <div id="tableLoader" class="table-loader">
+        <div class="lds-dual-ring"></div>
+    </div>
+
+    <table class="modern-table">
+
             <thead>
                 <tr>
                     <th>Họ tên</th>
@@ -300,7 +349,6 @@
                     <th>Số điện thoại</th>
                     <th>Ngày sinh</th>
                     <th>Trạng thái</th>
-                    <th>Vai trò</th>
                 </tr>
             </thead>
             <tbody>
@@ -314,28 +362,17 @@
 
                         <td data-label="Trạng thái">
                             @{
-                                // Lấy tên trạng thái từ Enum
                                 var statusName = user.TrangThai.ToString();
                                 var badgeClass = user.TrangThai == AdminDashboard.Models.TrangThaiNguoiDung.HoatDong ? "bg-active" : "bg-locked";
                             }
                             <span class="badge @badgeClass">@statusName</span>
                         </td>
-
-                        <td data-label="Vai trò">
-                            @{
-                                // Logic hiển thị Vai trò (giữ nguyên từ code cũ)
-                                var roleNames = user.UserRoles
-                                .Where(ur => ur.VaiTro != null)
-                                .Select(ur => ur.VaiTro.TenVaiTro)
-                                .ToList();
-                            }
-                            @string.Join(", ", roleNames)
-                        </td>
-
-                     </tr>
+                        </tr>
                 }
             </tbody>
-        </table>
+                </table>
+            </div>
+
         @if (ViewBag.TotalPages > 1)
         {
             <div class="d-flex justify-content-center">
@@ -376,10 +413,8 @@
             <i class="bi bi-info-circle-fill me-2"></i> Hiện chưa có người dùng nào được đăng ký.
         </div>
     }
-    <!-- Thêm script để tự động đóng alert (giả sử Bootstrap JS đã được load) -->
     @section Scripts {
         <script>
-            // Tự động đóng alert sau 3 giây
             setTimeout(() => {
                 const alerts = document.querySelectorAll('.alert-message.alert-success');
                 alerts.forEach(alert => {
@@ -389,5 +424,27 @@
                 });
             }, 3000);
         </script>
+        <script>
+            // Ẩn loading sau khi trang load xong
+            window.addEventListener("load", function () {
+                const loader = document.getElementById("tableLoader");
+                loader.style.opacity = "0";
+                loader.style.transition = "opacity 0.6s ease";
+
+                setTimeout(() => loader.style.display = "none", 600);
+            });
+
+
+            // Tự ẩn thông báo success sau 3s
+            setTimeout(() => {
+                const alerts = document.querySelectorAll('.alert-message.alert-success');
+                alerts.forEach(alert => {
+                    alert.style.opacity = '0';
+                    alert.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => alert.remove(), 500);
+                });
+            }, 3000);
+        </script>
+
     }
 </body>

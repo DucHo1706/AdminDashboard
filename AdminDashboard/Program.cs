@@ -25,6 +25,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IVnpayService, VnpayService>();
 builder.Services.AddScoped<IPaginationService, PaginationService>();
+builder.Services.AddHttpClient();
 
 // ===================== CLOUDINARY / LOCAL IMAGE SERVICE =====================
 var cloudinaryConfig = builder.Configuration.GetSection("Cloudinary");
@@ -92,13 +93,12 @@ app.MapControllerRoute(
     pattern: "{controller=Home_User}/{action=Home_User}/{id?}"
 );
 
+app.MapControllerRoute(
+    name: "chat_user",
+    pattern: "{controller=ChatUser}/{action=Index}/{id?}"
+);
+
+
 app.Run();
 
-/*
-─────────────────────────────────────────────
-🧩 Ghi chú:
-- Có đầy đủ: DbContext, SignalR, Cloudinary, LocalImage, Authentication, RazorPages, Area routing.
-- Không còn trùng lặp AddControllersWithViews() hay AddRazorPages().
-- ChatHub hoạt động qua endpoint /chathub.
-─────────────────────────────────────────────
-*/
+

@@ -6,19 +6,26 @@
     var taiXes = ViewBag.TaiXes as SelectList;
 }
 
-<div class="container-fluid">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">@ViewData["Title"]</h1>
+        <div>
+            <a asp-action="DanhSachPhanCong" class="btn btn-info me-2">
+                <i class="fas fa-history"></i> Lịch Sử Phân Công
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
     </div>
 
-    <!-- Hiển thị thông báo -->
+    <!-- Thông báo -->
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <strong>Thành công!</strong> @TempData["SuccessMessage"]
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
@@ -26,29 +33,25 @@
     {
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <strong>Lỗi!</strong> @TempData["ErrorMessage"]
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
-    <!-- Danh sách chuyến xe chưa phân công -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Chuyến Xe Chưa Phân Công</h6>
+    <!-- Danh sách chuyến xe -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Chuyến Xe Chưa Phân Công</h5>
         </div>
         <div class="card-body">
             @if (!Model.Any())
             {
-                <div class="text-center">
-                    <p class="text-muted">Không có chuyến xe nào cần phân công.</p>
-                </div>
+                <div class="text-center text-muted fst-italic">Không có chuyến xe nào cần phân công.</div>
             }
             else
             {
                 <div class="table-responsive">
-                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                        <thead>
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
                             <tr>
                                 <th>Mã Chuyến</th>
                                 <th>Lộ Trình</th>
@@ -77,23 +80,24 @@
                                     <td>@chuyen.NgayDi.ToString("dd/MM/yyyy") @chuyen.GioDi.ToString(@"hh\:mm")</td>
                                     <td>@(chuyen.Xe?.BienSoXe ?? "Không có xe")</td>
                                     <td>
+                                        @* Hiển thị badge theo enum với màu sắc *@
                                         <span class="badge
-                                                @(chuyen.TrangThai == TrangThaiChuyenXe.DaLenLich ? "badge-secondary" :
-                                                                                        chuyen.TrangThai == TrangThaiChuyenXe.DangMoBanVe ? "badge-info" :
-                                                                                        chuyen.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh ? "badge-warning" :
-                                                                                        chuyen.TrangThai == TrangThaiChuyenXe.DangDiChuyen ? "badge-primary" :
-                                                                                        chuyen.TrangThai == TrangThaiChuyenXe.DaHoanThanh ? "badge-success" : "badge-danger")">
-                                            @chuyen.TrangThai
+                                            @(chuyen.TrangThai == TrangThaiChuyenXe.DaLenLich ? "bg-secondary" :
+                                              chuyen.TrangThai == TrangThaiChuyenXe.DangMoBanVe ? "bg-info" :
+                                              chuyen.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh ? "bg-warning text-dark" :
+                                              chuyen.TrangThai == TrangThaiChuyenXe.DangDiChuyen ? "bg-primary" :
+                                              chuyen.TrangThai == TrangThaiChuyenXe.DaHoanThanh ? "bg-success" : "bg-danger")">
+                                            @Html.DisplayFor(modelItem => chuyen.TrangThai)
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="text-danger">Chưa phân công</span>
+                                        <span class="text-danger fw-semibold">Chưa phân công</span>
                                     </td>
                                     <td>
-                                        <form asp-action="PhanCongLich" method="post" class="form-inline">
+                                        <form asp-action="PhanCongLich" method="post" class="d-flex gap-2">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="chuyenId" value="@chuyen.ChuyenId" />
-                                            <select name="taiXeId" class="form-control form-control-sm mr-2" required style="min-width: 200px;">
+                                            <select name="taiXeId" class="form-select form-select-sm" required>
                                                 <option value="">-- Chọn tài xế --</option>
                                                 @if (taiXes != null)
                                                 {
@@ -117,47 +121,50 @@
         </div>
     </div>
 
-    <div class="text-center">
-        <a asp-action="DanhSachPhanCong" class="btn btn-info">
-            <i class="fas fa-history"></i> Xem Lịch Sử Phân Công
-        </a>
-        <a asp-action="Index" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Quay lại danh sách tài xế
-        </a>
+    <!-- Lịch tài xế -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Xem Lịch Làm Việc Tài Xế</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3 align-items-center mb-3">
+                <div class="col-md-4">
+                    <select id="taiXeSelect" class="form-select" name="taiXeId">
+                        <option value="">-- Chọn tài xế --</option>
+                        @foreach (var tx in (SelectList)ViewBag.TaiXes)
+                        {
+                            <option value="@tx.Value">@tx.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-8" id="lichTaiXeContainer"></div>
+            </div>
+        </div>
     </div>
+
 </div>
-
-<select id="taiXeSelect" class="form-control" name="taiXeId">
-    <option value="">-- Chọn tài xế --</option>
-    @foreach (var tx in (SelectList)ViewBag.TaiXes)
-{
-    <option value="@tx.Value">@tx.Text</option>
-}
-
-</select>
-
-<div id="lichTaiXeContainer" class="mt-3"></div>
 
 @section Scripts {
     <script>
-        document.getElementById("taiXeSelect").addEventListener("change", function() {
-            var taiXeId = this.value;
-            var container = document.getElementById("lichTaiXeContainer");
+        const taiXeSelect = document.getElementById("taiXeSelect");
+        const container = document.getElementById("lichTaiXeContainer");
+
+        taiXeSelect.addEventListener("change", function () {
+            const taiXeId = this.value;
+            if (!taiXeId) {
+                container.innerHTML = "";
+                return;
+            }
+
             container.innerHTML = "<div class='text-info'>Đang tải lịch làm việc...</div>";
 
-            if (taiXeId) {
-                fetch(`/TaiXe/XemLichTaiXe?taiXeId=${taiXeId}`)
-                    .then(response => response.text())
-                    .then(html => {
-                        container.innerHTML = html;
-                    })
-                    .catch(error => {
-                        container.innerHTML = "<div class='alert alert-danger'>Lỗi khi tải dữ liệu.</div>";
-                        console.error(error);
-                    });
-            } else {
-                container.innerHTML = "";
-            }
+            fetch(`/TaiXe/XemLichTaiXe?taiXeId=${taiXeId}`)
+                .then(res => res.text())
+                .then(html => container.innerHTML = html)
+                .catch(err => {
+                    container.innerHTML = "<div class='alert alert-danger'>Lỗi khi tải dữ liệu.</div>";
+                    console.error(err);
+                });
         });
     </script>
 }
