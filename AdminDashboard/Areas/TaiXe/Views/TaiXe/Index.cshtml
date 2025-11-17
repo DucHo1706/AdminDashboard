@@ -235,7 +235,6 @@
 <body>
     <h1><a href="~/TaiXe/TaiXe" class="text-decoration-none">@ViewData["Title"]</a></h1>
     <hr />
-    <h2>Làm tiếp phần Phân công tài xế</h2>
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show d-flex align-items-center justify-content-between"
@@ -288,7 +287,6 @@
                         <td>
                             <div class="btn-group">
                                 <div style="padding-right:15px">
-                                    <!-- Nút xem chi tiết -->
                                     <a asp-action="ChiTiet" asp-route-id="@item.UserId" class="btn-action btn-edit">
                                         <i class="bi bi-list-ul"></i>
                                     </a>

@@ -14,89 +14,143 @@
 }
 
 <style>
+    h1 {
+        text-align: center;
+        font-size: 2.5em;
+        font-weight: 700;
+        color: #0033FF;
+        text-transform: uppercase;
+        margin: 20px;
+    }
+    .schedule-header {
+        background: linear-gradient(135deg, #ffffffdd, #f8f9fad9);
+        backdrop-filter: blur(8px);
+        border-radius: 14px;
+        padding: 18px 22px;
+        border: 1px solid #eee;
+    }
+
     .day-group {
-        margin-bottom: 2.5rem;
+        margin-bottom: 2.8rem;
     }
 
     .day-header {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #ff6600;
-        border-bottom: 2px solid #f0f0f0;
-        padding-bottom: 8px;
-        margin-bottom: 1rem;
+        font-size: 1.55rem;
+        font-weight: 700;
+        color: #ff7a00;
+        padding-bottom: 6px;
+        border-bottom: 2px solid #f3f3f3;
+        margin-bottom: 1.2rem;
+        letter-spacing: 0.3px;
     }
 
     .assignment-card {
-        background-color: #fff;
-        border: 1px solid #ddd;
-        border-left-width: 5px;
-        border-radius: 8px;
-        margin-bottom: 0.75rem;
-        padding: 1.25rem;
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 14px;
+        padding: 1.35rem 1.4rem;
+        margin-bottom: 0.9rem;
+        border-left-width: 6px !important;
+        border: 1px solid #e5e5e5;
+        transition: 0.2s ease;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
     }
 
         .assignment-card:hover {
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
         }
 
     .assignment-time {
-        font-size: 1.1rem;
+        font-size: 1.15rem;
         font-weight: 700;
-        color: #333;
         width: 140px;
-        display: inline-block;
+        color: #222;
     }
 
     .assignment-driver {
+        font-size: 1.05rem;
         font-weight: 600;
-        color: #007bff;
+        color: #005be0;
     }
 
     .assignment-route {
         font-size: 0.95rem;
         color: #555;
-        margin-top: 8px;
-        padding-left: 20px;
+        margin-top: 10px;
+        padding-left: 5px;
     }
 
+        .assignment-route i {
+            font-size: 1.1rem;
+            margin-right: 4px;
+        }
+
     .badge-status {
-        font-size: 0.85rem;
+        font-size: 0.82rem;
         font-weight: 600;
-        padding: 0.5em 0.75em;
+        padding: 0.45em 0.9em;
+        border-radius: 50px;
     }
 
     .border-status-ChoKhoiHanh {
-        border-left-color: #ffc107;
+        border-left-color: #ffce3a;
     }
-    /* Vàng */
+
     .border-status-DangDiChuyen {
-        border-left-color: #007bff;
+        border-left-color: #3b82f6;
     }
-    /* Xanh dương */
+
     .border-status-DaHoanThanh {
-        border-left-color: #28a745;
+        border-left-color: #22c55e;
     }
-    /* Xanh lá */
+
     .border-status-DaHuy {
-        border-left-color: #dc3545;
+        border-left-color: #ef4444;
     }
-    /* Đỏ */
+
     .border-status-default {
         border-left-color: #6c757d;
     }
-    /* Xám */
+
+    .btn-week {
+        border-radius: 20px;
+        padding: 6px 15px;
+    }
+
+        .btn-week i {
+            margin: 0 3px;
+        }
+
+    .assignment-card .btn {
+        border-radius: 10px;
+    }
+
+    .empty-state {
+        color: #777;
+        font-size: 1.2rem;
+    }
+
+    .empty-state-icon {
+        font-size: 3.2rem;
+        opacity: 0.25;
+    }
 
 </style>
 
-<div class="container-fluid">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
-    </div>
 
+<div class="container-fluid">
+    <div class="text-center mb-4">
+        <h1 class="page-title">@ViewData["Title"]</h1>
+    </div>
+    <div class="d-flex justify-content-between align-items-center header-actions mb-4">
+        <a asp-action="Index" class="text-decoration-none text-primary">
+            <i class="bi bi-arrow-left"></i> Quay lại
+        </a>
+
+        <a asp-action="PhanCongLich" class="btn btn-outline-primary btn-modern">
+            <i class="bi bi-plus-circle"></i> Phân Công Mới
+        </a>
+    </div>
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -113,29 +167,30 @@
     }
 
     <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <div class="card-header schedule-header d-flex flex-row align-items-center justify-content-between">
             <h6 class="m-0 font-weight-bold text-primary">
                 Lịch phân công (@startDate.ToString("dd/MM") - @endDate.ToString("dd/MM/yyyy"))
             </h6>
 
             <div>
                 <a asp-action="DanhSachPhanCong" asp-route-startDate="@prevDate.ToString("yyyy-MM-dd")"
-                   class="btn btn-sm btn-outline-secondary">
+                   class="btn btn-sm btn-outline-secondary btn-week">
                     <i class="bi bi-chevron-left"></i> Tuần trước
                 </a>
 
                 @if (!isCurrentWeek)
                 {
                     <a asp-action="DanhSachPhanCong" asp-route-startDate="@null"
-                       class="btn btn-sm btn-outline-primary">
+                       class="btn btn-sm btn-outline-primary btn-week">
                         <i class="bi bi-calendar-check"></i> Tuần này
                     </a>
                 }
 
                 <a asp-action="DanhSachPhanCong" asp-route-startDate="@nextDate.ToString("yyyy-MM-dd")"
-                   class="btn btn-sm btn-outline-secondary">
+                   class="btn btn-sm btn-outline-secondary btn-week">
                     Tuần sau <i class="bi bi-chevron-right"></i>
                 </a>
+
             </div>
         </div>
         <div class="card-body">
@@ -143,14 +198,13 @@
             {
                 <div class="text-center" style="padding: 2rem 0;">
                     <p class="text-muted" style="font-size: 1.2rem;">
-                        <i class="bi bi-calendar2-x" style="font-size: 3rem; color: #e0e0e0;"></i><br><br>
+                        <i class="bi bi-calendar2-x empty-state-icon"></i>
                         Không có chuyến xe nào được phân công trong tuần này.
                     </p>
                 </div>
             }
             else
             {
-                // Logic nhóm theo ngày (Giữ nguyên)
                 var assignmentsByDay = Model.GroupBy(c => c.NgayDi.Date)
                 .OrderBy(g => g.Key);
 
@@ -164,7 +218,6 @@
                         <div class="list-group">
                             @foreach (var chuyen in dayGroup.OrderBy(c => c.GioDi))
                             {
-                                // Lấy màu sắc theo trạng thái
                                 string borderColor = "border-status-default";
                                 string badgeColor = "badge bg-secondary";
                                 switch (chuyen.TrangThai)
@@ -232,23 +285,18 @@
         </div>
     </div>
 
-    <div class="text-center mb-4">
-        <a asp-action="PhanCongLich" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Phân Công Mới
-        </a>
-        <a asp-action="Index" class="btn btn-secondary">
-            <i class="bi bi-arrow-left-circle"></i> Quay lại danh sách tài xế
-        </a>
-    </div>
 </div>
 
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             var alertList = document.querySelectorAll('.alert');
-            alertList.forEach(function (alert) {
-                new bootstrap.Alert(alert);
-            });
+            setTimeout(function () {
+                alertList.forEach(function (alert) {
+                    var bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                    bsAlert.close();
+                });
+            }, 3000);
         });
     </script>
 }
