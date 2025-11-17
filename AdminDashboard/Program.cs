@@ -1,24 +1,41 @@
-using AdminDashboard.Services;
 using AdminDashboard.TransportDBContext;
+using AdminDashboard.Services;
+using AdminDashboard.Hubs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using CloudinaryDotNet;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Đăng ký DbContext
+// ===================== ĐĂNG KÝ DATABASE =====================
 builder.Services.AddDbContext<Db27524Context>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlOptions => sqlOptions.EnableRetryOnFailure()
+        sqlOptions => 
+        {
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 3,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorNumbersToAdd: null);
+            sqlOptions.CommandTimeout(60); // Tăng command timeout lên 60 giây
+        }
     )
 );
 
-// Add services to the container
+// ===================== ĐĂNG KÝ MVC, RAZOR, SIGNALR, BLAZOR =====================
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddSignalR();
+builder.Services.AddServerSideBlazor();
 
-// ĐĂNG KÝ CLOUDINARY SERVICE - ƯU TIÊN DÙNG CLOUDINARY
+// ===================== ĐĂNG KÝ SERVICE =====================
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IOtpService, OtpService>();
+builder.Services.AddScoped<IVnpayService, VnpayService>();
+builder.Services.AddScoped<IPaginationService, PaginationService>();
+builder.Services.AddHttpClient();
+
+// ===================== CLOUDINARY / LOCAL IMAGE SERVICE =====================
 var cloudinaryConfig = builder.Configuration.GetSection("Cloudinary");
 var cloudName = cloudinaryConfig["CloudName"];
 var apiKey = cloudinaryConfig["ApiKey"];
@@ -28,22 +45,19 @@ if (!string.IsNullOrEmpty(cloudName) &&
     !string.IsNullOrEmpty(apiKey) &&
     !string.IsNullOrEmpty(apiSecret))
 {
-    // SỬ DỤNG CLOUDINARY - TỐT NHẤT CHO PRODUCTION
     var account = new Account(cloudName, apiKey, apiSecret);
     var cloudinary = new Cloudinary(account);
-
     builder.Services.AddSingleton(cloudinary);
     builder.Services.AddScoped<IImageService, CloudinaryImageService>();
-
-    Console.WriteLine($" Đã đăng ký Cloudinary service: {cloudName}");
+    Console.WriteLine($"✅ Đã đăng ký Cloudinary service: {cloudName}");
 }
 else
 {
-    // FALLBACK: Dùng LocalImageService nếu không có cấu hình Cloudinary
     builder.Services.AddScoped<IImageService, LocalImageService>();
-    Console.WriteLine(" Đang dùng LocalImageService - Chỉ nên dùng cho development");
+    Console.WriteLine("⚠️ Đang dùng LocalImageService - chỉ nên dùng cho development");
 }
 
+// ===================== COOKIE AUTHENTICATION =====================
 builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", options =>
     {
@@ -51,13 +65,14 @@ builder.Services.AddAuthentication("CookieAuth")
         options.LogoutPath = "/Auth/Logout";
         options.AccessDeniedPath = "/Auth/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromHours(2);
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     });
 
-builder.Services.AddScoped<IVnpayService, VnpayService>();
-builder.Services.AddHostedService<AdminDashboard.Services.TrangThaiChuyenXeService>();
+// ===================== XÂY DỰNG APP =====================
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// ===================== MIDDLEWARE PIPELINE =====================
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -67,13 +82,42 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+// Đảm bảo Blazor static files được serve
+app.UseStaticFiles(new StaticFileOptions
+{
+    RequestPath = "/_framework"
+});
+
 app.UseRouting();
+
+// ⚠️ Authentication phải trước Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
+// ===================== MAP HUB & ROUTES =====================
+app.MapHub<ChatHub>("/chathub"); // ChatHub realtime
+
+// Map Blazor Hub - phải map trước MapRazorPages
+app.MapBlazorHub(); // Blazor Server Hub - serve tại /_blazor
+
 app.MapRazorPages();
+
+app.MapControllerRoute(
+    name: "Areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+);
+
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home_User}/{action=Home_User}/{id?}"
+);
+
+app.MapControllerRoute(
+    name: "chat_user",
+    pattern: "{controller=ChatUser}/{action=Index}/{id?}"
+);
+
 
 app.Run();
+
+

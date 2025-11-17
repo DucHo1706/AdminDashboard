@@ -1,0 +1,333 @@
+﻿@* GoSix - TanHuy *@
+@model IEnumerable<AdminDashboard.Models.Xe>
+
+@{
+    ViewData["Title"] = "Quản Lý Xe";
+}
+
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title"><i class="fas fa-bus"></i> @ViewData["Title"]</h1>
+        <a asp-action="Create" class="btn btn-add-new">
+            <i class="fas fa-plus-circle"></i> Thêm Xe Mới
+        </a>
+    </div>
+
+    <div class="content-panel">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success custom-alert">
+                <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger custom-alert">
+                <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <div class="table-responsive">
+            <table class="table modern-table">
+                <thead>
+                    <tr>
+                        <th>Mã Xe</th>
+                        <th>Biển Số</th>
+                        <th>Loại Xe</th>
+                        <th>Số Ghế</th>
+                        <th class="text-center">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><span class="badge bg-primary-light">@item.XeId</span></td>
+                            <td class="fw-bold">@item.BienSoXe</td>
+                            <td>@item.LoaiXe?.TenLoaiXe</td>
+                            <td>
+                                @if (item.DanhSachGhe != null)
+                                {
+                                    <span class="badge bg-info-light">@item.DanhSachGhe.Count ghế</span>
+                                    <a asp-action="DanhSachGhe" asp-route-id="@item.XeId" class="btn-view-seats">
+                                        <i class="fas fa-chair"></i> Xem ghế
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-light">0 ghế</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a asp-action="Edit" asp-route-id="@item.XeId" class="btn-action btn-edit" title="Sửa">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.XeId" class="btn-action btn-details" title="Chi tiết">
+                                        <i class="bi bi-list-ul"></i>
+                                    </a>
+                                    <button type="button" class="btn-action btn-delete" title="Xóa"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteModal"
+                                            data-id="@item.XeId"
+                                            data-bienso="@item.BienSoXe"
+                                            data-loaixe="@item.LoaiXe?.TenLoaiXe">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Xác Nhận Xóa -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" id="deleteForm">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel"><i class="fas fa-exclamation-triangle"></i> Xác Nhận Xóa Xe</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="deleteXeId" name="id" />
+                    <p>Bạn có chắc chắn muốn xóa xe này không?</p>
+                    <dl class="row mt-3 bg-light p-2 rounded">
+                        <dt class="col-sm-4">Biển Số</dt>
+                        <dd class="col-sm-8" id="deleteBienSo"></dd>
+                        <dt class="col-sm-4">Loại Xe</dt>
+                        <dd class="col-sm-8" id="deleteLoaiXe"></dd>
+                    </dl>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Xóa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteForm = document.getElementById('deleteForm');
+        
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-id');
+            const bienso = button.getAttribute('data-bienso');
+            const loaixe = button.getAttribute('data-loaixe');
+            
+            // Set giá trị vào form
+            deleteModal.querySelector('#deleteXeId').value = id;
+            deleteModal.querySelector('#deleteBienSo').textContent = bienso;
+            deleteModal.querySelector('#deleteLoaiXe').textContent = loaixe || 'N/A';
+            
+            // Cập nhật action của form với id đúng
+            if (deleteForm && id) {
+                deleteForm.action = '/Admin/Xe/Delete/' + id;
+            }
+        });
+        
+        // Xử lý submit form
+        if (deleteForm) {
+            deleteForm.addEventListener('submit', function(e) {
+                const id = document.getElementById('deleteXeId').value;
+                if (!id) {
+                    e.preventDefault();
+                    alert('Không tìm thấy ID xe để xóa!');
+                    return false;
+                }
+            });
+        }
+
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                if (bsAlert) bsAlert.close();
+            });
+        }, 3000);
+    </script>
+}
+
+<style>
+    body {
+        background: linear-gradient(to right, #fff5e6, #fff);
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .page-container {
+        padding: 30px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .page-title {
+        font-size: 2em;
+        font-weight: 700;
+        color: #333;
+    }
+
+        .page-title i {
+            margin-right: 10px;
+            color: #ff8c00;
+        }
+
+    .btn-add-new {
+        background: #ff8c00;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 25px;
+        font-weight: 600;
+        transition: 0.3s;
+        text-decoration: none;
+        box-shadow: 0 4px 10px rgba(255, 140, 0, 0.3);
+    }
+
+        .btn-add-new:hover {
+            background: #ffa733;
+            transform: translateY(-2px);
+        }
+
+    .content-panel {
+        background: #fff;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .modern-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .modern-table thead th {
+            padding: 12px;
+            color: #ff8c00;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        .modern-table tbody td {
+            padding: 12px;
+            color: #555;
+            vertical-align: middle;
+        }
+
+        .modern-table tbody tr:nth-child(even) {
+            background: #fdf8f3;
+        }
+
+    .badge {
+        font-size: 12px;
+        padding: 5px 8px;
+        font-weight: 600;
+        border-radius: 6px;
+    }
+
+    .bg-primary-light {
+        background-color: #ffe3b3;
+        color: #7a4100;
+    }
+
+    .bg-info-light {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .bg-secondary-light {
+        background-color: #e2e3e5;
+        color: #383d41;
+    }
+
+    .btn-view-seats {
+        background-color: #0dcaf0;
+        color: #fff;
+        border-radius: 6px;
+        padding: 4px 10px;
+        font-size: 13px;
+        margin-left: 5px;
+        text-decoration: none;
+        transition: 0.25s;
+    }
+
+        .btn-view-seats:hover {
+            background-color: #0bbce0;
+        }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .btn-action {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #555;
+        background: transparent;
+        border: 2px solid;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        position: relative;
+    }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            color: white;
+        }
+
+    .btn-edit {
+        border-color: #28a745;
+        color: #28a745;
+    }
+
+        .btn-edit:hover {
+            background-color: #28a745;
+        }
+
+    .btn-details {
+        border-color: #17a2b8;
+        color: #17a2b8;
+    }
+
+        .btn-details:hover {
+            background-color: #17a2b8;
+        }
+
+    .btn-delete {
+        border-color: #dc3545;
+        color: #dc3545;
+    }
+
+        .btn-delete:hover {
+            background-color: #dc3545;
+        }
+
+    .custom-alert {
+        border-radius: 8px;
+        margin-bottom: 15px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+</style>

@@ -1,0 +1,198 @@
+﻿@model AdminDashboard.Models.TaiXe
+
+@{
+    ViewData["Title"] = "Hồ Sơ Tài Xế";
+    Layout = "_Layout";
+}
+
+<head>
+    <meta charset="utf-8" />
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        a.text-decoration-none {
+            color: #FF6600;
+            transition: transform 0.2s ease;
+        }
+        hr {
+            max-width: 900px;
+            height: 3px;
+            background-color: #990000;
+            border: none;
+            border-radius: 3px;
+            margin: 0 auto 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid p-4">
+
+        <h1 class="fw-bold text-center mb-3" style="color:orangered">@ViewData["Title"]: @Model.HoTen</h1>
+        <hr/> 
+        <div class="header-bar mb-3">
+            <a asp-action="Index" class="text-decoration-none">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                     class="bi bi-box-arrow-left" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd"
+                          d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0z" />
+                    <path fill-rule="evenodd"
+                          d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708z" />
+                </svg>
+            </a>
+            <div style="width:18px;"></div>
+        </div>
+        <div>
+            <div class="row g-4">
+
+                <div class="col-lg-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <i class="bi bi-person-vcard display-1 text-primary"></i>
+
+                            <h4 class="card-title fw-bold mt-3 mb-1">@Model.HoTen</h4>
+                            <p class="text-muted mb-3">Bằng lái: @Model.BangLaiXe</p>
+
+                            @if (Model.TrangThai == "Hoạt động")
+                            {
+                                <span class="badge fs-6 bg-success">@Model.TrangThai</span>
+                            }
+                            else
+                            {
+                                <span class="badge fs-6 bg-danger">@Model.TrangThai</span>
+                            }
+
+                            <hr class="my-4">
+
+                            <h6 class="text-muted text-start fw-semibold mb-3">Hành động</h6>
+
+                            <div class="d-grid gap-2">
+                                @if (Model.TrangThai == "Hoạt động")
+                                {
+                                    <form asp-action="DinhChi" method="post" class="d-grid">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@Model.UserId" />
+                                        <button type="submit" class="btn btn-warning"
+                                                onclick="return confirm('Bạn có chắc chắn muốn đình chỉ tài xế này?')">
+                                            <i class="bi bi-pause-circle me-1"></i> Đình chỉ
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="BoDinhChi" method="post" class="d-grid">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@Model.UserId" />
+                                        <button type="submit" class="btn btn-success"
+                                                onclick="return confirm('Bạn có chắc chắn muốn bỏ đình chỉ tài xế này?')">
+                                            <i class="bi bi-play-circle me-1"></i> Bỏ đình chỉ
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header p-0 border-bottom-0">
+                            <ul class="nav nav-tabs nav-tabs-bordered" id="profileTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#tab-details" type="button" role="tab" aria-controls="tab-details" aria-selected="true">
+                                        <i class="bi bi-person-lines-fill me-1"></i> Thông tin chi tiết
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#tab-history" type="button" role="tab" aria-controls="tab-history" aria-selected="false">
+                                        <i class="bi bi-list-task me-1"></i> Lịch sử chuyến xe
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="card-body p-4">
+                            <div class="tab-content" id="profileTabsContent">
+
+                                <div class="tab-pane fade show active" id="tab-details" role="tabpanel" aria-labelledby="details-tab">
+
+                                    <h5 class="fw-semibold mb-3">Thông tin tài khoản</h5>
+                                    <dl class="row">
+                                        <dt class="col-sm-4">Email</dt>
+                                        <dd class="col-sm-8">@Model.NguoiDung?.Email</dd>
+
+                                        <dt class="col-sm-4">Số điện thoại</dt>
+                                        <dd class="col-sm-8">@Model.NguoiDung?.SoDienThoai</dd>
+
+                                        <dt class="col-sm-4">Ngày sinh</dt>
+                                        <dd class="col-sm-8">@(Model.NguoiDung?.NgaySinh?.ToString("dd/MM/yyyy") ?? "N/A")</dd>
+
+                                        <dt class="col-sm-4">Trạng thái tài khoản</dt>
+                                        <dd class="col-sm-8">
+                                            @if (Model.NguoiDung?.TrangThai == AdminDashboard.Models.TrangThaiNguoiDung.HoatDong)
+                                            {
+                                                <span class="badge bg-success">Hoạt động</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">Không hoạt động</span>
+                                            }
+                                        </dd>
+                                    </dl>
+
+                                    <hr class="my-4">
+
+                                    <h5 class="fw-semibold mb-3">Thông tin công việc</h5>
+                                    <dl class="row">
+                                        <dt class="col-sm-4">Ngày vào làm</dt>
+                                        <dd class="col-sm-8">@Model.NgayVaoLam.ToString("dd/MM/yyyy")</dd>
+
+                                        <dt class="col-sm-4">ID Tài Xế (UserId)</dt>
+                                        <dd class="col-sm-8"><code>@Model.UserId</code></dd>
+                                    </dl>
+
+                                </div>
+
+                                <div class="tab-pane fade" id="tab-history" role="tabpanel" aria-labelledby="history-tab">
+
+                                    @if (ViewBag.LichSuChuyenXe != null && ViewBag.LichSuChuyenXe.Count > 0)
+                                    {
+                                        <ul class="list-group list-group-flush">
+                                            @foreach (var c in ViewBag.LichSuChuyenXe)
+                                            {
+                                                <li class="list-group-item d-flex justify-content-between align-items-start px-0">
+                                                    <div class="ms-2 me-auto">
+                                                        <div class="fw-bold">@c.LoTrinh.TramDiNavigation.TenTram - @c.LoTrinh.TramToiNavigation.TenTram</div>
+                                                        <small class="text-muted">Ngày đi: @c.NgayDi.ToString("dd/MM/yyyy")</small>
+                                                    </div>
+                                                    <span class="badge bg-primary rounded-pill">@c.TrangThai</span>
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted fst-italic mb-0">Chưa có chuyến xe nào.</p>
+                                    }
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        
+        </div>
+    </div>
+</body>

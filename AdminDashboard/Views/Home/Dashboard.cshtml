@@ -1,5 +1,6 @@
-﻿@* //BAOLONG// *@
+﻿
 @{
+    Layout = "_Layout";
     ViewData["Title"] = "Dashboard";
 }
 
@@ -7,12 +8,6 @@
 
     <div class="main-title-container mb-4">
         <h2 class="dashboard-main-title"><i class="fas fa-chart-bar"></i>📊 Thống kê hệ thống</h2>
-        @if (User.Identity.IsAuthenticated)
-        {
-            <a asp-controller="Auth" asp-action="Logout" class="btn btn-logout-v2">
-                <i class="fas fa-sign-out-alt"></i> Đăng xuất
-            </a>
-        }
     </div>
 
     <div class="row mb-5">

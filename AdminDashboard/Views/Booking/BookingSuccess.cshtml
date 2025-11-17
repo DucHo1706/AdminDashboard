@@ -1,136 +1,314 @@
 ﻿@model AdminDashboard.Models.DonHang
+@using AdminDashboard.Models
 
 @{
-    var isPaid = string.Equals(Model.TrangThaiThanhToan, "Đã thanh toán", StringComparison.OrdinalIgnoreCase);
-    var isPending = string.Equals(Model.TrangThaiThanhToan, "DangChoThanhToan", StringComparison.OrdinalIgnoreCase);
-    var isFailed = string.Equals(Model.TrangThaiThanhToan, "Giao dịch thất bại", StringComparison.OrdinalIgnoreCase) || string.Equals(Model.TrangThaiThanhToan, "Đã hủy", StringComparison.OrdinalIgnoreCase);
-    ViewData["Title"] = isPaid ? "Thanh toán thành công" : (isPending ? "Chưa thanh toán" : "Giao dịch thất bại");
+    var isPaid =
+        (Model.TrangThaiThanhToan != null &&
+        (Model.TrangThaiThanhToan.Equals("Đã thanh toán", StringComparison.OrdinalIgnoreCase)
+        || Model.TrangThaiThanhToan.Equals("Da thanh toan", StringComparison.OrdinalIgnoreCase)));
+
+    var isPending =
+        (Model.TrangThaiThanhToan != null &&
+        Model.TrangThaiThanhToan.Equals("DangChoThanhToan", StringComparison.OrdinalIgnoreCase));
+
+    var isFailed =
+        (Model.TrangThaiThanhToan != null &&
+        (Model.TrangThaiThanhToan.Contains("thất bại", StringComparison.OrdinalIgnoreCase)
+        || Model.TrangThaiThanhToan.Contains("hủy", StringComparison.OrdinalIgnoreCase)));
+
+    ViewData["Title"] = isPaid ? "Thanh toán thành công" : isPending ? "Chưa thanh toán" : "Giao dịch thất bại";
+
     var danhSachVe = ViewBag.DanhSachVe as List<Ve>;
+
+    // Dữ liệu mô phỏng
+    var MaGiaoDich = "15236922";
+    var MaNganHang = "NCB";
+    var MaKetQua = "00";
 }
 
-<div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-lg @(isPaid ? "border-success" : (isPending ? "border-warning" : "border-danger"))">
-                <div class="card-header text-white text-center @(isPaid ? "bg-success" : (isPending ? "bg-warning" : "bg-danger"))">
-                    <h2 class="mb-0">
-                        @if (isPaid)
-                        {
-                            <text><i class="bi bi-check-circle-fill"></i> Thanh toán thành công</text>
-                        }
-                        else if (isPending)
-                        {
-                            <text><i class="bi bi-hourglass-split"></i> Đơn hàng chưa thanh toán</text>
-                        }
-                        else
-                        {
-                            <text><i class="bi bi-x-circle-fill"></i> Giao dịch thất bại</text>
-                        }
-                    </h2>
+<style>
+    body {
+        background-color: #f4f4f4;
+        color: #222;
+        font-family: "Segoe UI", sans-serif;
+    }
+
+    .payment-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 15px;
+    }
+
+    .payment-card {
+        background: #fff;
+        border: 2px solid #198754;
+        border-radius: 10px;
+        max-width: 700px;
+        width: 100%;
+        box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+    }
+
+    .payment-title {
+        text-align: center;
+        font-size: 28px;
+        font-weight: bold;
+        color: #198754;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+    }
+
+    .info-block {
+        position: relative;
+        background-color: #e9f9ee;
+        border-radius: 8px;
+        padding: 20px;
+        color: #1a1a1a;
+        overflow: hidden;
+        animation: fadeUp 0.8s ease-out, greenGlow 3s infinite ease-in-out;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .info-block:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 25px rgba(25, 135, 84, 0.6);
+        }
+
+        .info-block::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -75%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient( 120deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.1) 100% );
+            animation: shineWave 3.5s infinite;
+        }
+
+    .info-label {
+        color: #198754;
+        font-weight: bold;
+        min-width: 150px;
+        display: inline-block;
+    }
+
+    .section {
+        margin-bottom: 25px;
+    }
+
+        .section h5 {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            color: #198754;
+        }
+
+    ul.detail-list {
+        list-style: none;
+        padding: 0;
+    }
+
+        ul.detail-list li {
+            border-bottom: 1px dashed #ccc;
+            padding: 8px 0;
+        }
+
+    .seat-badge {
+        background-color: #0d6efd;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 4px;
+        margin-right: 5px;
+    }
+
+    .total-price {
+        font-weight: bold;
+        color: #d63384;
+        font-size: 18px;
+    }
+
+    .footer {
+        text-align: center;
+        margin-top: 30px;
+    }
+
+        .footer a, .footer button {
+            margin: 5px;
+            padding: 10px 18px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+    /* Hiệu ứng */
+    @@keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes greenGlow {
+        0% {
+            box-shadow: 0 0 8px rgba(25, 135, 84, 0.2);
+        }
+
+        50% {
+            box-shadow: 0 0 18px rgba(25, 135, 84, 0.4);
+        }
+
+        100% {
+            box-shadow: 0 0 8px rgba(25, 135, 84, 0.2);
+        }
+    }
+
+    @@keyframes shineWave {
+        0% {
+            transform: translateX(-100%) rotate(25deg);
+            opacity: 0;
+        }
+
+        50% {
+            opacity: 0.5;
+        }
+
+        100% {
+            transform: translateX(150%) rotate(25deg);
+            opacity: 0;
+        }
+    }
+</style>
+
+
+<div class="payment-wrapper">
+    <div class="payment-card">
+        <div class="payment-title">
+            @(isPaid ? "THANH TOÁN THÀNH CÔNG" : isPending ? "CHƯA THANH TOÁN" : "GIAO DỊCH THẤT BẠI")
+        </div>
+
+        @if (isPaid)
+        {
+            <div class="text-center mb-3">Cảm ơn bạn đã sử dụng dịch vụ! Dưới đây là chi tiết giao dịch:</div>
+
+            <div class="info-block">
+                <div class="section">
+                    <h5>Thông tin đơn hàng</h5>
+                    <ul class="detail-list">
+                        <li><strong class="info-label">Mã đơn hàng:</strong> @Model.DonHangId</li>
+                        <li><strong class="info-label">Khách hàng:</strong> @Model.nguoiDung.HoTen</li>
+                        <li><strong class="info-label">Ngày đặt:</strong> @Model.NgayDat.ToString("dd/MM/yyyy HH:mm")</li>
+                        <li><strong class="info-label">Mã ngân hàng:</strong> @MaNganHang</li>
+                        <li><strong class="info-label">Mã giao dịch:</strong> @MaGiaoDich</li>
+                    </ul>
                 </div>
-                <div class="card-body p-4">
+            </div>
+        }
+        else
+        {
+            <div class="text-center mb-3">
+                @if (isPending)
+                {
+                    <div>
+                        <span style="color:#ffc107;font-weight:bold;">Đơn hàng của bạn đang chờ thanh toán.</span><br />
+                        Thời gian còn lại: <span id="countdown-detail" data-expire="@Model.ThoiGianHetHan.ToString("o")" style="color:white;font-weight:bold;">--:--</span>
+                    </div>
+                }
+                else
+                {
+                    <div style="color:#ff4444;font-weight:bold;">Giao dịch thất bại hoặc đã hết thời gian thanh toán.</div>
+                }
+            </div>
+        }
+
+        <div class="section">
+            <h5 class="mt-4">Thông tin hành trình</h5>
+            <ul class="detail-list">
+                <li><strong>Tuyến đường:</strong> @Model.ChuyenXe.LoTrinh.TramDiNavigation.TenTram → @Model.ChuyenXe.LoTrinh.TramToiNavigation.TenTram</li>
+                <li><strong>Ngày đi:</strong> @Model.ChuyenXe.NgayDi.ToString("dd/MM/yyyy")</li>
+                <li><strong>Giờ khởi hành:</strong> @Model.ChuyenXe.GioDi.ToString(@"hh\:mm")</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h5>Chi tiết vé</h5>
+            <ul class="detail-list">
+                @if (danhSachVe != null)
+                {
+                    <li>
+                        <strong>Số ghế:</strong>
+                        @foreach (var ve in danhSachVe)
+                        {
+                            <span class="seat-badge">@ve.Ghe.SoGhe</span>
+                        }
+                    </li>
+                }
+                <li><strong>Tổng tiền:</strong> <span class="total-price">@Model.TongTien.ToString("N0") VNĐ</span></li>
+                <li>
+                    <strong>Trạng thái:</strong>
                     @if (isPaid)
                     {
-                        <p class="text-center">Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi. Dưới đây là thông tin chi tiết vé.</p>
+                        <span class="badge bg-success">Đã thanh toán</span>
                     }
                     else if (isPending)
                     {
-                        <p class="text-center">
-                            Đơn hàng của bạn đang chờ thanh toán. Thời gian còn lại:
-                            <span id="countdown-detail" data-expire="@Model.ThoiGianHetHan.ToString("o")">--:--</span>
-                        </p>
+                        <span class="badge bg-warning text-dark">Chờ thanh toán</span>
                     }
                     else
                     {
-                        <p class="text-center">Giao dịch thất bại hoặc đã hết thời gian thanh toán.</p>
+                        <span class="badge bg-danger">Thất bại</span>
                     }
-                    <hr />
-                    <h5 class="mt-4">Thông tin đơn hàng</h5>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><strong>Mã đơn hàng:</strong> @Model.DonHangId</li>
-                        <li class="list-group-item"><strong>Khách hàng:</strong> @Model.nguoiDung.HoTen</li>
-                        <li class="list-group-item"><strong>Ngày đặt:</strong> @Model.NgayDat.ToString("dd/MM/yyyy HH:mm")</li>
-                    </ul>
+                </li>
+            </ul>
+        </div>
 
-                    <h5 class="mt-4">Thông tin hành trình</h5>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><strong>Tuyến đường:</strong> @Model.ChuyenXe.LoTrinh.TramDiNavigation.TenTram → @Model.ChuyenXe.LoTrinh.TramToiNavigation.TenTram</li>
-                        <li class="list-group-item"><strong>Ngày đi:</strong> @Model.ChuyenXe.NgayDi.ToString("dd/MM/yyyy")</li>
-                        <li class="list-group-item"><strong>Giờ khởi hành:</strong> @Model.ChuyenXe.GioDi.ToString(@"hh\:mm")</li>
-                    </ul>
+        <div class="footer">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Về trang chủ</a>
+            <a asp-controller="Home_User" asp-action="PurchaseHistory" class="btn btn-secondary">Lịch sử đặt vé</a>
 
-                    <h5 class="mt-4">Chi tiết vé</h5>
-                    <ul class="list-group list-group-flush">
-                        @if (danhSachVe != null)
-                        {
-                            <li class="list-group-item">
-                                <strong>Số ghế đã đặt:</strong>
-                                @foreach (var ve in danhSachVe)
-                                {
-                                    <span class="badge bg-primary fs-6 me-1">@ve.Ghe.SoGhe</span>
-                                }
-                            </li>
-                        }
-                        <li class="list-group-item"><strong>Tổng tiền:</strong> <span class="fw-bold fs-4 text-danger">@Model.TongTien.ToString("N0") VNĐ</span></li>
-                        <li class="list-group-item"><strong>Trạng thái:</strong>
-                            @if (isPaid)
-                            {
-                                <span class="badge bg-success">Đã thanh toán</span>
-                            }
-                            else if (isPending)
-                            {
-                                <span class="badge bg-warning text-dark">Chờ thanh toán</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger">Giao dịch thất bại</span>
-                            }
-                        </li>
-                    </ul>
-                </div>
-                <div class="card-footer text-center">
-                    <a asp-action="Index" asp-controller="Home" class="btn btn-primary">Về trang chủ</a>
-                    <a asp-action="PurchaseHistory" asp-controller="Home_User" class="btn btn-secondary">Xem lịch sử đặt vé</a>
-                    @if (isPending)
-                    {
-                        <form asp-action="PayAgain" asp-controller="Booking" method="post" class="d-inline">
-                            <input type="hidden" name="id" value="@Model.DonHangId" />
-                            <button type="submit" class="btn btn-danger ms-2">Thanh toán lại</button>
-                        </form>
-                        <form asp-action="CancelOrder" asp-controller="Booking" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@Model.DonHangId" />
-                            <button type="submit" class="btn btn-outline-secondary ms-2">Hủy mua vé</button>
-                        </form>
-                    }
-                </div>
-            </div>
+            @if (isPending)
+            {
+                <form asp-controller="Booking" asp-action="PayAgain" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.DonHangId" />
+                    <button type="submit" class="btn btn-danger">Thanh toán lại</button>
+                </form>
+                <form asp-controller="Booking" asp-action="CancelOrder" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.DonHangId" />
+                    <button type="submit" class="btn btn-outline-light">Hủy mua vé</button>
+                </form>
+            }
         </div>
     </div>
 </div>
 
 @if (isPending)
 {
-<script>
-    (function () {
-        const el = document.getElementById('countdown-detail');
-        if (!el) return;
-        function format(ms) {
-            if (ms <= 0) return '00:00:00';
-            const totalSec = Math.floor(ms / 1000);
-            const h = String(Math.floor(totalSec / 3600)).padStart(2, '0');
-            const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
-            const s = String(totalSec % 60).padStart(2, '0');
-            return `${h}:${m}:${s}`;
-        }
-        function tick() {
-            const now = new Date();
-            const expire = new Date(el.getAttribute('data-expire'));
-            const remain = expire - now;
-            el.textContent = remain <= 0 ? 'Hết hạn' : format(remain);
-        }
-        tick();
-        setInterval(tick, 1000);
-    })();
-</script>
+    <script>
+        (() => {
+            const el = document.getElementById("countdown-detail");
+            if (!el) return;
+
+            const expire = new Date(el.dataset.expire);
+            const tick = () => {
+                const remain = expire - new Date();
+                if (remain <= 0) {
+                    el.textContent = "Hết hạn";
+                    return;
+                }
+                const sec = Math.floor(remain / 1000);
+                const h = String(Math.floor(sec / 3600)).padStart(2, "0");
+                const m = String(Math.floor((sec % 3600) / 60)).padStart(2, "0");
+                const s = String(sec % 60).padStart(2, "0");
+                el.textContent = `${h}:${m}:${s}`;
+            };
+            tick();
+            setInterval(tick, 1000);
+        })();
+    </script>
 }

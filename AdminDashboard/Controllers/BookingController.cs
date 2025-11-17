@@ -14,102 +14,112 @@ namespace AdminDashboard.Controllers
         private readonly Db27524Context _context;
         private readonly IVnpayService _vnpayService;
         private readonly IConfiguration _config;
+        private readonly ILogger<BookingController> _logger; // Thêm Logger
 
-        public BookingController(Db27524Context context, IVnpayService vnpayService, IConfiguration config)
+        public BookingController(Db27524Context context,
+                                 IVnpayService vnpayService,
+                                 IConfiguration config,
+                                 ILogger<BookingController> logger) // Thêm Logger vào hàm khởi tạo
         {
             _context = context;
             _vnpayService = vnpayService;
             _config = config;
+            _logger = logger; // Gán Logger
         }
 
-        // Action này được gọi khi người dùng nhấn "Chọn chuyến"
-        [Authorize] // Chỉ người dùng đã đăng nhập mới được vào trang này
+        [Authorize]
+        [Authorize(Roles = "KhachHang")]
         public async Task<IActionResult> ChonGhe(string chuyenId)
         {
             if (string.IsNullOrEmpty(chuyenId))
             {
-                return BadRequest("Không có thông tin chuyến xe.");
+                return BadRequest("Khong co thong tin chuyen xe.");
             }
 
-            // Lấy thông tin chuyến xe, bao gồm cả Xe và Lộ trình
             var chuyenXe = await _context.ChuyenXe
                 .Include(c => c.Xe)
-                    .ThenInclude(x => x.DanhSachGhe) 
+                    .ThenInclude(x => x.DanhSachGhe)
                 .Include(c => c.LoTrinh)
                     .ThenInclude(lt => lt.TramDiNavigation)
                 .Include(c => c.LoTrinh)
                     .ThenInclude(lt => lt.TramToiNavigation)
+                .Include(c => c.Images)
                 .FirstOrDefaultAsync(c => c.ChuyenId == chuyenId);
 
             if (chuyenXe == null)
             {
-                return NotFound("Chuyến xe không tồn tại.");
+                return NotFound("Chuyen xe khong ton tai.");
             }
 
-            // Dọn dẹp các đơn đã hết hạn cho chuyến này: giải phóng ghế và đánh dấu hủy
-            var expiredOrders = await _context.DonHang
-                .Where(d => d.ChuyenId == chuyenId && d.TrangThaiThanhToan == "DangChoThanhToan" && d.ThoiGianHetHan < DateTime.Now)
-                .ToListAsync();
-            if (expiredOrders.Any())
+            List<string> danhSachGheDaDat = new List<string>();
+
+            try
             {
-                foreach (var dh in expiredOrders)
+                var expiredOrders = await _context.DonHang
+                    .Where(d => d.ChuyenId == chuyenId && d.TrangThaiThanhToan == "DangChoThanhToan" && d.ThoiGianHetHan < DateTime.Now)
+                    .ToListAsync();
+
+                if (expiredOrders.Any())
                 {
-                    var vesExpired = await _context.Ve.Where(v => v.DonHangId == dh.DonHangId).ToListAsync();
-                    _context.Ve.RemoveRange(vesExpired);
-                    dh.TrangThaiThanhToan = "Đã hủy";
+                    foreach (var dh in expiredOrders)
+                    {
+                        var vesExpired = await _context.Ve.Where(v => v.DonHangId == dh.DonHangId).ToListAsync();
+                        _context.Ve.RemoveRange(vesExpired);
+                        dh.TrangThaiThanhToan = "Da huy"; // Sửa: Tiếng Việt không dấu
+                    }
+                    await _context.SaveChangesAsync();
                 }
-                await _context.SaveChangesAsync();
+
+                danhSachGheDaDat = await _context.Ve
+                    .Where(v => v.DonHang.ChuyenId == chuyenId &&
+                                 (v.DonHang.TrangThaiThanhToan == "Da thanh toan" || // Sửa: Tiếng Việt không dấu
+                                  (v.DonHang.TrangThaiThanhToan == "DangChoThanhToan" && v.DonHang.ThoiGianHetHan >= DateTime.Now)))
+                    .Select(v => v.GheID)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Loi khi don dep hoac lay danh sach ghe da dat cho ChuyenId: {ChuyenId}", chuyenId);
+
+                danhSachGheDaDat = await _context.Ve
+                    .Where(v => v.DonHang.ChuyenId == chuyenId && v.DonHang.TrangThaiThanhToan == "Da thanh toan") // Sửa: Tiếng Việt không dấu
+                    .Select(v => v.GheID)
+                    .ToListAsync();
             }
 
-            // Lấy ID của những ghế đang bị giữ hợp lệ (chưa hết hạn) hoặc đã thanh toán
-            var danhSachGheDaDat = await _context.Ve
-                .Where(v => v.DonHang.ChuyenId == chuyenId &&
-                            (v.DonHang.TrangThaiThanhToan == "Đã thanh toán" ||
-                             (v.DonHang.TrangThaiThanhToan == "DangChoThanhToan" && v.DonHang.ThoiGianHetHan >= DateTime.Now)))
-                .Select(v => v.GheID)
-                .ToListAsync();
-
-            // Đưa danh sách ghế đã đặt vào ViewBag
             ViewBag.DanhSachGheDaDat = danhSachGheDaDat;
-
-            // Trả về View và truyền đối tượng chuyenXe làm model
             return View(chuyenXe);
         }
 
         [HttpPost]
         [Authorize]
+        [Authorize(Roles = "KhachHang")]
         public async Task<IActionResult> XacNhanBooking(string chuyenId, string danhSachGheId)
         {
-            //  Kiểm tra thông tin đầu vào
             if (string.IsNullOrEmpty(chuyenId) || string.IsNullOrEmpty(danhSachGheId))
             {
-                TempData["ErrorMessage"] = "Thông tin đặt vé không hợp lệ, vui lòng thử lại.";
-                return RedirectToAction("Index", "Home"); // Chuyển về trang chủ
+                TempData["ErrorMessage"] = "Thong tin dat ve khong hop le, vui long thu lai.";
+                return RedirectToAction("Index", "Home");
             }
 
-            //  Lấy thông tin người dùng đang đăng nhập
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null)
             {
-                // Yêu cầu đăng nhập nếu chưa có
                 return Challenge();
             }
 
             var cacGheIdDaChon = danhSachGheId.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
 
-            //  KIỂM TRA CHỐNG TRÙNG VÉ 
-            // Kiểm tra xem có ai đã đặt mất ghế trong lúc mình đang chọn không
             var gheDaBiDat = await _context.Ve
                 .FirstOrDefaultAsync(v => v.DonHang.ChuyenId == chuyenId && cacGheIdDaChon.Contains(v.GheID));
 
             if (gheDaBiDat != null)
             {
                 var gheBiTrung = await _context.Ghe.FindAsync(gheDaBiDat.GheID);
-                TempData["ErrorMessage"] = $"Rất tiếc, ghế {gheBiTrung?.SoGhe} vừa có người khác đặt. Vui lòng chọn lại.";
+                TempData["ErrorMessage"] = $"Rat tiec, ghe {gheBiTrung?.SoGhe} vua co nguoi khac dat. Vui long chon lai.";
                 return RedirectToAction("ChonGhe", new { chuyenId = chuyenId });
             }
 
-            //  Lấy thông tin chuyến xe để tính giá
             var chuyenXe = await _context.ChuyenXe
                 .Include(c => c.LoTrinh)
                 .FirstOrDefaultAsync(c => c.ChuyenId == chuyenId);
@@ -119,7 +129,6 @@ namespace AdminDashboard.Controllers
             decimal giaVe = chuyenXe.LoTrinh.GiaVeCoDinh ?? 0;
             decimal tongTien = cacGheIdDaChon.Count * giaVe;
 
-            //  Tạo  DonHang và danh sách Ve
             var donHang = new DonHang
             {
                 DonHangId = Guid.NewGuid().ToString("N"),
@@ -127,8 +136,8 @@ namespace AdminDashboard.Controllers
                 ChuyenId = chuyenId,
                 NgayDat = DateTime.Now,
                 TongTien = tongTien,
-                TrangThaiThanhToan = "DangChoThanhToan", //  trạng thái
-                ThoiGianHetHan = DateTime.Now.AddMinutes(15) // Giữ vé trong 15 phút
+                TrangThaiThanhToan = "DangChoThanhToan",
+                ThoiGianHetHan = DateTime.Now.AddMinutes(15)
             };
 
             var danhSachVe = cacGheIdDaChon.Select(gheId => new Ve
@@ -139,31 +148,27 @@ namespace AdminDashboard.Controllers
                 Gia = giaVe
             }).ToList();
 
-            // Lưu tất cả vào cơ sở dữ liệu
             try
-            {  
-              
-
+            {
                 _context.DonHang.Add(donHang);
                 _context.Ve.AddRange(danhSachVe);
                 await _context.SaveChangesAsync();
 
-               //  tạo link VNPay và chuyển hướng người dùng
                 string paymentUrl = _vnpayService.CreatePaymentUrl(donHang, HttpContext);
                 return Redirect(paymentUrl);
             }
             catch (Exception ex)
             {
-                // Nếu có lỗi, thông báo và quay lại trang chọn ghế
-                TempData["ErrorMessage"] = "Lỗi hệ thống khi lưu vé: " + ex.Message;
+                // **Ghi log lỗi ra Console Output**
+                _logger.LogError(ex, "LỖI PHÁT SINH KHI TẠO URL VNPAY. DonHangId: {DonHangId}", donHang.DonHangId);
+
+                TempData["ErrorMessage"] = "LỖI VNPay: " + ex.Message + " | Inner: " + ex.InnerException?.Message;
                 return RedirectToAction("ChonGhe", new { chuyenId = chuyenId });
             }
         }
-        // Sửa lại Action VnpayReturn hiện tại của bạn
 
         public IActionResult VnpayReturn()
         {
-            // Đọc các tham số trả về từ VNPay
             var vnpayData = new VnpayLibrary();
             foreach (var (key, value) in Request.Query)
             {
@@ -174,7 +179,6 @@ namespace AdminDashboard.Controllers
             var vnp_TxnRef = vnpayData.GetResponseData("vnp_TxnRef");
             var vnp_SecureHash = vnpayData.GetResponseData("vnp_SecureHash");
 
-            // Fallback: nếu chữ ký hợp lệ và mã phản hồi 00, cập nhật trạng thái ngay
             var hashSecret = _config["Vnpay:HashSecret"];
             var isSignatureValid = vnpayData.ValidateSignature(vnp_SecureHash, hashSecret);
 
@@ -183,23 +187,23 @@ namespace AdminDashboard.Controllers
                 var donHang = _context.DonHang.Find(vnp_TxnRef);
                 if (donHang != null && donHang.TrangThaiThanhToan == "DangChoThanhToan" && DateTime.Now <= donHang.ThoiGianHetHan)
                 {
-                    donHang.TrangThaiThanhToan = "Đã thanh toán";
+                    donHang.TrangThaiThanhToan = "Da thanh toan"; // Sửa: Tiếng Việt không dấu
                     _context.SaveChanges();
                 }
                 return RedirectToAction("BookingSuccess", new { id = vnp_TxnRef });
             }
 
-            // Không thành công hoặc chữ ký không hợp lệ
-            TempData["ErrorMessage"] = $"Thanh toán không thành công. Mã lỗi VNPay: {vnp_ResponseCode}";
+            TempData["ErrorMessage"] = $"Thanh toan khong thanh cong. Ma loi VNPay: {vnp_ResponseCode}";
             var donHangFail = _context.DonHang.Find(vnp_TxnRef);
             return RedirectToAction("ChonGhe", new { chuyenId = donHangFail?.ChuyenId });
         }
+
         [Authorize]
+        [Authorize(Roles = "KhachHang")]
         public async Task<IActionResult> BookingSuccess(string id)
         {
             if (id == null) return NotFound();
 
-            // Lấy thông tin đơn hàng vừa tạo để hiển thị
             var donHang = await _context.DonHang
                 .Include(d => d.ChuyenXe).ThenInclude(cx => cx.LoTrinh).ThenInclude(lt => lt.TramDiNavigation)
                 .Include(d => d.ChuyenXe).ThenInclude(cx => cx.LoTrinh).ThenInclude(lt => lt.TramToiNavigation)
@@ -208,9 +212,8 @@ namespace AdminDashboard.Controllers
 
             if (donHang == null) return NotFound();
 
-            // Lấy danh sách vé của đơn hàng này
             ViewBag.DanhSachVe = await _context.Ve
-                .Include(v => v.Ghe) // Lấy thông tin số ghế
+                .Include(v => v.Ghe)
                 .Where(v => v.DonHangId == id).ToListAsync();
 
             return View(donHang);
@@ -226,24 +229,22 @@ namespace AdminDashboard.Controllers
             var donHang = await _context.DonHang.FirstOrDefaultAsync(d => d.DonHangId == id && d.IDKhachHang == userId);
             if (donHang == null) return NotFound();
 
-            if (donHang.TrangThaiThanhToan != "DangChoThanhToan" && donHang.TrangThaiThanhToan != "Đã hủy")
+            if (donHang.TrangThaiThanhToan != "DangChoThanhToan" && donHang.TrangThaiThanhToan != "Da huy") // Sửa
             {
-                TempData["ErrorMessage"] = "Đơn hàng đã được thanh toán.";
+                TempData["ErrorMessage"] = "Don hang da duoc thanh toan.";
                 return RedirectToAction("BookingSuccess", new { id });
             }
 
             if (DateTime.Now > donHang.ThoiGianHetHan)
             {
-                // Hết hạn thanh toán: hủy đơn và giải phóng ghế
                 var ves = await _context.Ve.Where(v => v.DonHangId == donHang.DonHangId).ToListAsync();
                 _context.Ve.RemoveRange(ves);
-                donHang.TrangThaiThanhToan = "Đã hủy";
+                donHang.TrangThaiThanhToan = "Da huy"; // Sửa
                 await _context.SaveChangesAsync();
-                TempData["ErrorMessage"] = "Đơn hàng đã hết thời gian thanh toán.";
+                TempData["ErrorMessage"] = "Don hang da het thoi gian thanh toan.";
                 return RedirectToAction("BookingSuccess", new { id });
             }
 
-            // Reset về chờ thanh toán để thanh toán lại
             donHang.TrangThaiThanhToan = "DangChoThanhToan";
             await _context.SaveChangesAsync();
 
@@ -262,31 +263,27 @@ namespace AdminDashboard.Controllers
             var donHang = await _context.DonHang.FirstOrDefaultAsync(d => d.DonHangId == id && d.IDKhachHang == userId);
             if (donHang == null) return NotFound();
 
-            if (donHang.TrangThaiThanhToan == "Đã thanh toán")
+            if (donHang.TrangThaiThanhToan == "Da thanh toan") // Sửa
             {
-                TempData["ErrorMessage"] = "Đơn hàng đã thanh toán không thể hủy.";
+                TempData["ErrorMessage"] = "Don hang da thanh toan khong the huy.";
                 return RedirectToAction("BookingSuccess", new { id });
             }
 
-            // Hủy: xóa vé để giải phóng ghế và đánh dấu trạng thái
             var ves = await _context.Ve.Where(v => v.DonHangId == donHang.DonHangId).ToListAsync();
             _context.Ve.RemoveRange(ves);
-            donHang.TrangThaiThanhToan = "Đã hủy";
+            donHang.TrangThaiThanhToan = "Da huy"; // Sửa
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Đã hủy đơn hàng và giải phóng ghế.";
+            TempData["SuccessMessage"] = "Da huy don hang va giai phong ghe.";
             return RedirectToAction("PurchaseHistory", "Home_User");
         }
 
-        // Thêm Action này vào BookingController.cs
-
-        [AllowAnonymous] // IPN không yêu cầu đăng nhập
+        [AllowAnonymous]
         [HttpGet]
-        [HttpPost] // Cho phép cả GET và POST để tương thích cấu hình VNPay
+        [HttpPost]
         public async Task<IActionResult> PaymentIPN()
         {
             var vnpayData = new VnpayLibrary();
-            // Dùng Request.Query vì VNPay thường gửi IPN qua GET
             foreach (var (key, value) in Request.Query)
             {
                 vnpayData.AddResponseData(key, value);
@@ -299,7 +296,6 @@ namespace AdminDashboard.Controllers
 
             bool checkSignature = vnpayData.ValidateSignature(vnp_SecureHash, hashSecret);
 
-            // Tạo đối tượng để trả về cho VNPay
             var response = new { RspCode = "", Message = "" };
 
             if (!checkSignature)
@@ -321,12 +317,11 @@ namespace AdminDashboard.Controllers
                 return Json(response);
             }
 
-            // Hết hạn thanh toán
             if (DateTime.Now > donHang.ThoiGianHetHan)
             {
                 var ves = await _context.Ve.Where(v => v.DonHangId == donHang.DonHangId).ToListAsync();
                 _context.Ve.RemoveRange(ves);
-                donHang.TrangThaiThanhToan = "Đã hủy";
+                donHang.TrangThaiThanhToan = "Da huy"; // Sửa
                 await _context.SaveChangesAsync();
                 response = new { RspCode = "98", Message = "Order expired" };
                 return Json(response);
@@ -334,19 +329,15 @@ namespace AdminDashboard.Controllers
 
             if (vnp_ResponseCode == "00")
             {
-                donHang.TrangThaiThanhToan = "Đã thanh toán";
+                donHang.TrangThaiThanhToan = "Da thanh toan"; // Sửa
                 await _context.SaveChangesAsync();
                 response = new { RspCode = "00", Message = "Confirm Success" };
             }
             else
             {
-                // Giao dịch thất bại hoặc người dùng hủy ở cổng thanh toán.
-                // KHÔNG hủy đơn ngay; giữ trạng thái Chờ thanh toán để người dùng thanh toán lại
-                // Việc hủy sẽ do hết hạn tự động hoặc người dùng chủ động hủy.
                 response = new { RspCode = "99", Message = "Transaction Failed - Keep Pending" };
             }
 
-            // Trả về JSON cho VNPay biết đã nhận được kết quả
             return Json(response);
         }
     }

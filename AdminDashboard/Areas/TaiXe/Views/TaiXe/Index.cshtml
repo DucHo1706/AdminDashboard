@@ -1,0 +1,361 @@
+﻿@model IEnumerable<AdminDashboard.Models.TaiXe>
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Danh sách Tài xế";
+}
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+            h1,
+            h1 a {
+            color: #FF6600 !important;
+                text-decoration: none;
+                text-align: center;
+                font-size: 1.7em;
+                font-weight: 700;
+                text-transform: uppercase;
+                margin: 20px;
+            }
+
+        hr {
+            max-width: 900px;
+            height: 3px;
+            background-color: #990000;
+            border: none;
+            border-radius: 3px;
+            margin: 0 auto 50px;
+        }
+
+        .btn_add {
+            font-weight: bold;
+            display: inline-block;
+            margin: 15px;
+            padding: 15px 30px;
+            font-size: 18px;
+            letter-spacing: 1px;
+            text-decoration: none;
+            color: #FF6600;
+            background: transparent;
+            cursor: pointer;
+            transition: ease-out 0.5s;
+            border: 2px solid #FF9900;
+            border-radius: 10px;
+            box-shadow: inset 0 0 0 0 #FF9900;
+        }
+
+            .btn_add:hover {
+                color: white;
+                box-shadow: inset 0 -100px 0 0 #FF6633;
+            }
+
+            .btn_add:active {
+                transform: scale(0.9);
+            }
+
+        table.modern-table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            border-radius: 12px;
+            overflow: hidden;
+            font-size: 0.9em;
+            color: #333;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        }
+        .modern-table thead {
+            background-color: #FF9900;
+            color: white;
+        }
+
+            .modern-table thead th {
+                padding: 15px;
+                font-weight: bold;
+                text-transform: uppercase;
+                font-size: 13px;
+                text-align: center;
+                border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            }
+
+        .modern-table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            color: #222;
+            text-align:start;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        tbody tr {
+            transition: background-color 0.25s ease;
+        }
+
+            tbody tr:hover {
+                background-color: rgba(255,127,80, 0.05);
+            }
+
+        .badge {
+            font-size: 12px;
+            padding: 6px 10px;
+            font-weight: 600;
+            border-radius: 6px;
+        }
+
+        .bg-success-light {
+            background-color: rgba(209, 231, 221, 0.8);
+            color: #0a3622;
+        }
+
+        .bg-danger-light {
+            background-color: rgba(248, 215, 218, 0.8);
+            color: #58151c;
+        }
+
+        .alert {
+            width: 70%;
+            margin: 0 auto 20px;
+            font-weight: 600;
+        }
+
+        /* Căn giữa toàn bộ bảng */
+        .modern-table th,
+        .modern-table td {
+            text-align: center !important;
+            vertical-align: middle !important;
+        }
+
+            /* Cột text dài như Email, Bằng lái cho thu gọn mềm */
+            .modern-table td:nth-child(2),
+            .modern-table td:nth-child(3),
+            .modern-table td:nth-child(4) {
+                text-align: center !important;
+            }
+
+        /* Căn giữa nút Chi tiết + Dropdown */
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+
+            /* Đảm bảo nút Dropdown nằm ở giữa */
+            .btn-group .dropdown {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+        /* Căn giữa hàng cả chiều ngang lẫn dọc */
+        .modern-table tbody tr {
+            height: 70px;
+        }
+
+
+        /* Căn đều các nút trong cột thao tác */
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .action-buttons a {
+                flex: 1;
+                text-align: center;
+            }
+
+        .action-buttons {
+            text-align: center;
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-action {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #555;
+            background: transparent;
+            border: 2px solid;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+            .btn-action i {
+                font-size: 16px;
+            }
+
+            .btn-action:hover {
+                transform: translateY(-2px);
+                color: white;
+            }
+
+        .btn-edit {
+            border-color: #28a745;
+            color: #28a745;
+        }
+
+            .btn-edit:hover {
+                background-color: #28a745;
+            }
+        .btn-delete {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+
+            .btn-delete:hover {
+                background-color: #dc3545;
+            }
+    </style>
+</head>
+
+<body>
+    <h1><a href="~/TaiXe/TaiXe" class="text-decoration-none">@ViewData["Title"]</a></h1>
+    <hr />
+    <h2>Làm tiếp phần Phân công tài xế</h2>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center justify-content-between"
+             role="alert">
+            <span><i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]</span>
+            <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Đóng"></button>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            <i class="fas fa-info-circle me-2"></i> Hiện chưa có tài xế nào được đăng ký.
+        </div>
+    }
+    else
+    {
+        <table class="modern-table">
+            <thead>
+                <tr>
+                    <th>Mã tài xế</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Bằng lái xe</th>
+                    <th>Ngày vào làm</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.UserId</td>
+                        <td>@item.NguoiDung?.HoTen</td>
+                        <td>@item.NguoiDung?.Email</td>
+                        <td>@item.BangLaiXe</td>
+                        <td>@item.NgayVaoLam.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            @if (item.TrangThai == "Hoạt động")
+                            {
+                                <span class="badge bg-success-light">@item.TrangThai</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger-light">@item.TrangThai</span>
+                            }
+                        </td>
+
+                        <td>
+                            <div class="btn-group">
+                                <div style="padding-right:15px">
+                                    <!-- Nút xem chi tiết -->
+                                    <a asp-action="ChiTiet" asp-route-id="@item.UserId" class="btn-action btn-edit">
+                                        <i class="bi bi-list-ul"></i>
+                                    </a>
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <div class="dropdown">
+                                        <button class="btn-action btn-delete dropdown-toggle" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+
+                                        <ul class="dropdown-menu dropdown-menu-end">
+
+                                            @if (item.TrangThai == "Hoạt động")
+                                            {
+                                                <li>
+                                                    <form asp-action="DinhChi" method="post" class="dropdown-item p-0">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@item.UserId" />
+                                                        <button type="submit" class="dropdown-item text-danger"
+                                                                onclick="return confirm('Bạn có chắc chắn muốn đình chỉ tài xế này?')">
+                                                            <i class="bi bi-dash-circle me-2"></i> Đình chỉ tài xế
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            }
+                                            else
+                                            {
+                                                <li>
+                                                    <form asp-action="BoDinhChi" method="post" class="dropdown-item p-0">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@item.UserId" />
+                                                        <button type="submit" class="dropdown-item text-success"
+                                                                onclick="return confirm('Bạn có chắc chắn muốn bỏ đình chỉ tài xế này?')">
+                                                            <i class="bi bi-plus-circle me-2"></i> Mở đình chỉ
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+
+                               
+                            </div>
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <p class="text-center">
+        <a asp-action="Create" class="btn_add">
+            <i class="fas fa-plus-circle me-2"></i> Thêm tài xế mới
+        </a>
+    </p>
+
+    @section Scripts {
+        <script>
+            setTimeout(() => {
+                const alerts = document.querySelectorAll('.alert.alert-dismissible');
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 3000);
+        </script>
+    }
+</body>

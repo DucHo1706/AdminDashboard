@@ -1,0 +1,70 @@
+﻿<div class="row">
+    <div class="col-md-4">
+        <h5>Người dùng</h5>
+        <ul id="userList" class="list-group"></ul>
+    </div>
+    <div class="col-md-8">
+<<<<<<< HEAD
+        <h5>Chat với <span id="chatUser"></span></h5>
+        <div id="chatBox" class="border p-2 mb-2" style="height:350px; overflow-y:auto"></div>
+=======
+        <h5>Chat</h5>
+        <div id="chatBox" class="border p-2 mb-2 bg-info" style="height:350px; overflow-y:auto"></div>
+>>>>>>> e6d1d97944459fdc017f584230850266d2cec681
+        <div class="input-group">
+            <input id="messageInput" class="form-control" placeholder="Nhập tin nhắn..." />
+            <button id="sendButton" class="btn btn-success">Gửi</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+<script>
+    const connection = new signalR.HubConnectionBuilder().withUrl("/chathub").build();
+    let currentUserId = null;
+
+    async function loadUsers() {
+        const res = await fetch('/api/chat/users');
+        const users = await res.json();
+        const list = document.getElementById('userList');
+        list.innerHTML = '';
+        users.forEach(u => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            li.innerHTML = `
+                <span style="${u.unreadCount > 0 ? 'font-weight:bold;' : ''}">${u.userId}</span>
+                ${u.unreadCount > 0 ? `<span class="badge bg-danger">${u.unreadCount}</span>` : ''}
+            `;
+            li.onclick = () => openChat(u.userId);
+            list.appendChild(li);
+        });
+    }
+
+    async function openChat(userId) {
+        currentUserId = userId;
+        document.getElementById('chatUser').textContent = userId;
+
+        // Lấy lịch sử chat từ Firebase
+        const res = await fetch(`/api/chat/history/${userId}`);
+        const data = await res.json();
+        const chatBox = document.getElementById('chatBox');
+        chatBox.innerHTML = '';
+        for (let key in data) {
+            const m = data[key];
+            chatBox.innerHTML += `<div><b>${m.senderName}:</b> ${m.message}</div>`;
+        }
+
+        // Đánh dấu đã đọc
+        await fetch(`/api/chat/mark-read/${userId}`, { method: 'POST' });
+
+        await loadUsers(); // refresh danh sách
+    }
+
+    document.getElementById('sendButton').onclick = async () => {
+        const msg = document.getElementById('messageInput').value;
+        await connection.invoke('SendPrivateMessage', currentUserId, msg);
+        document.getElementById('messageInput').value = '';
+    };
+
+    connection.start().then(loadUsers);
+</script>

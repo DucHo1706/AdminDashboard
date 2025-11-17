@@ -1,0 +1,732 @@
+﻿@page
+@model AdminDashboard.Areas.Admin.Pages.StatisticsModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Thống Kê";
+}
+@Html.AntiForgeryToken()
+
+<div class="statistics-container">
+    <!-- Error Alert -->
+    @if (Model.HasError)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>Lỗi!</strong> @Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Header -->
+    <div class="main-title-container mb-4">
+        <h2 class="dashboard-main-title">
+            <i class="bi bi-bar-chart-line-fill"></i> 📊 Thống Kê Hệ Thống
+        </h2>
+    </div>
+
+    <!-- Tổng Quan Thống Kê -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card bg-primary">
+                <div class="stat-card-header">
+                    <i class="bi bi-people-fill"></i> Tổng Khách Hàng
+                </div>
+                <div class="stat-card-body">
+                    @Model.TongKhachHang
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card bg-success">
+                <div class="stat-card-header">
+                    <i class="bi bi-receipt"></i> Tổng Đơn Hàng
+                </div>
+                <div class="stat-card-body">
+                    @Model.TongDonHang
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card bg-warning">
+                <div class="stat-card-header">
+                    <i class="bi bi-calendar-day"></i> Doanh Thu Hôm Nay
+                </div>
+                <div class="stat-card-body">
+                    @string.Format("{0:N0}", Model.DoanhThuHomNay) <small>VNĐ</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card bg-info">
+                <div class="stat-card-header">
+                    <i class="bi bi-calendar-month"></i> Doanh Thu Tháng Này
+                </div>
+                <div class="stat-card-body">
+                    @string.Format("{0:N0}", Model.DoanhThuThangNay) <small>VNĐ</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doanh Thu Tổng -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="stat-card bg-gradient">
+                <div class="stat-card-header">
+                    <i class="bi bi-cash-coin"></i> Tổng Doanh Thu
+                </div>
+                <div class="stat-card-body-large">
+                    @string.Format("{0:N0}", Model.DoanhThuTong) <small>VNĐ</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs mb-4" id="statisticsTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="khachhang-tab" data-bs-toggle="tab" data-bs-target="#khachhang" type="button" role="tab">
+                <i class="bi bi-people"></i> Khách Hàng
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="donhang-tab" data-bs-toggle="tab" data-bs-target="#donhang" type="button" role="tab">
+                <i class="bi bi-cart"></i> Đơn Hàng
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="doanhthu-tab" data-bs-toggle="tab" data-bs-target="#doanhthu" type="button" role="tab">
+                <i class="bi bi-graph-up"></i> Doanh Thu
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="statisticsTabContent">
+        <!-- Tab Khách Hàng -->
+        <div class="tab-pane fade show active" id="khachhang" role="tabpanel">
+            <!-- Thống kê theo độ tuổi -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Thống Kê Khách Hàng Theo Độ Tuổi</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach (var item in Model.ThongKeTheoDoTuoi)
+                        {
+                            <div class="col-md-4 col-sm-6 mb-3">
+                                <div class="age-stat-item">
+                                    <div class="age-label">@item.Key</div>
+                                    <div class="age-value">@item.Value <small>khách hàng</small></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danh sách khách hàng -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-list-ul"></i> Danh Sách Khách Hàng</h5>
+                </div>
+                <div class="card-body" id="khachhang-list-container">
+                    @await Html.PartialAsync("_DanhSachKhachHang", Model)
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Đơn Hàng -->
+        <div class="tab-pane fade" id="donhang" role="tabpanel">
+            <!-- Thống kê đơn hàng theo thời gian -->
+            <div class="row mb-4">
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <div class="stat-card bg-primary">
+                        <div class="stat-card-header">
+                            <i class="bi bi-calendar-day"></i> Hôm Nay
+                        </div>
+                        <div class="stat-card-body-small">
+                            <div>@Model.ThongKeDonHang.DonHangHomNay đơn hàng</div>
+                            <div class="stat-card-subtitle">@string.Format("{0:N0}", Model.ThongKeDonHang.DoanhThuHomNay) VNĐ</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <div class="stat-card bg-success">
+                        <div class="stat-card-header">
+                            <i class="bi bi-calendar-month"></i> Tháng Này
+                        </div>
+                        <div class="stat-card-body-small">
+                            <div>@Model.ThongKeDonHang.DonHangThangNay đơn hàng</div>
+                            <div class="stat-card-subtitle">@string.Format("{0:N0}", Model.ThongKeDonHang.DoanhThuThangNay) VNĐ</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <div class="stat-card bg-info">
+                        <div class="stat-card-header">
+                            <i class="bi bi-calendar-year"></i> Năm Này
+                        </div>
+                        <div class="stat-card-body-small">
+                            <div>@Model.ThongKeDonHang.DonHangNamNay đơn hàng</div>
+                            <div class="stat-card-subtitle">@string.Format("{0:N0}", Model.ThongKeDonHang.DoanhThuNamNay) VNĐ</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thống kê trạng thái hôm nay -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Thống Kê Đơn Hàng Hôm Nay</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="status-stat-card status-success">
+                                <div class="status-label">Đã Thanh Toán</div>
+                                <div class="status-value">@Model.ThongKeDonHang.DaThanhToanHomNay</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="status-stat-card status-warning">
+                                <div class="status-label">Chờ Thanh Toán</div>
+                                <div class="status-value">@Model.ThongKeDonHang.ChoThanhToanHomNay</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="status-stat-card status-danger">
+                                <div class="status-label">Đã Hủy</div>
+                                <div class="status-value">@Model.ThongKeDonHang.DaHuyHomNay</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-funnel"></i> Lọc Theo Thời Gian</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="filterForm" class="row g-3">
+                        <input type="hidden" name="khachHangPage" value="@Model.KhachHangPageIndex" />
+                        <input type="hidden" name="donHangPage" value="1" />
+                        
+                        <div class="col-md-3">
+                            <label class="form-label">Loại Lọc</label>
+                            <select name="filterType" id="filterType" class="form-select" onchange="updateFilterFields()">
+                                @if (Model.FilterType == "all")
+                                {
+                                    <option value="all" selected>Tất Cả</option>
+                                }
+                                else
+                                {
+                                    <option value="all">Tất Cả</option>
+                                }
+                                @if (Model.FilterType == "day")
+                                {
+                                    <option value="day" selected>Theo Ngày</option>
+                                }
+                                else
+                                {
+                                    <option value="day">Theo Ngày</option>
+                                }
+                                @if (Model.FilterType == "month")
+                                {
+                                    <option value="month" selected>Theo Tháng</option>
+                                }
+                                else
+                                {
+                                    <option value="month">Theo Tháng</option>
+                                }
+                                @if (Model.FilterType == "year")
+                                {
+                                    <option value="year" selected>Theo Năm</option>
+                                }
+                                else
+                                {
+                                    <option value="year">Theo Năm</option>
+                                }
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3" id="filterDayGroup" style="display: @(Model.FilterType == "day" ? "block" : "none")">
+                            <label class="form-label">Chọn Ngày</label>
+                            <input type="date" name="filterDate" class="form-control" value="@(Model.FilterDate?.ToString("yyyy-MM-dd"))" />
+                        </div>
+                        
+                        <div class="col-md-3" id="filterMonthGroup" style="display: @(Model.FilterType == "month" ? "block" : "none")">
+                            <label class="form-label">Chọn Tháng</label>
+                            <select name="filterMonth" class="form-select">
+                                @for (int month = 1; month <= 12; month++)
+                                {
+                                    @if (Model.FilterMonth == month)
+                                    {
+                                        <option value="@month" selected>Tháng @month</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@month">Tháng @month</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3" id="filterYearGroup" style="display: @(Model.FilterType == "month" || Model.FilterType == "year" ? "block" : "none")">
+                            <label class="form-label">Chọn Năm</label>
+                            <select name="filterYear" class="form-select">
+                                @for (int year = DateTime.Now.Year; year >= DateTime.Now.Year - 5; year--)
+                                {
+                                    @if (Model.FilterYear == year)
+                                    {
+                                        <option value="@year" selected>@year</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@year">@year</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="bi bi-search"></i> Lọc
+                            </button>
+                            <a href="?khachHangPage=@Model.KhachHangPageIndex&donHangPage=1#donhang" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Reset
+                            </a>
+                        </div>
+                    </form>
+
+                    @if (Model.FilterType != "all")
+                    {
+                        <div class="mt-3">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> 
+                                Kết quả lọc: <strong>@Model.ThongKeDonHang.DonHangFiltered</strong> đơn hàng 
+                                | Doanh thu: <strong>@string.Format("{0:N0}", Model.ThongKeDonHang.DoanhThuFiltered) VNĐ</strong>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Danh sách đơn hàng -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-receipt-cutoff"></i> Danh Sách Đơn Hàng</h5>
+                </div>
+                <div class="card-body">
+                    @await Html.PartialAsync("_DanhSachDonHang", Model)
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Doanh Thu -->
+        <div class="tab-pane fade" id="doanhthu" role="tabpanel">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-graph-up-arrow"></i> Thống Kê Doanh Thu</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="revenue-card">
+                                <div class="revenue-label">Doanh Thu Hôm Nay</div>
+                                <div class="revenue-value text-primary">@string.Format("{0:N0}", Model.DoanhThuHomNay) VNĐ</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="revenue-card">
+                                <div class="revenue-label">Doanh Thu Tháng Này</div>
+                                <div class="revenue-value text-success">@string.Format("{0:N0}", Model.DoanhThuThangNay) VNĐ</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="revenue-card revenue-total">
+                                <div class="revenue-label">Tổng Doanh Thu</div>
+                                <div class="revenue-value-large text-info">@string.Format("{0:N0}", Model.DoanhThuTong) VNĐ</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .statistics-container {
+        padding: 25px;
+        background-color: #f4f6f9;
+        min-height: 100vh;
+    }
+
+    .main-title-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 15px;
+    }
+
+    .dashboard-main-title {
+        color: #3f4c6b;
+        font-weight: 700;
+        font-size: 28px;
+        margin: 0;
+    }
+
+    .dashboard-main-title i {
+        color: #ff9800;
+        margin-right: 10px;
+    }
+
+    /* Stat Cards */
+    .stat-card {
+        border-radius: 12px;
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-card-header {
+        padding: 15px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        background-color: rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .stat-card-body {
+        padding: 25px 20px;
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .stat-card-body-small {
+        padding: 20px;
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 1.3;
+    }
+
+    .stat-card-subtitle {
+        font-size: 16px;
+        font-weight: 500;
+        opacity: 0.9;
+        margin-top: 8px;
+    }
+
+    .stat-card-body-large {
+        padding: 35px 20px;
+        font-size: 48px;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+    }
+
+    /* Status Stat Cards */
+    .status-stat-card {
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .status-success {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .status-warning {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+
+    .status-danger {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        color: white;
+    }
+
+    .status-label {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-bottom: 10px;
+    }
+
+    .status-value {
+        font-size: 36px;
+        font-weight: 700;
+    }
+
+    .bg-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; }
+    .bg-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important; }
+    .bg-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important; }
+    .bg-info { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important; }
+    .bg-gradient { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%) !important; }
+
+    /* Tabs */
+    .nav-tabs {
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        border: none;
+        border-bottom: 3px solid transparent;
+        padding: 12px 20px;
+        font-weight: 600;
+    }
+
+    .nav-tabs .nav-link:hover {
+        border-bottom-color: #ff9800;
+        color: #ff9800;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #ff9800;
+        background-color: transparent;
+        border-bottom-color: #ff9800;
+    }
+
+    /* Age Statistics */
+    .age-stat-item {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .age-label {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 8px;
+    }
+
+    .age-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #3f4c6b;
+    }
+
+    /* Revenue Cards */
+    .revenue-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .revenue-card.revenue-total {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .revenue-label {
+        font-size: 16px;
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+
+    .revenue-card.revenue-total .revenue-label {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .revenue-value {
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .revenue-value-large {
+        font-size: 40px;
+        font-weight: 700;
+        color: white !important;
+    }
+
+    /* Table Styles */
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .modern-table {
+        width: 100%;
+        margin: 0;
+    }
+
+    .modern-table thead th {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 12px;
+        padding: 15px;
+        border: none;
+    }
+
+    .modern-table tbody td {
+        padding: 15px;
+        vertical-align: middle;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .modern-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .badge-status {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .badge-success { background-color: #d4edda; color: #155724; }
+    .badge-danger { background-color: #f8d7da; color: #721c24; }
+    .badge-warning { background-color: #fff3cd; color: #856404; }
+
+    /* Pagination */
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+        gap: 10px;
+    }
+
+    .page-info {
+        color: #6c757d;
+        font-size: 14px;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function xoaKhachHang(userId, hoTen) {
+            if (!confirm('Bạn có chắc chắn muốn xóa khách hàng "' + hoTen + '"?')) {
+                return;
+            }
+
+            // Get the anti-forgery token
+            var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || 
+                        document.querySelector('[name="__RequestVerificationToken"]')?.value || '';
+
+            // Create form data for POST
+            var formData = new FormData();
+            formData.append('userId', userId);
+            if (token) {
+                formData.append('__RequestVerificationToken', token);
+            }
+
+            fetch('?handler=XoaKhachHang', {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': token
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Lỗi: ' + error);
+            });
+        }
+
+        function updateFilterFields() {
+            var filterType = document.getElementById('filterType').value;
+            var filterDayGroup = document.getElementById('filterDayGroup');
+            var filterMonthGroup = document.getElementById('filterMonthGroup');
+            var filterYearGroup = document.getElementById('filterYearGroup');
+
+            // Ẩn tất cả
+            filterDayGroup.style.display = 'none';
+            filterMonthGroup.style.display = 'none';
+            filterYearGroup.style.display = 'none';
+
+            // Hiện các field tương ứng
+            if (filterType === 'day') {
+                filterDayGroup.style.display = 'block';
+            } else if (filterType === 'month') {
+                filterMonthGroup.style.display = 'block';
+                filterYearGroup.style.display = 'block';
+            } else if (filterType === 'year') {
+                filterYearGroup.style.display = 'block';
+            }
+        }
+
+        // Gọi khi trang load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateFilterFields();
+            
+            // Giữ tab Đơn Hàng khi submit form filter
+            var filterForm = document.getElementById('filterForm');
+            if (filterForm) {
+                filterForm.addEventListener('submit', function(e) {
+                    // Build query string từ form inputs
+                    var inputs = this.querySelectorAll('input, select');
+                    var params = [];
+                    
+                    inputs.forEach(function(input) {
+                        if (input.name && input.value) {
+                            params.push(encodeURIComponent(input.name) + '=' + encodeURIComponent(input.value));
+                        }
+                    });
+                    
+                    var queryString = params.join('&');
+                    var currentUrl = window.location.pathname;
+                    var newUrl = currentUrl + (queryString ? '?' + queryString : '') + '#donhang';
+                    
+                    // Redirect với hash để giữ tab
+                    window.location.href = newUrl;
+                    e.preventDefault();
+                });
+            }
+            
+            // Kích hoạt tab dựa trên hash trong URL khi trang load
+            function activateTabFromHash() {
+                var hash = window.location.hash;
+                if (hash) {
+                    var tabId = hash.substring(1) + '-tab';
+                    var tabElement = document.getElementById(tabId);
+                    if (tabElement) {
+                        var tab = new bootstrap.Tab(tabElement);
+                        tab.show();
+                    }
+                }
+            }
+            
+            // Kích hoạt tab ngay khi DOM ready
+            activateTabFromHash();
+            
+            // Kích hoạt tab khi hash thay đổi (khi click link có hash)
+            window.addEventListener('hashchange', activateTabFromHash);
+        });
+    </script>
+    
+}

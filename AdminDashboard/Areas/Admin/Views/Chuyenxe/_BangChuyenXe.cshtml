@@ -1,0 +1,111 @@
+﻿@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+@using AdminDashboard.Models.TrangThai
+@using AdminDashboard.Helpers
+
+
+<div class="container-fluid p-0">
+    @if (Model.Any())
+    {
+       <div class="mb-4">
+            <table class="table modern-table table-hover">
+                <thead>
+                    <tr class="table">
+                        <th>Lộ Trình</th>
+                        <th>Biển Số Xe</th>
+                        <th>Hình Ảnh Xe</th>
+                        <th>Ngày Đi</th>
+                        <th>Giờ Đi</th>
+                        <th>Trạng Thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">
+                                @(item.LoTrinh?.TramDiNavigation?.TenTram)
+                                <i class="bi bi-arrow-right mx-1 text-muted"></i>
+                                @(item.LoTrinh?.TramToiNavigation?.TenTram)
+                            </td>
+                            <td><span class="badge bg-secondary-light">@item.Xe?.BienSoXe</span></td>
+                            <td>
+                                @if (item.Images != null && item.Images.Any())
+                                {
+                                    var firstImage = item.Images.FirstOrDefault();
+                                    <img src="@firstImage.ImageUrl" alt="Hình ảnh xe" style="width: 80px; height: 60px; object-fit: cover; border-radius: 5px;" />
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Chưa có ảnh</span>
+                                }
+                            </td>
+                            <td>@item.NgayDi.ToString("dd/MM/yyyy")</td>
+                            <td>@item.GioDi.ToString(@"hh\:mm")</td>
+                            <td>
+                                <span class="badge @(item.TrangThai == TrangThaiChuyenXe.DaHoanThanh ? "bg-secondary-light" :
+                                                   item.TrangThai == TrangThaiChuyenXe.DangMoBanVe ? "bg-success-light" :
+                                                   item.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh ? "bg-info-light" :
+                                                   item.TrangThai == TrangThaiChuyenXe.DaHuy ? "bg-danger" :
+                                                   "bg-warning-light")">
+                                    @item.TrangThai.GetDisplayName()
+                                </span>
+                            </td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-info">
+                                    <i class="bi bi-card-text"></i>
+                                </a> |
+                                <a asp-action="Edit" asp-route-id="@item.ChuyenId" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a> |
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="@item.ChuyenId">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (ViewBag.TotalPages > 1)
+        {
+            <div class="d-flex justify-content-center">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination pagination-sm">
+                        @{
+                            var currentPage = ViewBag.CurrentPage;
+                            var totalPages = ViewBag.TotalPages;
+                        }
+
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <a class="page-link" href="#" data-page="@(currentPage - 1)" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                <a class="page-link" href="#" data-page="@i">@i</a>
+                            </li>
+                        }
+
+                        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                            <a class="page-link" href="#" data-page="@(currentPage + 1)" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-warning text-center mt-3">
+            Không tìm thấy chuyến xe nào phù hợp với tiêu chí.
+        </div>
+    }
+</div>

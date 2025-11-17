@@ -1,0 +1,218 @@
+﻿@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+@{
+    Layout = "_Layout_User";
+    ViewData["Title"] = "Home_User";
+}
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --futa-orange: #f7941e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #333;
+        }
+
+        .gosix-title {
+            color: var(--futa-orange);
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+
+        .about-section {
+            margin-bottom: 50px;
+        }
+
+            .about-section img {
+                max-width: 100%;
+                height: auto;
+                border-radius: 10px;
+            }
+
+            .about-section h2 {
+                margin-top: 20px;
+                margin-bottom: 15px;
+                color: var(--futa-orange);
+                font-weight: 600;
+            }
+
+            .about-section p {
+                font-size: 1.1rem;
+                line-height: 1.6;
+            }
+
+        .background {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 40px;
+        }
+
+
+        .content-section {
+            display: flex;
+            align-items: center;
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+        }
+
+        .content-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .mission-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+            .mission-list li {
+                position: relative;
+                padding-left: 1.75rem;
+                margin-bottom: 1rem;
+                font-size: 1.1rem;
+            }
+
+                .mission-list li::before {
+                    content: '✔';
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    color: var(--futa-orange);
+                    font-weight: bold;
+                }
+
+        .values-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+            .values-list li {
+                position: relative;
+                padding-left: 1.75rem;
+                margin-bottom: 1.25rem;
+            }
+
+                .values-list li::before {
+                    content: '—';
+                    position: absolute;
+                    left: 0;
+                    top: -2px;
+                    color: var(--futa-orange);
+                    font-weight: bold;
+                    font-size: 1.2rem;
+                }
+    </style>
+</head>
+<body>
+    <div class="container my-5 background">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 text-center">
+                <h1 class="display-4 futa-title">Về Chúng Tôi</h1>
+                <h4 class="text-muted fw-light mb-3">"Đi nhanh sống trọn"</h4>
+                <p class="lead">
+                    Tập đoàn 6AE - GOSIX Group được thành lập vào năm 2025, với 100% vốn trong nước.
+                    Trải qua hơn 23 năm hoạt động, GOSIX Group đã khẳng định vị thế là doanh nghiệp vận tải hành khách
+                    và hàng hóa hàng đầu Việt Nam. Chúng tôi luôn cam kết mang đến chất lượng dịch vụ tốt nhất
+                    và không ngừng cải tiến để phục vụ khách hàng.
+                </p>
+            </div>
+        </div>
+        <hr class="my-5">
+        <div class="row my-5 d-flex align-items-center about-section">
+            <div class="col-md-6">
+                <img src="https://cdn.futabus.vn/futa-busline-web-cms-prod/anh_png_01_34151d7558/anh_png_01_34151d7558.png" class="img-fluid" alt="GOSIX Bus Lines">
+            </div>
+            <div class="col-md-6">
+                <h2 class="gosix-title">GOSIX BUS LINES</h2>
+                <p>Lĩnh vực chủ phương châm "Đi nhanh sống trọn". Công ty Cổ phần Xe khách 6AE (GOSIX Bus Lines) hiện đang vận hành trên 60 tuyến vận tải hành khách liên tỉnh, với hơn 2.500 xe các loại. Chúng tôi tự hào phục vụ hơn 20 triệu lượt khách mỗi năm.</p>
+            </div>
+        </div>
+
+        <div class="row my-5 d-flex align-items-center about-section">
+            <div class="col-md-6 order-md-2">
+                <img src="https://cdn.futabus.vn/futa-busline-cms-dev/futaland_63c14d8ebf/futaland_63c14d8ebf.jpg" class="img-fluid" alt="GOSIX Land">
+            </div>
+            <div class="col-md-6 order-md-1">
+                <h2 class="gosix-title">GOSIX LAND</h2>
+                <p>Với mảng bất động sản, 6AE đã đặt những chính sách lâu dài, định vị các dự án tại các vị trí đắc địa, tạo ra các sản phẩm bất động sản tối ưu cho khách hàng, góp phần thay đổi diện mạo đô thị.</p>
+            </div>
+        </div>
+        <hr class="my-4">
+        <div class="row content-section">
+            <div class="col-md-6">
+                <img src="https://cdn.futabus.vn/futa-busline-web-cms-prod/Artboard_3_3x_fb31ff2c98/Artboard_3_3x_fb31ff2c98.png"
+                     class="content-image"
+                     alt="Tầm nhìn và Sứ mệnh">
+            </div>
+            <div class="col-md-6">
+                <h1 class="gosix-title">TẦM NHÌN VÀ SỨ MỆNH</h1>
+                <p class="lead"><strong>BẢO ĐẢM TỔ QUỐC VÌ MỘT VIỆT NAM HÙNG CƯỜNG.</strong></p>
+                <p>Trở thành Tập Đoàn uy tín và chất lượng hàng đầu Việt Nam với cam kết:</p>
+
+                <ul class="mission-list">
+                    <li>Tạo môi trường làm việc năng động, thân thiện.</li>
+                    <li>Phát triển từ lòng tin của khách hàng.</li>
+                    <li>Trở thành tập đoàn dẫn đầu chuyên nghiệp.</li>
+                </ul>
+
+                <p>6AE luôn phấn đấu làm việc hiệu quả nhất, để luôn cống hiến, đóng góp hết sức mình vì một Việt Nam hùng cường.</p>
+            </div>
+        </div>
+        <hr class="my-4">
+        <div class="row content-section">
+            <div class="col-md-6 order-md-2">
+                <img src="https://cdn.futabus.vn/futa-busline-web-cms-prod/Artboard_4_3x_44277bbc3b/Artboard_4_3x_44277bbc3b.png"
+                     class="content-image"
+                     alt="Giá trị cốt lõi">
+            </div>
+            <div class="col-md-6 order-md-1">
+                <h1 class="gosix-title">GIÁ TRỊ CỐT LÕI</h1>
+                <p><strong>Giá trị cốt lõi – "ĐI NHANH SỐNG TRỌN"</strong></p>
+
+                <ul class="values-list">
+                    <li>
+                        <strong>Nhanh chóng nhưng hiệu quả:</strong> Luôn chủ động và quyết đoán - Tập trung vào kết quả để không lãng phí thời gian sống.
+                    </li>
+                    <li>
+                        <strong>Sống trọn vẹn từng khoảnh khắc:</strong> Trân trọng trải nghiệm, tận hưởng cuộc sống - Cân bằng giữa công việc và bản thân.
+                    </li>
+                    <li>
+                        <strong>Tối ưu hóa sự di chuyển – tối ưu hóa cuộc sống:</strong> Khi việc di chuyển thuận lợi, cuộc sống cũng thoải mái và đầy đủ hơn.
+                    </li>
+                    <li>
+                        <strong>Năng động, hiện đại:</strong> Luôn sẵn sàng thay đổi để bắt kịp nhịp sống mới - Hướng tới chất lượng dịch vụ và trải nghiệm tốt hơn.
+                    </li>
+                    <li>
+                        <strong>Trao giá trị cho cộng đồng:</strong> Tiết kiệm thời gian cho mỗi người → tạo nên một xã hội hiệu quả hơn - Khuyến khích cuộc sống tích cực, an toàn và văn minh.
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <hr class="my-4">
+        <div class="row content-section">
+            <div class="col-md-6">
+                <img src="https://cdn.futabus.vn/futa-busline-web-cms-prod/Artboard_5_3x_cf15563d46/Artboard_5_3x_cf15563d46.png"
+                     class="content-image"
+                     alt="Triết lý">
+            </div>
+            <div class="col-md-6">
+                <h1 class="gosix-title">TRIẾT LÝ</h1>
+                <p>Hội nhập và phát triển góp phần vào sự thịnh vượng của đất nước. Nguồn nhân lực chính là nhân tố then chốt, là tài sản lớn nhất của Công ty 6AE, chú trọng tạo ra môi trường làm việc hiện đại, năng động, thân thiện và trao cơ hội phát triển nghề nghiệp cho tất cả thành viên.</p>
+                <p>Sự hài lòng của khách hàng là minh chứng cho chất lượng dịch vụ của 6AE. Không ngừng hoàn thiện và phát triển năng lực kinh doanh. 6AE luôn đặt nhu cầu khách hàng, mang đến sản phẩm dịch vụ hoàn hảo, đáp ứng tối đa mong đợi của khách hàng.</p>
+            </div>
+        </div>
+
+    </div>
+</body>

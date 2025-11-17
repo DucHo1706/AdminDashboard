@@ -1,4 +1,4 @@
-﻿```csharp
+﻿
 @{
     if (User.IsInRole("Admin"))
     {
@@ -6,7 +6,7 @@
     }
     else if (User.IsInRole("User"))
     {
-        Layout = "~/Views/Shared/_UserLayout.cshtml";
+        Layout = "~/Views/Shared/_Layout_User.cshtml";
     }
     else if (User.IsInRole("TaiXe"))
     {
@@ -14,7 +14,6 @@
     }
     else
     {
-        Layout = "~/Views/Shared/_UserLayout.cshtml"; // Mặc định cho người chưa đăng nhập
+        Layout = "~/Views/Shared_Layout_User.cshtml"; // Mặc định cho người chưa đăng nhập
     }
 }
-```

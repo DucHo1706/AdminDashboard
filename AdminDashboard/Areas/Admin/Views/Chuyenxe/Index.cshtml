@@ -1,0 +1,523 @@
+﻿@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+@using AdminDashboard.Models
+@using AdminDashboard.Models.TrangThai
+
+
+@{
+    ViewData["Title"] = "Danh sách Chuyến xe";
+}
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            background-size: cover;
+            background-position: center;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #003366;
+            text-transform: uppercase;
+            margin: 20px;
+        }
+
+        p {
+            text-align: center;
+        }
+
+        .btn_add {
+            font-weight: bold;
+            display: inline-block;
+            margin: 15px;
+            padding: 15px 30px;
+            font-size: 18px;
+            letter-spacing: 1px;
+            text-decoration: none;
+            color: #FF6600;
+            background: transparent;
+            cursor: pointer;
+            transition: ease-out 0.5s;
+            border: 2px solid #FF9900;
+            border-radius: 10px;
+            box-shadow: inset 0 0 0 0 #FF9900;
+        }
+
+            .btn_add:hover {
+                color: orangered;
+                box-shadow: inset 0 -100px 0 0 moccasin;
+            }
+
+            .btn_add:active {
+                transform: scale(0.9);
+            }
+
+        hr {
+            max-width: 900px;
+            height: 3px;
+            background-color: #990000;
+            border: none;
+            border-radius: 3px;
+            margin: 0 auto 50px;
+        }
+
+        /* --- Bảng dữ liệu (Table) --- */
+        table {
+            text-align: center;
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            border-radius: 12px;
+            overflow: hidden;
+            font-size: 0.9em;
+            color: #333;
+            background: rgb(255,165,0);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        /* --- Phần tiêu đề bảng --- */
+        .modern-table thead th {
+            padding: 15px;
+            color: rgb(0, 0, 139);
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .modern-table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            color: #222;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modern-table tbody tr {
+            transition: background-color 0.25s ease;
+        }
+
+            .modern-table tbody tr:hover {
+                background-color: rgba(255, 255, 255, 0.2);
+            }
+
+        .badge {
+            font-size: 12px;
+            padding: 6px 10px;
+            font-weight: 600;
+            border-radius: 6px;
+        }
+
+        .bg-secondary-light {
+            background-color: rgba(226, 227, 229, 0.8);
+            color: #41464b;
+        }
+
+        .bg-success-light {
+            background-color: rgba(209, 231, 221, 0.8);
+            color: #0a3622;
+        }
+
+        .bg-warning-light {
+            background-color: rgba(255, 243, 205, 0.8);
+            color: #664d03;
+        }
+
+        .bg-info-light {
+            background-color: rgba(207, 244, 252, 0.8);
+            color: #055160;
+        }
+
+        .bg-danger-light {
+            background-color: rgba(248, 215, 218, 0.8);
+            color: #58151c;
+        }
+
+        .bg-primary-light {
+            background-color: rgba(207, 226, 255, 0.8);
+            color: #0a2351;
+        }
+
+        /* CSS cho Form Tìm Kiếm (từ các file trước) */
+        .search-box {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 60px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            border: 1px solid #eee;
+            padding: 5px;
+            transition: box-shadow 0.3s ease;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        .search-item {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            border-right: 1px solid #e5e5e5;
+        }
+
+            .search-item:last-of-type {
+                border-right: none;
+            }
+
+            .search-item i {
+                color: #FF6600;
+                font-size: 1.3rem;
+                margin-right: 10px;
+            }
+
+            .search-item .form-select {
+                appearance: none;
+                background: transparent;
+                border: none;
+                padding: 10px 15px;
+                color: #333;
+                font-weight: 500;
+                width: 100%;
+                box-shadow: none !important;
+                cursor: pointer;
+            }
+
+        .btn-search {
+            background: linear-gradient(135deg, #FF6600, #FF944D);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 28px;
+            font-weight: 600;
+            font-size: 1rem;
+            gap: 8px;
+            margin-left: 5px;
+            transition: all 0.3s ease;
+        }
+
+/*         LOADING
+ */       
+.pagination {
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 50px;
+    padding: 8px 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.page-item {
+    margin: 0 4px;
+}
+
+.page-item .page-link {
+    color: #FF6600;
+    border: none;
+    font-weight: 600;
+    border-radius: 30px;
+    padding: 8px 14px;
+    background: transparent;
+    transition: all 0.25s ease-in-out;
+}
+
+.page-item .page-link:hover {
+    background-color: rgba(255, 153, 0, 0.15);
+    color: #CC5200;
+    transform: translateY(-1px);
+}
+
+.page-item.active .page-link {
+    background: linear-gradient(135deg, #FF6600, #FF944D);
+    color: white;
+    box-shadow: 0 3px 8px rgba(255, 102, 0, 0.4);
+}
+
+.page-item.disabled .page-link {
+    color: #aaa;
+    background: rgba(240, 240, 240, 0.7);
+    pointer-events: none;
+}
+
+/* Căn giữa phần phân trang */
+nav[aria-label="Page navigation"] {
+    display: inline-block;
+    margin-top: 20px;
+}
+
+#ajax-results-container {
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #wifi-loader {
+            --background: #62abff;
+            --front-color: #ef4d86;
+            --front-color-in: #fbb216;
+            --back-color: #c3c8de;
+            --text-color: #414856;
+            width: 64px;
+            height: 64px;
+            border-radius: 50px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #wifi-loader svg {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #wifi-loader svg circle {
+            position: absolute;
+            fill: none;
+            stroke-width: 6px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transform: rotate(-100deg);
+            transform-origin: center;
+        }
+
+        #wifi-loader svg circle.back { stroke: var(--back-color); }
+        #wifi-loader svg circle.front { stroke: var(--front-color); }
+
+        #wifi-loader svg.circle-outer { height: 86px; width: 86px; }
+        #wifi-loader svg.circle-outer circle { stroke-dasharray: 62.75 188.25; }
+        #wifi-loader svg.circle-outer circle.back { animation: circle-outer135 1.8s ease infinite 0.3s; }
+        #wifi-loader svg.circle-outer circle.front { animation: circle-outer135 1.8s ease infinite 0.15s; }
+
+        #wifi-loader svg.circle-middle { height: 60px; width: 60px; }
+        #wifi-loader svg.circle-middle circle { stroke: var(--front-color-in); stroke-dasharray: 42.5 127.5; }
+        #wifi-loader svg.circle-middle circle.back { animation: circle-middle6123 1.8s ease infinite 0.25s; }
+        #wifi-loader svg.circle-middle circle.front { animation: circle-middle6123 1.8s ease infinite 0.1s; }
+
+        #wifi-loader .text {
+            position: absolute;
+            bottom: -40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-transform: lowercase;
+            font-weight: 500;
+            font-size: 14px;
+            letter-spacing: 0.2px;
+        }
+
+        #wifi-loader .text::before,
+        #wifi-loader .text::after {
+            content: attr(data-text);
+        }
+
+        #wifi-loader .text::before { color: var(--text-color); }
+        #wifi-loader .text::after {
+            color: var(--front-color-in);
+            animation: text-animation76 3.6s ease infinite;
+            position: absolute;
+            left: 0;
+        }
+
+        @@keyframes circle-outer135 {
+            0% { stroke-dashoffset: 25; }
+            25% { stroke-dashoffset: 0; }
+            65% { stroke-dashoffset: 301; }
+            80% { stroke-dashoffset: 276; }
+            100% { stroke-dashoffset: 276; }
+        }
+
+        @@keyframes circle-middle6123 {
+            0% { stroke-dashoffset: 17; }
+            25% { stroke-dashoffset: 0; }
+            65% { stroke-dashoffset: 204; }
+            80% { stroke-dashoffset: 187; }
+            100% { stroke-dashoffset: 187; }
+        }
+
+        @@keyframes text-animation76 {
+            0% { clip-path: inset(0 100% 0 0); }
+            50% { clip-path: inset(0); }
+            100% { clip-path: inset(0 0 0 100%); }
+        }
+    </style>
+</head>
+<body>
+    <h1><a href="~/Admin/ChuyenXe" class="text-decoration-none">@ViewData["Title"]</a></h1>
+    <hr />
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center justify-content-between mx-auto"
+             role="alert"
+             style="font-weight:600; width: 70%; text-align:left;">
+            <span>@TempData["SuccessMessage"]</span>
+            <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Đóng"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center justify-content-between mx-auto"
+             role="alert"
+             style="font-weight:600; width: 70%; text-align:left;">
+            <span>@TempData["ErrorMessage"]</span>
+            <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Đóng"></button>
+        </div>
+    }
+    <form id="searchForm" class="search-box">
+        <div class="search-item">
+            <i class="bi bi-geo-alt-fill"></i>
+            <select id="diemDi" name="diemDi" class="form-select" asp-items="@ViewBag.TramDiList">
+                <option value="">-- Chọn điểm đi --</option>
+            </select>
+        </div>
+        <div class="search-item">
+            <i class="bi bi-geo-alt"></i>
+            <select id="diemDen" name="diemDen" class="form-select" asp-items="@ViewBag.TramDenList">
+                <option value="">-- Chọn điểm đến --</option>
+            </select>
+        </div>
+        <button type="submit" class="btn-search">
+            <i class="bi bi-search"></i> Tìm kiếm
+        </button>
+    </form>
+    <div id="ajax-results-container" class="mt-4">
+        @await Html.PartialAsync("_BangChuyenXe", Model)
+    </div>
+    <p>
+        <a asp-action="Create" class="btn_add">
+            Thêm chuyến xe mới
+        </a>
+    </p>
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="Delete" method="post">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="deleteModalLabel">Xác nhận Xóa</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <input type="hidden" id="deleteChuyenId" name="id" />
+
+                        <p class="text-danger mt-3">Bạn có chắc chắn muốn xóa chuyến xe này không?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-danger">Xóa</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    @section Scripts {
+        <script>
+            $(function () {
+                function loadPage(page, diemDi, diemDen) {
+                    $('#ajax-results-container').html(`
+                                    <div id="wifi-loader">
+                                        <svg viewBox="0 0 86 86" class="circle-outer">
+                                            <circle r="40" cy="43" cx="43" class="back"></circle>
+                                            <circle r="40" cy="43" cx="43" class="front"></circle>
+                                            <circle r="40" cy="43" cx="43" class="new"></circle>
+                                        </svg>
+                                        <svg viewBox="0 0 60 60" class="circle-middle">
+                                            <circle r="27" cy="30" cx="30" class="back"></circle>
+                                            <circle r="27" cy="30" cx="30" class="front"></circle>
+                                        </svg>
+                                        <div data-text="Loading..." class="text"></div>
+                                    </div>
+                    `);
+
+                    $.ajax({
+                        url: '@Url.Action("TimKiemAjax", "ChuyenXe")',
+                        type: 'GET',
+                        data: { diemDi: diemDi || '', diemDen: diemDen || '', page: page },
+                        success: function (resultHtml) {
+                            $('#ajax-results-container').html(resultHtml);
+
+                            const url = new URL(window.location);
+                            url.searchParams.set('page', page);
+                            if (diemDi) url.searchParams.set('diemDi', diemDi);
+                            if (diemDen) url.searchParams.set('diemDen', diemDen);
+                            window.history.pushState({}, '', url);
+                        },
+                        error: function () {
+                            $('#ajax-results-container').html(
+                                "<div class='alert alert-danger text-center'>Không thể tải dữ liệu. Vui lòng thử lại.</div>"
+                            );
+                        }
+                    });
+                }
+
+                $('#searchForm').on('submit', function (e) {
+                    e.preventDefault();
+                    const diemDi = $('#diemDi').val();
+                    const diemDen = $('#diemDen').val();
+                    loadPage(1, diemDi, diemDen);
+                });
+
+                $(document).on('click', '.page-link', function (e) {
+                    e.preventDefault();
+                    const page = $(this).data('page');
+                    if (!page) return;
+                    const diemDi = $('#diemDi').val() || '';
+                    const diemDen = $('#diemDen').val() || '';
+                    loadPage(page, diemDi, diemDen);
+                });
+
+                $(document).ready(function () {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const page = parseInt(urlParams.get('page')) || 1;
+                    const diemDi = urlParams.get('diemDi') || '';
+                    const diemDen = urlParams.get('diemDen') || '';
+                    if (diemDi || diemDen) {
+                        $('#diemDi').val(diemDi);
+                        $('#diemDen').val(diemDen);
+                        loadPage(page, diemDi, diemDen);
+                    } else if (page > 1) {
+                        loadPage(page, '', '');
+                    }
+                });
+
+                const deleteModal = document.getElementById('deleteModal');
+                if (deleteModal) {
+                    deleteModal.addEventListener('show.bs.modal', function (event) {
+                        const button = event.relatedTarget;
+                        const id = button.getAttribute('data-id');
+                        deleteModal.querySelector('#deleteChuyenId').value = id;
+                    });
+                }
+
+                setTimeout(() => {
+                    $('.alert.alert-dismissible').each(function () {
+                        const bsAlert = new bootstrap.Alert(this);
+                        bsAlert.close();
+                    });
+                }, 3000);
+            });
+        </script>
+    }
+</body>

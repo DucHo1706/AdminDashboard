@@ -1,0 +1,254 @@
+﻿@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+@using AdminDashboard.Models.TrangThai
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Lịch Phân Công";
+
+    // Lấy thông tin lọc từ Controller
+    var startDate = (DateTime)ViewBag.StartDate;
+    var endDate = (DateTime)ViewBag.EndDate;
+    var prevDate = (DateTime)ViewBag.PreviousWeekDate;
+    var nextDate = (DateTime)ViewBag.NextWeekDate;
+    var isCurrentWeek = (bool)ViewBag.IsCurrentWeek;
+}
+
+<style>
+    .day-group {
+        margin-bottom: 2.5rem;
+    }
+
+    .day-header {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #ff6600;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .assignment-card {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-left-width: 5px;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+        padding: 1.25rem;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+        .assignment-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+    .assignment-time {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #333;
+        width: 140px;
+        display: inline-block;
+    }
+
+    .assignment-driver {
+        font-weight: 600;
+        color: #007bff;
+    }
+
+    .assignment-route {
+        font-size: 0.95rem;
+        color: #555;
+        margin-top: 8px;
+        padding-left: 20px;
+    }
+
+    .badge-status {
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 0.5em 0.75em;
+    }
+
+    .border-status-ChoKhoiHanh {
+        border-left-color: #ffc107;
+    }
+    /* Vàng */
+    .border-status-DangDiChuyen {
+        border-left-color: #007bff;
+    }
+    /* Xanh dương */
+    .border-status-DaHoanThanh {
+        border-left-color: #28a745;
+    }
+    /* Xanh lá */
+    .border-status-DaHuy {
+        border-left-color: #dc3545;
+    }
+    /* Đỏ */
+    .border-status-default {
+        border-left-color: #6c757d;
+    }
+    /* Xám */
+
+</style>
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">
+                Lịch phân công (@startDate.ToString("dd/MM") - @endDate.ToString("dd/MM/yyyy"))
+            </h6>
+
+            <div>
+                <a asp-action="DanhSachPhanCong" asp-route-startDate="@prevDate.ToString("yyyy-MM-dd")"
+                   class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-chevron-left"></i> Tuần trước
+                </a>
+
+                @if (!isCurrentWeek)
+                {
+                    <a asp-action="DanhSachPhanCong" asp-route-startDate="@null"
+                       class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-calendar-check"></i> Tuần này
+                    </a>
+                }
+
+                <a asp-action="DanhSachPhanCong" asp-route-startDate="@nextDate.ToString("yyyy-MM-dd")"
+                   class="btn btn-sm btn-outline-secondary">
+                    Tuần sau <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="text-center" style="padding: 2rem 0;">
+                    <p class="text-muted" style="font-size: 1.2rem;">
+                        <i class="bi bi-calendar2-x" style="font-size: 3rem; color: #e0e0e0;"></i><br><br>
+                        Không có chuyến xe nào được phân công trong tuần này.
+                    </p>
+                </div>
+            }
+            else
+            {
+                // Logic nhóm theo ngày (Giữ nguyên)
+                var assignmentsByDay = Model.GroupBy(c => c.NgayDi.Date)
+                .OrderBy(g => g.Key);
+
+                foreach (var dayGroup in assignmentsByDay)
+                {
+                    <div class="day-group">
+                        <h5 class="day-header">
+                            @dayGroup.Key.ToString("dddd, dd/MM/yyyy")
+                        </h5>
+
+                        <div class="list-group">
+                            @foreach (var chuyen in dayGroup.OrderBy(c => c.GioDi))
+                            {
+                                // Lấy màu sắc theo trạng thái
+                                string borderColor = "border-status-default";
+                                string badgeColor = "badge bg-secondary";
+                                switch (chuyen.TrangThai)
+                                {
+                                    case TrangThaiChuyenXe.ChoKhoiHanh:
+                                        borderColor = "border-status-ChoKhoiHanh";
+                                        badgeColor = "badge bg-warning text-dark";
+                                        break;
+                                    case TrangThaiChuyenXe.DangDiChuyen:
+                                        borderColor = "border-status-DangDiChuyen";
+                                        badgeColor = "badge bg-primary";
+                                        break;
+                                    case TrangThaiChuyenXe.DaHoanThanh:
+                                        borderColor = "border-status-DaHoanThanh";
+                                        badgeColor = "badge bg-success";
+                                        break;
+                                    case TrangThaiChuyenXe.DaHuy:
+                                        borderColor = "border-status-DaHuy";
+                                        badgeColor = "badge bg-danger";
+                                        break;
+                                }
+
+                                <div class="assignment-card @borderColor">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center">
+                                            <span class="assignment-time">
+                                                <i class="bi bi-clock-fill text-muted"></i> @chuyen.GioDi.ToString(@"hh\:mm")
+                                            </span>
+                                            <span class="assignment-driver">
+                                                <i class="bi bi-person-circle"></i> @chuyen.TaiXe?.HoTen
+                                            </span>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge-status @badgeColor">@chuyen.TrangThai</span>
+
+                                            <a asp-action="ChinhSuaPhanCong" asp-route-chuyenId="@chuyen.ChuyenId" class="btn btn-sm btn-outline-warning" title="Chỉnh sửa">
+                                                <i class="bi bi-pencil-fill"></i>
+                                            </a>
+
+                                            @if (chuyen.TrangThai != TrangThaiChuyenXe.DangDiChuyen &&
+                                           chuyen.TrangThai != TrangThaiChuyenXe.DaHoanThanh)
+                                            {
+                                                <form asp-action="HuyPhanCong" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="chuyenId" value="@chuyen.ChuyenId" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Hủy phân công"
+                                                            onclick="return confirm('Bạn có chắc muốn hủy phân công này?')">
+                                                        <i class="bi bi-trash-fill"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="assignment-route mt-2">
+                                        <i class="bi bi-sign-turn-right-fill text-muted"></i>
+                                        <strong>Lộ trình:</strong> @chuyen.LoTrinh?.TramDiNavigation?.TenTram → @chuyen.LoTrinh?.TramToiNavigation?.TenTram
+                                        (@chuyen.Xe?.BienSoXe)
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="text-center mb-4">
+        <a asp-action="PhanCongLich" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Phân Công Mới
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left-circle"></i> Quay lại danh sách tài xế
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var alertList = document.querySelectorAll('.alert');
+            alertList.forEach(function (alert) {
+                new bootstrap.Alert(alert);
+            });
+        });
+    </script>
+}
