@@ -22,7 +22,7 @@ builder.Services.AddDbContext<Db27524Context>(options =>
     )
 );
 
-// ===================== ĐĂNG KÝ MVC, RAZOR, SIGNALR, BLAZOR =====================
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
@@ -69,10 +69,10 @@ builder.Services.AddAuthentication("CookieAuth")
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     });
 
-// ===================== XÂY DỰNG APP =====================
+
 var app = builder.Build();
 
-// ===================== MIDDLEWARE PIPELINE =====================
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -82,7 +82,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-// Đảm bảo Blazor static files được serve
+
 app.UseStaticFiles(new StaticFileOptions
 {
     RequestPath = "/_framework"
@@ -90,15 +90,14 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.UseRouting();
 
-// ⚠️ Authentication phải trước Authorization
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-// ===================== MAP HUB & ROUTES =====================
-app.MapHub<ChatHub>("/chathub"); // ChatHub realtime
+app.MapHub<ChatHub>("/chathub"); 
 
-// Map Blazor Hub - phải map trước MapRazorPages
-app.MapBlazorHub(); // Blazor Server Hub - serve tại /_blazor
+
+app.MapBlazorHub(); 
 
 app.MapRazorPages();
 
