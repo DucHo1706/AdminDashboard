@@ -96,15 +96,26 @@ app.UseAuthorization();
 
 app.MapHub<ChatHub>("/chathub"); 
 
-
+// Map Blazor Hub for SignalR
 app.MapBlazorHub(); 
 
+// Map Razor Pages first
 app.MapRazorPages();
 
+// Map controller routes (Areas) - exclude Statistics from matching
 app.MapControllerRoute(
     name: "Areas",
-    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}",
+    defaults: null,
+    constraints: new 
+    { 
+        controller = new Microsoft.AspNetCore.Routing.Constraints.RegexRouteConstraint("^(?!Statistics$).*"),
+        action = new Microsoft.AspNetCore.Routing.Constraints.RegexRouteConstraint(".*")
+    }
 );
+
+// Map Blazor fallback to catch Blazor routes (including /Admin/Statistics)
+app.MapFallbackToPage("/_BlazorHost");
 
 app.MapControllerRoute(
     name: "default",

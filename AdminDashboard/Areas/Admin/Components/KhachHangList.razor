@@ -1,5 +1,5 @@
-@using AdminDashboard.Areas.Admin.Pages
 @using AdminDashboard.Models
+@using AdminDashboard.Areas.Admin.Components
 @using Microsoft.AspNetCore.Components
 @inject IJSRuntime JSRuntime
 @implements IDisposable
@@ -103,7 +103,7 @@
                         if (isAgeHighlight)
                         {
                             rowClass = "age-highlight";
-                            rowStyle += " background-color: #fff3cd !important; border-left: 4px solid #ffc107 !important;";
+                            rowStyle += " background-color: #fff3cd !important; border-left: 4px solid #ffc107 !important; font-weight: bold !important;";
                         }
                         if (isSelected)
                         {
@@ -117,19 +117,25 @@
                                 <span class="badge @(isAgeHighlight ? "bg-warning text-dark" : "bg-secondary")">@kh.UserId</span>
                             </td>
                             <td>
-                                <strong>@kh.HoTen</strong>
+                                <span style="@(isAgeHighlight ? "font-weight: bold !important;" : "")">@kh.HoTen</span>
                                 @if (isSelected)
                                 {
                                     <i class="bi bi-check-circle-fill text-primary ms-1"></i>
                                 }
                             </td>
-                            <td>@kh.Email</td>
-                            <td>@kh.SoDienThoai</td>
-                            <td>@(kh.NgaySinh?.ToString("dd/MM/yyyy") ?? "—")</td>
+                            <td>
+                                <span style="@(isAgeHighlight ? "font-weight: bold !important;" : "")">@kh.Email</span>
+                            </td>
+                            <td>
+                                <span style="@(isAgeHighlight ? "font-weight: bold !important;" : "")">@kh.SoDienThoai</span>
+                            </td>
+                            <td>
+                                <span style="@(isAgeHighlight ? "font-weight: bold !important;" : "")">@(kh.NgaySinh?.ToString("dd/MM/yyyy") ?? "—")</span>
+                            </td>
                             <td>
                                 @if (kh.Tuoi.HasValue)
                                 {
-                                    <span class="@(isAgeHighlight ? "fw-bold text-primary" : "")" style="@(isAgeHighlight ? "font-weight: bold !important; color: #0d6efd !important;" : "")">@kh.Tuoi.Value</span>
+                                    <span class="@(isAgeHighlight ? "fw-bold text-primary" : "")" style="@(isAgeHighlight ? "font-weight: bold !important; color: #0d6efd !important; font-size: 1.1em;" : "")">@kh.Tuoi.Value</span>
                                 }
                                 else
                                 {
@@ -172,7 +178,7 @@
                         @if (KhachHangs.HasPreviousPage)
                         {
                             <li class="page-item">
-                                <a class="page-link" href="?khachHangPage=@(KhachHangs.PageIndex - 1)&donHangPage=@DonHangPageIndex#khachhang">
+                                <a class="page-link" href="#" @onclick="@(() => HandlePageChange(KhachHangs.PageIndex - 1))" @onclick:preventDefault="true">
                                     <i class="bi bi-chevron-left"></i> Trước
                                 </a>
                             </li>
@@ -188,15 +194,16 @@
                              i <= Math.Min(KhachHangs.TotalPages, KhachHangs.PageIndex + 2); 
                              i++)
                         {
-                            <li class="page-item @(i == KhachHangs.PageIndex ? "active" : "")">
-                                <a class="page-link" href="?khachHangPage=@i&donHangPage=@DonHangPageIndex#khachhang">@i</a>
+                            var pageNum = i; // Capture loop variable to avoid closure issue
+                            <li class="page-item @(pageNum == KhachHangs.PageIndex ? "active" : "")">
+                                <a class="page-link" href="#" @onclick="@(() => HandlePageChange(pageNum))" @onclick:preventDefault="true">@pageNum</a>
                             </li>
                         }
 
                         @if (KhachHangs.HasNextPage)
                         {
                             <li class="page-item">
-                                <a class="page-link" href="?khachHangPage=@(KhachHangs.PageIndex + 1)&donHangPage=@DonHangPageIndex#khachhang">
+                                <a class="page-link" href="#" @onclick="@(() => HandlePageChange(KhachHangs.PageIndex + 1))" @onclick:preventDefault="true">
                                     Sau <i class="bi bi-chevron-right"></i>
                                 </a>
                             </li>
@@ -228,7 +235,7 @@
     .age-highlight {
         background-color: #fff3cd !important;
         border-left: 4px solid #ffc107 !important;
-        font-weight: 600;
+        font-weight: 700 !important;
     }
 
     .age-highlight:hover {
@@ -237,10 +244,16 @@
     
     .age-highlight td {
         background-color: #fff3cd !important;
+        font-weight: 700 !important;
     }
     
     .age-highlight:hover td {
         background-color: #ffe69c !important;
+        font-weight: 700 !important;
+    }
+    
+    .age-highlight td * {
+        font-weight: 700 !important;
     }
 
     .selected-row:hover {
@@ -276,6 +289,9 @@
 
     [Parameter]
     public string DeleteUrl { get; set; } = "";
+
+    [Parameter]
+    public EventCallback<int> OnPageChange { get; set; }
 
     private string? SelectedUserId { get; set; }
     private string? SelectedAgeFilter { get; set; }
@@ -353,6 +369,21 @@
         if (await JSRuntime.InvokeAsync<bool>("confirm", $"Bạn có chắc chắn muốn xóa khách hàng \"{hoTen}\"?"))
         {
             await JSRuntime.InvokeVoidAsync("xoaKhachHang", userId, hoTen);
+        }
+    }
+
+    private async Task HandlePageChange(int pageIndex)
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("console.log", 
+                $"🔵 KhachHangList.HandlePageChange called with pageIndex: {pageIndex}, KhachHangs.PageIndex: {KhachHangs?.PageIndex}");
+        }
+        catch { }
+        
+        if (OnPageChange.HasDelegate)
+        {
+            await OnPageChange.InvokeAsync(pageIndex);
         }
     }
 

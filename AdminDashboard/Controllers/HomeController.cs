@@ -20,7 +20,8 @@ namespace AdminDashboard.Controllers
 
         public IActionResult Index()
         {
-            return RedirectToPage("/Statistics", new { area = "Admin" });
+            // Redirect to Blazor Statistics page
+            return Redirect("/Admin/Statistics");
         }
 
     }
