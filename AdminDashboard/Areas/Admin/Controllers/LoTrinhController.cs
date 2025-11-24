@@ -63,6 +63,36 @@ namespace AdminDashboard.Areas.Admin.Controllers
             ModelState.Remove("TramDiNavigation");
             ModelState.Remove("TramToiNavigation");
 
+            // KIỂM TRA GIÁ TRỊ - CHẶN HOÀN TOÀN SỐ ÂM VÀ < 5000
+            if (!loTrinh.GiaVeCoDinh.HasValue)
+            {
+                ModelState.AddModelError("GiaVeCoDinh", "Giá vé là bắt buộc và phải lớn hơn hoặc bằng 5,000 VNĐ.");
+                ViewData["TramDi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramDi);
+                ViewData["TramToi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramToi);
+                return View(loTrinh);
+            }
+
+            decimal originalValue = loTrinh.GiaVeCoDinh.Value;
+            
+            // CHẶN HOÀN TOÀN SỐ ÂM - KHÔNG CHO LƯU BẤT KỲ TRƯỜNG HỢP NÀO
+            if (originalValue < 0)
+            {
+                ModelState.AddModelError("GiaVeCoDinh", "Giá vé không được là số âm! Vui lòng nhập số dương lớn hơn hoặc bằng 5,000 VNĐ.");
+                ViewData["TramDi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramDi);
+                ViewData["TramToi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramToi);
+                return View(loTrinh);
+            }
+            
+            // KIỂM TRA GIÁ TRỊ PHẢI >= 5000 - KHÔNG TỰ ĐỘNG SỬA, BẮT BUỘC NGƯỜI DÙNG NHẬP LẠI
+            if (originalValue < 5000)
+            {
+                ModelState.AddModelError("GiaVeCoDinh", "Giá vé phải lớn hơn hoặc bằng 5,000 VNĐ. Vui lòng nhập lại!");
+                ViewData["TramDi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramDi);
+                ViewData["TramToi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramToi);
+                return View(loTrinh);
+            }
+
+            // CHỈ CHO PHÉP LƯU NẾU GIÁ TRỊ >= 5000 VÀ KHÔNG PHẢI SỐ ÂM
             if (ModelState.IsValid)
             {
                 if (loTrinh.TramDi == loTrinh.TramToi)
@@ -73,12 +103,16 @@ namespace AdminDashboard.Areas.Admin.Controllers
                     return View(loTrinh);
                 }
 
-
-
+                // KIỂM TRA LẠI LẦN CUỐI - KHÔNG CHO LƯU NẾU < 5000 HOẶC SỐ ÂM
+                if (!loTrinh.GiaVeCoDinh.HasValue || loTrinh.GiaVeCoDinh.Value < 0 || loTrinh.GiaVeCoDinh.Value < 5000)
+                {
+                    ModelState.AddModelError("GiaVeCoDinh", "Giá vé phải lớn hơn hoặc bằng 5,000 VNĐ và không được là số âm. Vui lòng nhập lại!");
+                    ViewData["TramDi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramDi);
+                    ViewData["TramToi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramToi);
+                    return View(loTrinh);
+                }
 
                 var newId = Guid.NewGuid().ToString();
-
-
                 loTrinh.LoTrinhId = newId;
 
                 _context.Add(loTrinh);
@@ -121,11 +155,50 @@ namespace AdminDashboard.Areas.Admin.Controllers
             ModelState.Remove("TramDiNavigation");
             ModelState.Remove("TramToiNavigation");
 
+            // KIỂM TRA GIÁ TRỊ - CHẶN HOÀN TOÀN SỐ ÂM VÀ < 5000
+            if (!loTrinh.GiaVeCoDinh.HasValue)
+            {
+                ModelState.AddModelError("GiaVeCoDinh", "Giá vé là bắt buộc và phải lớn hơn hoặc bằng 5,000 VNĐ.");
+                ViewData["TramDi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramDi);
+                ViewData["TramToi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramToi);
+                return View(loTrinh);
+            }
+
+            decimal originalValue = loTrinh.GiaVeCoDinh.Value;
+            
+            // CHẶN HOÀN TOÀN SỐ ÂM - KHÔNG CHO LƯU BẤT KỲ TRƯỜNG HỢP NÀO
+            if (originalValue < 0)
+            {
+                ModelState.AddModelError("GiaVeCoDinh", "Giá vé không được là số âm! Vui lòng nhập số dương lớn hơn hoặc bằng 5,000 VNĐ.");
+                ViewData["TramDi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramDi);
+                ViewData["TramToi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramToi);
+                return View(loTrinh);
+            }
+            
+            // KIỂM TRA GIÁ TRỊ PHẢI >= 5000 - KHÔNG TỰ ĐỘNG SỬA, BẮT BUỘC NGƯỜI DÙNG NHẬP LẠI
+            if (originalValue < 5000)
+            {
+                ModelState.AddModelError("GiaVeCoDinh", "Giá vé phải lớn hơn hoặc bằng 5,000 VNĐ. Vui lòng nhập lại!");
+                ViewData["TramDi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramDi);
+                ViewData["TramToi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramToi);
+                return View(loTrinh);
+            }
+
+            // CHỈ CHO PHÉP LƯU NẾU GIÁ TRỊ >= 5000 VÀ KHÔNG PHẢI SỐ ÂM
             if (ModelState.IsValid)
             {
                 if (loTrinh.TramDi == loTrinh.TramToi)
                 {
                     ModelState.AddModelError("TramToi", "Trạm đến không được trùng với trạm đi.");
+                    ViewData["TramDi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramDi);
+                    ViewData["TramToi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramToi);
+                    return View(loTrinh);
+                }
+
+                // KIỂM TRA LẠI LẦN CUỐI - KHÔNG CHO LƯU NẾU < 5000 HOẶC SỐ ÂM
+                if (!loTrinh.GiaVeCoDinh.HasValue || loTrinh.GiaVeCoDinh.Value < 0 || loTrinh.GiaVeCoDinh.Value < 5000)
+                {
+                    ModelState.AddModelError("GiaVeCoDinh", "Giá vé phải lớn hơn hoặc bằng 5,000 VNĐ và không được là số âm. Vui lòng nhập lại!");
                     ViewData["TramDi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramDi);
                     ViewData["TramToi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramToi);
                     return View(loTrinh);
@@ -179,6 +252,10 @@ namespace AdminDashboard.Areas.Admin.Controllers
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var loTrinh = await _context.LoTrinh.FindAsync(id);
+            if (loTrinh == null)
+            {
+                return NotFound();
+            }
             _context.LoTrinh.Remove(loTrinh);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

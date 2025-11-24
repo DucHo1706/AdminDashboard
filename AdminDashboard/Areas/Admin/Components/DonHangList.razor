@@ -1,0 +1,253 @@
+@using AdminDashboard.Models
+@using AdminDashboard.Areas.Admin.Components
+@using Microsoft.AspNetCore.Components
+@using DonHangVM = AdminDashboard.Areas.Admin.Components.DonHangViewModel
+@inject IJSRuntime JSRuntime
+
+@* Blazor Component for Order List *@
+<div class="donhang-list-container">
+    @if (DonHangs == null || !DonHangs.Any())
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Không có dữ liệu đơn hàng.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table modern-table table-hover">
+                <thead>
+                    <tr>
+                        <th>Mã Đơn Hàng</th>
+                        <th>Khách Hàng</th>
+                        <th>Mã Chuyến</th>
+                        <th>Ngày Đặt</th>
+                        <th>Tổng Tiền</th>
+                        <th>Trạng Thái Thanh Toán</th>
+                        <th>Thời Gian Hết Hạn</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var dh in DonHangs)
+                    {
+                        <tr>
+                            <td><span class="badge bg-primary">@dh.DonHangId</span></td>
+                            <td>
+                                <strong>@dh.KhachHangTen</strong>
+                                <br><small class="text-muted">@dh.KhachHangId</small>
+                            </td>
+                            <td><span class="badge bg-info">@dh.ChuyenId</span></td>
+                            <td>@dh.NgayDat.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td><strong class="text-success">@dh.TongTien.ToString("N0") VNĐ</strong></td>
+                            <td>
+                                @if (dh.TrangThaiThanhToan == "Đã thanh toán" || dh.TrangThaiThanhToan == "Da thanh toan")
+                                {
+                                    <span class="badge-status badge-success">@dh.TrangThaiThanhToan</span>
+                                }
+                                else if ((dh.TrangThaiThanhToan ?? "").Contains("Hết hạn") || (dh.TrangThaiThanhToan ?? "").Contains("Hủy") || (dh.TrangThaiThanhToan ?? "").Contains("huy"))
+                                {
+                                    <span class="badge-status badge-danger">@dh.TrangThaiThanhToan</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-status badge-warning">@dh.TrangThaiThanhToan</span>
+                                }
+                            </td>
+                            <td>
+                                @if (dh.ThoiGianHetHan < DateTime.Now && dh.TrangThaiThanhToan != "Đã thanh toán" && dh.TrangThaiThanhToan != "Da thanh toan")
+                                {
+                                    <span class="text-danger">@dh.ThoiGianHetHan.ToString("dd/MM/yyyy HH:mm")</span>
+                                }
+                                else
+                                {
+                                    @dh.ThoiGianHetHan.ToString("dd/MM/yyyy HH:mm")
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (DonHangs != null && DonHangs.TotalPages > 1)
+        {
+            <div class="pagination-wrapper">
+                <div class="page-info">
+                    Trang @DonHangs.PageIndex / @DonHangs.TotalPages
+                    (Tổng: @DonHangs.TotalCount đơn hàng)
+                </div>
+                <nav>
+                    <ul class="pagination mb-0">
+                        @if (DonHangs.HasPreviousPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="#" @onclick="@(() => HandlePageChange(DonHangs.PageIndex - 1))" @onclick:preventDefault="true">
+                                    <i class="bi bi-chevron-left"></i> Trước
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="bi bi-chevron-left"></i> Trước</span>
+                            </li>
+                        }
+
+                        @for (int i = Math.Max(1, DonHangs.PageIndex - 2);
+                             i <= Math.Min(DonHangs.TotalPages, DonHangs.PageIndex + 2);
+                             i++)
+                        {
+                            var pageNum = i; // Capture loop variable to avoid closure issue
+                            <li class="page-item @(pageNum == DonHangs.PageIndex ? "active" : "")">
+                                <a class="page-link" href="#" @onclick="@(() => HandlePageChange(pageNum))" @onclick:preventDefault="true">@pageNum</a>
+                            </li>
+                        }
+
+                        @if (DonHangs.HasNextPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="#" @onclick="@(() => HandlePageChange(DonHangs.PageIndex + 1))" @onclick:preventDefault="true">
+                                    Sau <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link">Sau <i class="bi bi-chevron-right"></i></span>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            </div>
+        }
+    }
+</div>
+
+<style>
+    .donhang-list-container {
+        width: 100%;
+    }
+
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .modern-table {
+        width: 100%;
+        margin: 0;
+    }
+
+    .modern-table thead th {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 12px;
+        padding: 15px;
+        border: none;
+    }
+
+    .modern-table tbody td {
+        padding: 15px;
+        vertical-align: middle;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .modern-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .badge-status {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .badge-success { background-color: #d4edda; color: #155724; }
+    .badge-danger { background-color: #f8d7da; color: #721c24; }
+    .badge-warning { background-color: #fff3cd; color: #856404; }
+
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+        gap: 10px;
+    }
+
+    .page-info {
+        color: #6c757d;
+        font-size: 14px;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public PaginatedList<DonHangVM>? DonHangs { get; set; }
+
+    [Parameter]
+    public int KhachHangPageIndex { get; set; } = 1;
+
+    [Parameter]
+    public string FilterType { get; set; } = "all";
+
+    [Parameter]
+    public DateTime? FilterDate { get; set; }
+
+    [Parameter]
+    public int? FilterMonth { get; set; }
+
+    [Parameter]
+    public int? FilterYear { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnPageChange { get; set; }
+
+    private async Task HandlePageChange(int pageIndex)
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("console.log", 
+                $"🟣 DonHangList.HandlePageChange called with pageIndex: {pageIndex}, DonHangs.PageIndex: {DonHangs?.PageIndex}");
+        }
+        catch { }
+        
+        if (OnPageChange.HasDelegate)
+        {
+            await OnPageChange.InvokeAsync(pageIndex);
+        }
+    }
+
+    private string GetPaginationUrl(int pageIndex)
+    {
+        var queryParams = new List<string>
+        {
+            $"khachHangPage={KhachHangPageIndex}",
+            $"donHangPage={pageIndex}"
+        };
+
+        if (FilterType != "all")
+        {
+            queryParams.Add($"filterType={FilterType}");
+            if (FilterDate.HasValue)
+            {
+                queryParams.Add($"filterDate={FilterDate.Value:yyyy-MM-dd}");
+            }
+            if (FilterMonth.HasValue)
+            {
+                queryParams.Add($"filterMonth={FilterMonth.Value}");
+            }
+            if (FilterYear.HasValue)
+            {
+                queryParams.Add($"filterYear={FilterYear.Value}");
+            }
+        }
+
+        return $"/Admin/Statistics?{string.Join("&", queryParams)}#donhang";
+    }
+}
+

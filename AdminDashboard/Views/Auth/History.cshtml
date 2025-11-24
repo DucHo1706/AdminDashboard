@@ -3,12 +3,25 @@
 @{
     Layout = "~/Views/Shared/_Layout_User.cshtml";
     ViewData["Title"] = "Lịch sử đặt vé";
+    var hienTai = Model
+        .Where(d => d.ChuyenXe != null)
+        .Where(d => d.TrangThaiThanhToan == "DangChoThanhToan" || d.TrangThaiThanhToan == "Da thanh toan")
+        // Giả định tên Enum của bạn là DangMoBan. Hãy sửa lại nếu tên khác.
+        .Where(d => d.ChuyenXe.TrangThai == AdminDashboard.Models.TrangThai.TrangThaiChuyenXe.DangMoBanVe)
+        .OrderBy(d => d.ChuyenXe.NgayDi).ThenBy(d => d.ChuyenXe.GioDi);
+    var daDi = Model
+        .Where(d => d.ChuyenXe != null)
+        .Where(d => d.TrangThaiThanhToan == "Da thanh toan")
+        .Where(d => d.ChuyenXe.TrangThai == AdminDashboard.Models.TrangThai.TrangThaiChuyenXe.DaHoanThanh)
+        .OrderByDescending(d => d.ChuyenXe.NgayDi);
+    var daHuy = Model
+        .Where(d => d.TrangThaiThanhToan == "Da huy" || d.TrangThaiThanhToan == "Giao dich that bai")
+        .OrderByDescending(d => d.NgayDat);
 }
 
 <head>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        /* (Toàn bộ CSS của bạn giữ nguyên, tôi không lặp lại ở đây) */
         body {
             height: 100vh;
             font-family: 'Segoe UI', sans-serif;
@@ -204,42 +217,16 @@
                             }
                             else
                             {
-                                
-
-                                var hienTai = Model
-                                .Where(d => d.ChuyenXe != null)
-                                .Where(d => d.ChuyenXe.TrangThai != AdminDashboard.Models.TrangThai.TrangThaiChuyenXe.DaHoanThanh)
-                             
-                                .Where(d => d.TrangThaiThanhToan == "DangChoThanhToan" || d.TrangThaiThanhToan == "Da thanh toan")
-                                .OrderBy(d => d.ChuyenXe.NgayDi).ThenBy(d => d.ChuyenXe.GioDi);
-
-                                var daDi = Model
-                                .Where(d => d.ChuyenXe != null)
-                              
-                                .Where(d => d.TrangThaiThanhToan == "Da thanh toan")
-                                .Where(d => d.ChuyenXe.TrangThai == AdminDashboard.Models.TrangThai.TrangThaiChuyenXe.DaHoanThanh || d.ChuyenXe.NgayDi <= DateTime.Today)
-                                .OrderByDescending(d => d.ChuyenXe.NgayDi);
-
-                             
-                                var daHuy = Model.Where(d => d.TrangThaiThanhToan == "Da huy" || d.TrangThaiThanhToan == "Giao dich that bai");
-
-                            
-
                                 <div class="tab-content">
+                                    @* --- TAB HIỆN TẠI (Đang mở bán) --- *@
                                     <div class="tab-pane fade show active" id="pane-current" role="tabpanel">
                                         <div class="row g-3">
                                             @foreach (var d in hienTai)
                                             {
-                                          
-                                             
                                                 var isPaid = string.Equals(d.TrangThaiThanhToan, "Da thanh toan", StringComparison.OrdinalIgnoreCase);
-                                             
-
                                                 var isPending = string.Equals(d.TrangThaiThanhToan, "DangChoThanhToan", StringComparison.OrdinalIgnoreCase);
                                                 var border = isPaid ? "border-success" : (isPending ? "border-warning" : "border-secondary");
                                                 var header = isPaid ? "bg-success" : (isPending ? "bg-warning" : "bg-secondary");
-
-                                             
                                                 var statusText = isPaid ? "Đã thanh toán" : (isPending ? "Chờ thanh toán" : "Đã hủy");
                                                 var badge = isPaid ? "bg-success" : (isPending ? "bg-warning text-dark" : "bg-secondary");
 
@@ -265,6 +252,7 @@
                                                                 <div class="col-md-6">
                                                                     <div><strong>Tuyến:</strong> @d.ChuyenXe?.LoTrinh?.TramDiNavigation?.TenTram - @d.ChuyenXe?.LoTrinh?.TramToiNavigation?.TenTram</div>
                                                                     <div><strong>Thời gian:</strong> @d.ChuyenXe?.NgayDi.ToString("dd/MM/yyyy") @d.ChuyenXe?.GioDi</div>
+                                                                    <div><strong>Trạng thái xe:</strong> <span class="text-primary">Đang mở bán</span></div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -286,9 +274,14 @@
                                                     </div>
                                                 </div>
                                             }
+                                            @if (!hienTai.Any())
+                                            {
+                                                <div class="text-center text-muted fst-italic mt-3">Không có vé hiện tại.</div>
+                                            }
                                         </div>
                                     </div>
 
+                                    @* --- TAB ĐÃ ĐI (Đã hoàn thành) --- *@
                                     <div class="tab-pane fade" id="pane-dadi" role="tabpanel">
                                         <div class="row g-3">
                                             @foreach (var d in daDi)
@@ -297,7 +290,7 @@
                                                     <div class="card shadow-sm border-success">
                                                         <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                                                             <div><strong>Mã đơn:</strong> @d.DonHangId</div>
-                                                            <span class="badge bg-success">Đã thanh toán</span>
+                                                            <span class="badge bg-success">Đã hoàn thành</span>
                                                         </div>
                                                         <div class="card-body">
                                                             <div class="row">
@@ -318,9 +311,14 @@
                                                     </div>
                                                 </div>
                                             }
+                                            @if (!daDi.Any())
+                                            {
+                                                <div class="text-center text-muted fst-italic mt-3">Chưa có lịch sử chuyến đi nào đã hoàn thành.</div>
+                                            }
                                         </div>
                                     </div>
 
+                                    @* --- TAB ĐÃ HỦY --- *@
                                     <div class="tab-pane fade" id="pane-dahuy" role="tabpanel">
                                         <div class="row g-3">
                                             @foreach (var d in daHuy)
@@ -348,6 +346,10 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                            }
+                                            @if (!daHuy.Any())
+                                            {
+                                                <div class="text-center text-muted fst-italic mt-3">Không có đơn hủy nào.</div>
                                             }
                                         </div>
                                     </div>
@@ -385,9 +387,9 @@
 
             tick();
             setInterval(tick, 1000);
-        })(); // ✅ kết thúc countdown function
+        })();
 
-        // ✅ underline animation cho tabs
+        // underline animation
         document.addEventListener("DOMContentLoaded", function () {
             const tabs = document.querySelectorAll("#historyTabs .nav-link");
             const underline = document.querySelector(".nav-underline");
