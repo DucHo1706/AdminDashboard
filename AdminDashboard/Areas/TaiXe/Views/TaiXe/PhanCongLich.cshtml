@@ -59,8 +59,79 @@
         padding: 15px;
         background: #f8f9ff;
         border-radius: 10px;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    .schedule-day-header {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #0033FF;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #e0e0e0;
+        margin-top: 20px;
+        margin-bottom: 15px;
     }
 
+       .schedule-day-header:first-of-type {
+            margin-top: 0;
+        }
+    .chuyen-card {
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .chuyen-info {
+        flex: 1;
+        min-width: 250px;
+    }
+
+        .chuyen-info h5 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #1e293b;
+        }
+
+        .chuyen-info p {
+            font-size: 0.95rem;
+            color: #475569;
+            margin: 3px 0;
+        }
+
+    .badge-secondary {
+        background-color: #9ca3af;
+        color: #fff;
+    }
+
+    .badge-info {
+        background-color: #3b82f6;
+        color: #fff;
+    }
+
+    .badge-warning {
+        background-color: #facc15;
+        color: #1e293b;
+    }
+
+    .badge-primary {
+        background-color: #2563eb;
+        color: #fff;
+    }
+    .badge-success {
+        background-color: #22c55e;
+        color: #fff;
+    }
+    .badge-danger {
+        background-color: #ef4444;
+        color: #fff;
+    }
 </style>
 
 
@@ -185,24 +256,19 @@
         <div class="card-header bg-dark text-white py-3">
             <h5 class="mb-0 fw-semibold"><i class="bi bi-calendar3"></i> Lịch Làm Việc Tài Xế</h5>
         </div>
-
-        <div class="card-body p-4">
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <label class="fw-semibold mb-2">Chọn Tài Xế</label>
-                    <select id="taiXeSelect" class="form-select select-driver">
-                        <option value="">-- Chọn tài xế --</option>
-                        @foreach (var tx in (SelectList)ViewBag.TaiXes)
-                        {
-                            <option value="@tx.Value">@tx.Text</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="col-md-8">
-                    <div id="lichTaiXeContainer" class="schedule-box"></div>
-                </div>
-            </div>
+        <div>
+            <label class="fw-semibold mb-2">Chọn Tài Xế</label>
+            <select id="taiXeSelect" class="form-select select-driver">
+                <option value="">-- Chọn tài xế --</option>
+                @foreach (var tx in (SelectList)ViewBag.TaiXes)
+                {
+                    <option value="@tx.Value">@tx.Text</option>
+                }
+            </select>
+        </div>
+        <div id="lichTaiXeContainer"
+             class="schedule-box"
+             data-url="@Url.Action("XemLichTaiXe", "TaiXe", new { area = "TaiXe" })">
         </div>
     </div>
 </div>
@@ -213,6 +279,8 @@
         const taiXeSelect = document.getElementById("taiXeSelect");
         const container = document.getElementById("lichTaiXeContainer");
 
+        const xemLichUrl = container.dataset.url;
+
         taiXeSelect.addEventListener("change", function () {
             const taiXeId = this.value;
             if (!taiXeId) {
@@ -220,9 +288,9 @@
                 return;
             }
 
-            container.innerHTML = "<div class='text-primary'>Đang tải dữ liệu...</div>";
+            container.innerHTML = "<div class'text-primary'>Đang tải dữ liệu...</div>";
 
-            fetch(`/TaiXe/XemLichTaiXe?taiXeId=${taiXeId}`)
+            fetch(`${xemLichUrl}?taiXeId=${taiXeId}`)
                 .then(res => res.text())
                 .then(html => container.innerHTML = html)
                 .catch(() => {

@@ -1,0 +1,364 @@
+@using AdminDashboard.Areas.Admin.Pages
+@using AdminDashboard.Models
+@using Microsoft.AspNetCore.Components
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+
+@* Blazor Component for Customer List with Age Filtering *@
+<div class="khachhang-list-container">
+    <!-- Filter theo độ tuổi -->
+    <div class="card mb-3">
+        <div class="card-header bg-light">
+            <h6 class="mb-0"><i class="bi bi-funnel"></i> Lọc Theo Độ Tuổi</h6>
+        </div>
+        <div class="card-body">
+            <div class="age-filter-buttons">
+                <button type="button" 
+                        class="btn btn-sm @(SelectedAgeFilter == null ? "btn-primary" : "btn-outline-primary")"
+                        @onclick="@(() => FilterByAge(null))"
+                        @onclick:preventDefault="true">
+                    Tất Cả
+                </button>
+                <button type="button" 
+                        class="btn btn-sm @(SelectedAgeFilter == "duoi18" ? "btn-primary" : "btn-outline-primary")"
+                        @onclick="@(() => FilterByAge("duoi18"))"
+                        @onclick:preventDefault="true">
+                    Dưới 18 tuổi
+                </button>
+                <button type="button" 
+                        class="btn btn-sm @(SelectedAgeFilter == "18-25" ? "btn-primary" : "btn-outline-primary")"
+                        @onclick="@(() => FilterByAge("18-25"))"
+                        @onclick:preventDefault="true">
+                    18-25 tuổi
+                </button>
+                <button type="button" 
+                        class="btn btn-sm @(SelectedAgeFilter == "26-35" ? "btn-primary" : "btn-outline-primary")"
+                        @onclick="@(() => FilterByAge("26-35"))"
+                        @onclick:preventDefault="true">
+                    26-35 tuổi
+                </button>
+                <button type="button" 
+                        class="btn btn-sm @(SelectedAgeFilter == "36-45" ? "btn-primary" : "btn-outline-primary")"
+                        @onclick="@(() => FilterByAge("36-45"))"
+                        @onclick:preventDefault="true">
+                    36-45 tuổi
+                </button>
+                <button type="button" 
+                        class="btn btn-sm @(SelectedAgeFilter == "46-60" ? "btn-primary" : "btn-outline-primary")"
+                        @onclick="@(() => FilterByAge("46-60"))"
+                        @onclick:preventDefault="true">
+                    46-60 tuổi
+                </button>
+                <button type="button" 
+                        class="btn btn-sm @(SelectedAgeFilter == "tren60" ? "btn-primary" : "btn-outline-primary")"
+                        @onclick="@(() => FilterByAge("tren60"))"
+                        @onclick:preventDefault="true">
+                    Trên 60 tuổi
+                </button>
+            </div>
+            @if (SelectedAgeFilter != null)
+            {
+                <div class="mt-2">
+                    <span class="text-info">
+                        <i class="bi bi-info-circle"></i> Đang highlight: <strong>@GetAgeFilterLabel(SelectedAgeFilter)</strong>
+                    </span>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Danh sách khách hàng -->
+    @if (KhachHangs == null || !KhachHangs.Any())
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Không có dữ liệu khách hàng.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table modern-table table-hover">
+                <thead>
+                    <tr>
+                        <th>Mã KH</th>
+                        <th>Tên Khách Hàng</th>
+                        <th>Email</th>
+                        <th>Số Điện Thoại</th>
+                        <th>Ngày Sinh</th>
+                        <th>Tuổi</th>
+                        <th>Trạng Thái</th>
+                        <th>Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var kh in FilteredKhachHangs)
+                    {
+                        var isSelected = SelectedUserId == kh.UserId;
+                        var isAgeHighlight = SelectedAgeFilter != null && IsInAgeRange(kh.Tuoi, SelectedAgeFilter);
+                        
+                        // Xây dựng class cho row - ưu tiên age highlight
+                        var rowClass = "";
+                        var rowStyle = "cursor: pointer;";
+                        
+                        if (isAgeHighlight)
+                        {
+                            rowClass = "age-highlight";
+                            rowStyle += " background-color: #fff3cd !important; border-left: 4px solid #ffc107 !important;";
+                        }
+                        if (isSelected)
+                        {
+                            rowClass += (string.IsNullOrEmpty(rowClass) ? "" : " ") + "selected-row";
+                        }
+                        
+                        <tr class="@rowClass" 
+                            @onclick="() => SelectRow(kh.UserId)"
+                            style="@rowStyle">
+                            <td>
+                                <span class="badge @(isAgeHighlight ? "bg-warning text-dark" : "bg-secondary")">@kh.UserId</span>
+                            </td>
+                            <td>
+                                <strong>@kh.HoTen</strong>
+                                @if (isSelected)
+                                {
+                                    <i class="bi bi-check-circle-fill text-primary ms-1"></i>
+                                }
+                            </td>
+                            <td>@kh.Email</td>
+                            <td>@kh.SoDienThoai</td>
+                            <td>@(kh.NgaySinh?.ToString("dd/MM/yyyy") ?? "—")</td>
+                            <td>
+                                @if (kh.Tuoi.HasValue)
+                                {
+                                    <span class="@(isAgeHighlight ? "fw-bold text-primary" : "")" style="@(isAgeHighlight ? "font-weight: bold !important; color: #0d6efd !important;" : "")">@kh.Tuoi.Value</span>
+                                }
+                                else
+                                {
+                                    <span>—</span>
+                                }
+                            </td>
+                            <td>
+                                @if (kh.TrangThai == TrangThaiNguoiDung.HoatDong)
+                                {
+                                    <span class="badge-status badge-success">Hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-status badge-danger">Bị khóa</span>
+                                }
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" 
+                                        @onclick:stopPropagation="true"
+                                        @onclick="() => DeleteKhachHang(kh.UserId, kh.HoTen)">
+                                    <i class="bi bi-trash"></i> Xóa
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (KhachHangs != null && KhachHangs.TotalPages > 1)
+        {
+            <div class="pagination-wrapper">
+                <div class="page-info">
+                    Trang @KhachHangs.PageIndex / @KhachHangs.TotalPages 
+                    (Tổng: @KhachHangs.TotalCount khách hàng)
+                </div>
+                <nav>
+                    <ul class="pagination mb-0">
+                        @if (KhachHangs.HasPreviousPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="?khachHangPage=@(KhachHangs.PageIndex - 1)&donHangPage=@DonHangPageIndex#khachhang">
+                                    <i class="bi bi-chevron-left"></i> Trước
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="bi bi-chevron-left"></i> Trước</span>
+                            </li>
+                        }
+
+                        @for (int i = Math.Max(1, KhachHangs.PageIndex - 2); 
+                             i <= Math.Min(KhachHangs.TotalPages, KhachHangs.PageIndex + 2); 
+                             i++)
+                        {
+                            <li class="page-item @(i == KhachHangs.PageIndex ? "active" : "")">
+                                <a class="page-link" href="?khachHangPage=@i&donHangPage=@DonHangPageIndex#khachhang">@i</a>
+                            </li>
+                        }
+
+                        @if (KhachHangs.HasNextPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="?khachHangPage=@(KhachHangs.PageIndex + 1)&donHangPage=@DonHangPageIndex#khachhang">
+                                    Sau <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link">Sau <i class="bi bi-chevron-right"></i></span>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            </div>
+        }
+    }
+</div>
+
+<style>
+    .khachhang-list-container {
+        width: 100%;
+    }
+
+    .selected-row {
+        background-color: #e7f3ff !important;
+        border-left: 4px solid #0d6efd;
+        font-weight: 600;
+    }
+
+    .age-highlight {
+        background-color: #fff3cd !important;
+        border-left: 4px solid #ffc107 !important;
+        font-weight: 600;
+    }
+
+    .age-highlight:hover {
+        background-color: #ffe69c !important;
+    }
+    
+    .age-highlight td {
+        background-color: #fff3cd !important;
+    }
+    
+    .age-highlight:hover td {
+        background-color: #ffe69c !important;
+    }
+
+    .selected-row:hover {
+        background-color: #d0e7ff !important;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        transform: scale(1.01);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .age-filter-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .age-filter-buttons .btn {
+        margin: 0;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public PaginatedList<NguoiDungViewModel>? KhachHangs { get; set; }
+
+    [Parameter]
+    public int DonHangPageIndex { get; set; } = 1;
+
+    [Parameter]
+    public string DeleteUrl { get; set; } = "";
+
+    private string? SelectedUserId { get; set; }
+    private string? SelectedAgeFilter { get; set; }
+
+    private IEnumerable<NguoiDungViewModel> FilteredKhachHangs
+    {
+        get
+        {
+            if (KhachHangs == null || !KhachHangs.Any())
+                return Enumerable.Empty<NguoiDungViewModel>();
+
+            // Luôn hiển thị tất cả, chỉ highlight theo filter
+            return KhachHangs.ToList();
+        }
+    }
+
+    private bool IsInAgeRange(int? tuoi, string? ageFilter)
+    {
+        if (!tuoi.HasValue || string.IsNullOrEmpty(ageFilter))
+            return false;
+
+        var age = tuoi.Value;
+        
+        return ageFilter switch
+        {
+            "duoi18" => age < 18,
+            "18-25" => age >= 18 && age <= 25,
+            "26-35" => age >= 26 && age <= 35,
+            "36-45" => age >= 36 && age <= 45,
+            "46-60" => age >= 46 && age <= 60,
+            "tren60" => age > 60,
+            _ => false
+        };
+    }
+
+    private string GetAgeFilterLabel(string? ageFilter)
+    {
+        return ageFilter switch
+        {
+            "duoi18" => "Dưới 18 tuổi",
+            "18-25" => "18-25 tuổi",
+            "26-35" => "26-35 tuổi",
+            "36-45" => "36-45 tuổi",
+            "46-60" => "46-60 tuổi",
+            "tren60" => "Trên 60 tuổi",
+            _ => ""
+        };
+    }
+
+    private void SelectRow(string userId)
+    {
+        SelectedUserId = SelectedUserId == userId ? null : userId;
+        StateHasChanged(); // Force re-render
+    }
+
+    private async Task FilterByAge(string? ageFilter)
+    {
+        // Toggle filter - nếu đang chọn thì bỏ, nếu chưa chọn thì chọn
+        if (SelectedAgeFilter == ageFilter)
+        {
+            SelectedAgeFilter = null;
+        }
+        else
+        {
+            SelectedAgeFilter = ageFilter;
+        }
+        SelectedUserId = null; // Reset selection when filtering
+        
+        // Force re-render
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task DeleteKhachHang(string userId, string hoTen)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", $"Bạn có chắc chắn muốn xóa khách hàng \"{hoTen}\"?"))
+        {
+            await JSRuntime.InvokeVoidAsync("xoaKhachHang", userId, hoTen);
+        }
+    }
+
+    public void Dispose()
+    {
+        // Cleanup if needed
+    }
+}
+

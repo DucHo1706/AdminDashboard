@@ -4,204 +4,341 @@
     ViewData["Title"] = "Lịch sử mua vé";
 }
 
-<div class="container my-4">
-    <h3 class="mb-3">Lịch sử mua vé</h3>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f5f5f7;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    <ul class="nav nav-pills mb-3" id="historyTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="tab-current" data-bs-toggle="pill" data-bs-target="#pane-current" type="button" role="tab">Hiện tại</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tab-dadi" data-bs-toggle="pill" data-bs-target="#pane-dadi" type="button" role="tab">Đã đi</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tab-dahuy" data-bs-toggle="pill" data-bs-target="#pane-dahuy" type="button" role="tab">Đã hủy</button>
-        </li>
-    </ul>
+        h3 {
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 20px;
+        }
 
-    @if (Model == null || !Model.Any())
-    {
-        <div class="alert alert-info">Bạn chưa có đơn hàng nào.</div>
-    }
-    else
-    {
-        var hienTai = Model
+        /* NAV PILLS */
+        .nav-pills .nav-link {
+            border-radius: 12px;
+            font-weight: 500;
+            padding: 10px 18px;
+            color: #444;
+            transition: 0.25s;
+            background: #e9e9e9;
+        }
+
+            .nav-pills .nav-link.active {
+                background: #4A7BFF;
+                color: white !important;
+                box-shadow: 0 4px 12px rgba(74,123,255,0.4);
+            }
+
+            .nav-pills .nav-link:hover {
+                background: #dcdcdc;
+            }
+
+        /* ===== TICKET CARD ===== */
+        .ticket-card {
+            position: relative;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+            margin-bottom: 20px;
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .ticket-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 28px rgba(0,0,0,0.12);
+            }
+
+            .ticket-card::after {
+                content: '';
+                position: absolute;
+                width: 100%;
+                height: 1px;
+                border-top: 1px dashed #ccc;
+                top: 60px;
+                left: 0;
+            }
+
+        /* HEADER */
+        .ticket-header {
+            padding: 16px 20px;
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ticket-card.paid .ticket-header {
+            background: #3DBE5B;
+            color: white;
+        }
+
+        .ticket-card.pending .ticket-header {
+            background: #FFC94B;
+            color: #222;
+        }
+
+        .ticket-card.cancelled .ticket-header {
+            background: #8A8A8A;
+            color: white;
+        }
+
+        .ticket-badge {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* BODY */
+        .ticket-body {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px 20px 24px;
+            font-size: 0.95rem;
+        }
+
+        .ticket-body-left, .ticket-body-right {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        /* FOOTER */
+        .ticket-footer {
+            background: #f7f7f7;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* BUTTONS */
+        .btn-ticket {
+            border-radius: 12px;
+            padding: 6px 14px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+
+        .btn-view {
+            border: 1px solid #4A7BFF;
+            color: #4A7BFF;
+            background: transparent;
+        }
+
+            .btn-view:hover {
+                background: #4A7BFF;
+                color: white;
+            }
+
+        .btn-pay {
+            background: #FF4E4E;
+            color: white;
+            border: none;
+        }
+
+        .btn-cancel {
+            border: 1px solid #999;
+            color: #555;
+            background: transparent;
+        }
+
+            .btn-cancel:hover {
+                background: #ddd;
+            }
+
+        @@media (max-width: 768px) {
+            .ticket-body {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-4">
+        <h3>Lịch sử mua vé</h3>
+
+        <ul class="nav nav-pills mb-3" id="historyTabs" role="tablist">
+            <li class="nav-item"><button class="nav-link active" id="tab-current" data-bs-toggle="pill" data-bs-target="#pane-current" type="button">Hiện tại</button></li>
+            <li class="nav-item"><button class="nav-link" id="tab-dadi" data-bs-toggle="pill" data-bs-target="#pane-dadi" type="button">Đã đi</button></li>
+            <li class="nav-item"><button class="nav-link" id="tab-dahuy" data-bs-toggle="pill" data-bs-target="#pane-dahuy" type="button">Đã hủy</button></li>
+        </ul>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-info">Bạn chưa có đơn hàng nào.</div>
+        }
+        else
+        {
+            var hienTai = Model
             .Where(d => d.ChuyenXe != null)
             .Where(d => d.ChuyenXe.TrangThai != AdminDashboard.Models.TrangThai.TrangThaiChuyenXe.DaHoanThanh)
-            .Where(d => d.TrangThaiThanhToan == "DangChoThanhToan" || d.TrangThaiThanhToan == "Đã thanh toán")
+            .Where(d => d.TrangThaiThanhToan == "DangChoThanhToan" || d.TrangThaiThanhToan == "Da thanh toan")
             .OrderBy(d => d.ChuyenXe.NgayDi).ThenBy(d => d.ChuyenXe.GioDi);
 
-        var daDi = Model
+            var daDi = Model
             .Where(d => d.ChuyenXe != null)
-            .Where(d => d.TrangThaiThanhToan == "Đã thanh toán")
-            .Where(d => d.ChuyenXe.TrangThai == AdminDashboard.Models.TrangThai.TrangThaiChuyenXe.DaHoanThanh || d.ChuyenXe.NgayDi < DateTime.Today)
+            .Where(d => d.TrangThaiThanhToan == "Da thanh toan")
+            .Where(d => d.ChuyenXe.TrangThai == AdminDashboard.Models.TrangThai.TrangThaiChuyenXe.DaHoanThanh)
             .OrderByDescending(d => d.ChuyenXe.NgayDi);
-        var daHuy = Model.Where(d => d.TrangThaiThanhToan == "Đã hủy" || d.TrangThaiThanhToan == "Giao dịch thất bại");
 
-        <div class="tab-content">
-            <div class="tab-pane fade show active" id="pane-current" role="tabpanel">
-                <div class="row g-3">
-                @foreach (var d in hienTai)
-                {
-            var isPaid = string.Equals(d.TrangThaiThanhToan, "Đã thanh toán", StringComparison.OrdinalIgnoreCase);
-            var isPending = string.Equals(d.TrangThaiThanhToan, "DangChoThanhToan", StringComparison.OrdinalIgnoreCase);
-            var isCancelled = string.Equals(d.TrangThaiThanhToan, "Đã hủy", StringComparison.OrdinalIgnoreCase);
+            var daHuy = Model.Where(d => d.TrangThaiThanhToan == "Da huy" || d.TrangThaiThanhToan == "Giao dich that bai");
+            <div class="tab-content">
 
-            var border = isPaid ? "border-success" : (isPending ? "border-warning" : "border-secondary");
-            var header = isPaid ? "bg-success" : (isPending ? "bg-warning" : "bg-secondary");
-            var statusText = isPaid ? "Đã thanh toán" : (isPending ? "Chờ thanh toán" : "Đã hủy");
-            var badge = isPaid ? "bg-success" : (isPending ? "bg-warning text-dark" : "bg-secondary");
-
-            <div class="col-12">
-                <div class="card shadow-sm @border">
-                    <div class="card-header text-white @header d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>Mã đơn:</strong> @d.DonHangId
-                        </div>
-                        <span class="badge @badge">@statusText</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-2"><strong>Ngày đặt:</strong> @d.NgayDat.ToString("dd/MM/yyyy HH:mm")</div>
-                                <div class="mb-2"><strong>Tổng tiền:</strong> <span class="text-danger fw-semibold">@d.TongTien.ToString("N0") VNĐ</span></div>
-                                @if (isPending)
-                                {
-                                    <div class="mb-2 text-danger fw-semibold">
-                                        <span>Thời gian thanh toán còn lại: </span>
-                                        <span class="countdown" data-expire="@d.ThoiGianHetHan.ToString("o")" data-order="@d.DonHangId" data-pending="1">--:--</span>
-                                    </div>
-                                }
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-2"><strong>Tuyến:</strong> @d.ChuyenXe?.LoTrinh?.TramDiNavigation?.TenTram - @d.ChuyenXe?.LoTrinh?.TramToiNavigation?.TenTram</div>
-                                <div class="mb-2"><strong>Thời gian:</strong> @d.ChuyenXe?.NgayDi.ToString("dd/MM/yyyy") @d.ChuyenXe?.GioDi</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer d-flex justify-content-end gap-2">
-                        <a asp-controller="Booking" asp-action="BookingSuccess" asp-route-id="@d.DonHangId" class="btn btn-outline-primary btn-sm">Chi tiết</a>
-                        @if (isPending)
+                <div class="tab-pane fade show active" id="pane-current">
+                    <div class="row g-3">
+                        @foreach (var d in hienTai)
                         {
-                            <form asp-controller="Booking" asp-action="PayAgain" method="post" class="d-inline">
-                                <input type="hidden" name="id" value="@d.DonHangId" />
-                                <button type="submit" class="btn btn-danger btn-sm">Thanh toán lại</button>
-                            </form>
-                            <form asp-controller="Booking" asp-action="CancelOrder" method="post" class="d-inline" id="cancel-@d.DonHangId">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="id" value="@d.DonHangId" />
-                                <button type="submit" class="btn btn-outline-secondary btn-sm">Hủy mua vé</button>
-                            </form>
+                            var isPaid = string.Equals(d.TrangThaiThanhToan, "Da thanh toan", StringComparison.OrdinalIgnoreCase);
+                            var isPending = string.Equals(d.TrangThaiThanhToan, "DangChoThanhToan", StringComparison.OrdinalIgnoreCase);
+                            var isCancelled = string.Equals(d.TrangThaiThanhToan, "Da huy", StringComparison.OrdinalIgnoreCase) || string.Equals(d.TrangThaiThanhToan, "Giao dich that bai", StringComparison.OrdinalIgnoreCase);
+                            var statusText = isPaid ? "Đã thanh toán" : (isPending ? "Chờ thanh toán" : "Đã hủy");
+
+                            <div class="col-12">
+                                <div class="ticket-card @(isPaid ? "paid" : (isPending ? "pending" : "cancelled"))">
+                                    <div class="ticket-header">
+                                        <div><strong>Mã đơn:</strong> @d.DonHangId</div>
+                                        <span class="ticket-badge">@statusText</span>
+                                    </div>
+                                    <div class="ticket-body">
+                                        <div class="ticket-body-left">
+                                            <div><strong>Ngày đặt:</strong> @d.NgayDat.ToString("dd/MM/yyyy HH:mm")</div>
+                                            <div><strong>Tổng tiền:</strong> <span class="text-danger fw-semibold">@d.TongTien.ToString("N0") VNĐ</span></div>
+                                            @if (isPending)
+                                            {
+                                                <div><strong>Thời gian còn lại:</strong> <span class="countdown" data-expire="@d.ThoiGianHetHan.ToString("o")" data-order="@d.DonHangId">--:--</span></div>
+                                            }
+                                        </div>
+                                        <div class="ticket-body-right">
+                                            <div><strong>Tuyến:</strong> @d.ChuyenXe?.LoTrinh?.TramDiNavigation?.TenTram - @d.ChuyenXe?.LoTrinh?.TramToiNavigation?.TenTram</div>
+                                            <div><strong>Thời gian:</strong> @d.ChuyenXe?.NgayDi.ToString("dd/MM/yyyy") @d.ChuyenXe?.GioDi</div>
+                                        </div>
+                                    </div>
+                                    <div class="ticket-footer">
+                                        <a asp-controller="Booking" asp-action="BookingSuccess" asp-route-id="@d.DonHangId" class="btn-ticket btn-view">Chi tiết</a>
+                                        @if (isPending)
+                                        {
+                                            <form asp-controller="Booking" asp-action="PayAgain" method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="@d.DonHangId" />
+                                                <button type="submit" class="btn-ticket btn-pay">Thanh toán lại</button>
+                                            </form>
+                                            <form asp-controller="Booking" asp-action="CancelOrder" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@d.DonHangId" />
+                                                <button type="submit" class="btn-ticket btn-cancel">Hủy mua vé</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
                         }
                     </div>
                 </div>
+
+                <div class="tab-pane fade" id="pane-dadi">
+                    <div class="row g-3">
+                        @foreach (var d in daDi)
+                        {
+                            <div class="col-12">
+                                <div class="ticket-card paid">
+                                    <div class="ticket-header">
+                                        <div><strong>Mã đơn:</strong> @d.DonHangId</div>
+                                        <span class="ticket-badge">Đã thanh toán</span>
+                                    </div>
+                                    <div class="ticket-body">
+                                        <div class="ticket-body-left">
+                                            <div><strong>Ngày đặt:</strong> @d.NgayDat.ToString("dd/MM/yyyy HH:mm")</div>
+                                            <div><strong>Tổng tiền:</strong> <span class="text-danger fw-semibold">@d.TongTien.ToString("N0") VNĐ</span></div>
+                                        </div>
+                                        <div class="ticket-body-right">
+                                            <div><strong>Tuyến:</strong> @d.ChuyenXe?.LoTrinh?.TramDiNavigation?.TenTram - @d.ChuyenXe?.LoTrinh?.TramToiNavigation?.TenTram</div>
+                                            <div><strong>Thời gian:</strong> @d.ChuyenXe?.NgayDi.ToString("dd/MM/yyyy") @d.ChuyenXe?.GioDi</div>
+                                        </div>
+                                    </div>
+                                    <div class="ticket-footer">
+                                        <a asp-controller="Booking" asp-action="BookingSuccess" asp-route-id="@d.DonHangId" class="btn-ticket btn-view">Xem vé điện</a>
+                                        <a asp-controller="Home_User" asp-action="Home_User" class="btn-ticket btn-view">Đặt chuyến</a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="pane-dahuy">
+                    <div class="row g-3">
+                        @foreach (var d in daHuy)
+                        {
+                            <div class="col-12">
+                                <div class="ticket-card cancelled">
+                                    <div class="ticket-header">
+                                        <div><strong>Mã đơn:</strong> @d.DonHangId</div>
+                                        <span class="ticket-badge">Đã hủy</span>
+                                    </div>
+                                    <div class="ticket-body">
+                                        <div class="ticket-body-left">
+                                            <div><strong>Ngày đặt:</strong> @d.NgayDat.ToString("dd/MM/yyyy HH:mm")</div>
+                                            <div><strong>Tổng tiền:</strong> <span class="text-danger fw-semibold">@d.TongTien.ToString("N0") VNĐ</span></div>
+                                        </div>
+                                        <div class="ticket-body-right">
+                                            <div><strong>Tuyến:</strong> @d.ChuyenXe?.LoTrinh?.TramDiNavigation?.TenTram - @d.ChuyenXe?.LoTrinh?.TramToiNavigation?.TenTram</div>
+                                            <div><strong>Thời gian:</strong> @d.ChuyenXe?.NgayDi.ToString("dd/MM/yyyy") @d.ChuyenXe?.GioDi</div>
+                                        </div>
+                                    </div>
+                                    <div class="ticket-footer">
+                                        <a asp-controller="Home_User" asp-action="Home_User" class="btn-ticket btn-view">Đặt chuyến</a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
             </div>
         }
-                </div>
-            </div>
+    </div>
 
-            <div class="tab-pane fade" id="pane-dadi" role="tabpanel">
-                <div class="row g-3">
-                @foreach (var d in daDi)
-                {
-                    var isPaid = true; var isPending = false; var isCancelled = false;
-                    var border = "border-success"; var header = "bg-success"; var statusText = "Đã thanh toán"; var badge = "bg-success";
-            <div class="col-12">
-                <div class="card shadow-sm @border">
-                    <div class="card-header text-white @header d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>Mã đơn:</strong> @d.DonHangId
-                        </div>
-                        <span class="badge @badge">@statusText</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-2"><strong>Ngày đặt:</strong> @d.NgayDat.ToString("dd/MM/yyyy HH:mm")</div>
-                                <div class="mb-2"><strong>Tổng tiền:</strong> <span class="text-danger fw-semibold">@d.TongTien.ToString("N0") VNĐ</span></div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-2"><strong>Tuyến:</strong> @d.ChuyenXe?.LoTrinh?.TramDiNavigation?.TenTram - @d.ChuyenXe?.LoTrinh?.TramToiNavigation?.TenTram</div>
-                                <div class="mb-2"><strong>Thời gian:</strong> @d.ChuyenXe?.NgayDi.ToString("dd/MM/yyyy") @d.ChuyenXe?.GioDi</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer d-flex justify-content-end gap-2">
-                        <a asp-controller="Booking" asp-action="BookingSuccess" asp-route-id="@d.DonHangId" class="btn btn-outline-primary btn-sm">Xem vé điện</a>
-                        <a asp-controller="Home_User" asp-action="Home_User" class="btn btn-primary btn-sm">Đặt chuyến</a>
-                    </div>
-                </div>
-            </div>
-                }
-                </div>
-            </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function () {
+            const nodes = document.querySelectorAll('.countdown');
+            if (!nodes.length) return;
 
-            <div class="tab-pane fade" id="pane-dahuy" role="tabpanel">
-                <div class="row g-3">
-                @foreach (var d in daHuy)
-                {
-                    var isPaid = false; var isPending = false; var isCancelled = true;
-                    var border = "border-secondary"; var header = "bg-secondary"; var statusText = "Đã hủy"; var badge = "bg-secondary";
-            <div class="col-12">
-                <div class="card shadow-sm @border">
-                    <div class="card-header text-white @header d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>Mã đơn:</strong> @d.DonHangId
-                        </div>
-                        <span class="badge @badge">@statusText</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-2"><strong>Ngày đặt:</strong> @d.NgayDat.ToString("dd/MM/yyyy HH:mm")</div>
-                                <div class="mb-2"><strong>Tổng tiền:</strong> <span class="text-danger fw-semibold">@d.TongTien.ToString("N0") VNĐ</span></div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-2"><strong>Tuyến:</strong> @d.ChuyenXe?.LoTrinh?.TramDiNavigation?.TenTram - @d.ChuyenXe?.LoTrinh?.TramToiNavigation?.TenTram</div>
-                                <div class="mb-2"><strong>Thời gian:</strong> @d.ChuyenXe?.NgayDi.ToString("dd/MM/yyyy") @d.ChuyenXe?.GioDi</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer d-flex justify-content-end gap-2">
-                        <a asp-controller="Home_User" asp-action="Home_User" class="btn btn-primary btn-sm">Đặt chuyến</a>
-                    </div>
-                </div>
-            </div>
-                }
-                </div>
-            </div>
-        </div>
-    }
-</div>
+            function format(ms) {
+                if (ms <= 0) return '00:00:00';
+                const totalSec = Math.floor(ms / 1000);
+                const h = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+                const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+                const s = String(totalSec % 60).padStart(2, '0');
+                return `${h}:${m}:${s}`;
+            }
 
-<script>
-    (function () {
-        const nodes = document.querySelectorAll('.countdown');
-        if (!nodes.length) return;
-
-        function format(ms) {
-            if (ms <= 0) return '00:00:00';
-            const totalSec = Math.floor(ms / 1000);
-            const h = String(Math.floor(totalSec / 3600)).padStart(2, '0');
-            const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
-            const s = String(totalSec % 60).padStart(2, '0');
-            return `${h}:${m}:${s}`;
-        }
-
-        function tick() {
-            const now = new Date();
-            nodes.forEach(el => {
-                const expire = new Date(el.getAttribute('data-expire'));
-                const remain = expire - now;
-                if (remain <= 0) {
-                    el.textContent = 'Hết hạn';
-                    // Giữ nguyên tab hiện tại, KHÔNG tự chuyển sang Đã hủy
-                } else {
-                    el.textContent = format(remain);
-                }
-            });
-        }
-        tick();
-        setInterval(tick, 1000);
-    })();
-</script>
+            function tick() {
+                const now = new Date();
+                nodes.forEach(el => {
+                    const expire = new Date(el.getAttribute('data-expire'));
+                    const remain = expire - now;
+                    if (remain <= 0) el.textContent = 'Hết hạn';
+                    else el.textContent = format(remain);
+                });
+            }
+            tick();
+            setInterval(tick, 1000);
+        })();
+    </script>
+</body>
+</html>

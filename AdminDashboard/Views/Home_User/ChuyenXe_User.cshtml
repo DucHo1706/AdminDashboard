@@ -7,9 +7,11 @@
 
     var danhSachChuyenXe = Model?
         .Where(cx => cx.TrangThai == TrangThaiChuyenXe.DangMoBanVe
-                  || cx.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh
-                  || cx.TrangThai == TrangThaiChuyenXe.DaLenLich)
+        && cx.NgayDi.Date >= DateTime.Today)
+        .OrderBy(cx => cx.NgayDi)
+        .ThenBy(cx => cx.GioDi)
         .ToList();
+
 }
 
 <head>

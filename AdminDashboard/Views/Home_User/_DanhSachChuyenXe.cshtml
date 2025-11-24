@@ -1,6 +1,19 @@
-﻿@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+﻿@using AdminDashboard.Models.TrangThai
+@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+
+@{
+    var danhSachLoc = Model?
+        .Where(cx =>
+            cx.TrangThai == TrangThaiChuyenXe.DangMoBanVe
+            && cx.NgayDi.Date >= DateTime.Today
+        )
+        .OrderBy(cx => cx.NgayDi)
+        .ThenBy(cx => cx.GioDi)
+        .ToList();
+}
+
 <body>
-    @if (Model == null || !Model.Any())
+    @if (danhSachLoc == null || !danhSachLoc.Any())
     {
         <div class="alert alert-warning text-center">Không tìm thấy chuyến xe nào phù hợp.</div>
     }
@@ -20,7 +33,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var cx in Model)
+                    @foreach (var cx in danhSachLoc)
                     {
                         <tr>
                             <td>

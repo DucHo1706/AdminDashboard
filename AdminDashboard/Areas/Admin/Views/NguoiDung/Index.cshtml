@@ -348,6 +348,7 @@
                     <th>Email</th>
                     <th>Số điện thoại</th>
                     <th>Ngày sinh</th>
+                    <th>Mật khẩu</th>
                     <th>Trạng thái</th>
                 </tr>
             </thead>
@@ -359,7 +360,7 @@
                         <td data-label="Email">@user.Email</td>
                         <td data-label="Số ĐT">@user.SoDienThoai</td>
                         <td data-label="Ngày sinh">@user.NgaySinh?.ToString("dd/MM/yyyy")</td>
-
+                        <td data-label="Mật khẩu">@user.MatKhau</td>
                         <td data-label="Trạng thái">
                             @{
                                 var statusName = user.TrangThai.ToString();

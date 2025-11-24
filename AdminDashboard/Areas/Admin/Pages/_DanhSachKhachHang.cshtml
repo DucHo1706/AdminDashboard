@@ -1,5 +1,56 @@
 @model AdminDashboard.Areas.Admin.Pages.StatisticsModel
 
+<!-- Filter theo độ tuổi -->
+<div class="card mb-3">
+    <div class="card-header bg-light">
+        <h6 class="mb-0"><i class="bi bi-funnel"></i> Lọc Theo Độ Tuổi</h6>
+    </div>
+    <div class="card-body">
+        <div class="age-filter-buttons">
+            <button type="button" 
+                    class="btn btn-sm btn-primary age-filter-btn" 
+                    data-age-filter="all">
+                Tất Cả
+            </button>
+            <button type="button" 
+                    class="btn btn-sm btn-outline-primary age-filter-btn" 
+                    data-age-filter="duoi18">
+                Dưới 18 tuổi
+            </button>
+            <button type="button" 
+                    class="btn btn-sm btn-outline-primary age-filter-btn" 
+                    data-age-filter="18-25">
+                18-25 tuổi
+            </button>
+            <button type="button" 
+                    class="btn btn-sm btn-outline-primary age-filter-btn" 
+                    data-age-filter="26-35">
+                26-35 tuổi
+            </button>
+            <button type="button" 
+                    class="btn btn-sm btn-outline-primary age-filter-btn" 
+                    data-age-filter="36-45">
+                36-45 tuổi
+            </button>
+            <button type="button" 
+                    class="btn btn-sm btn-outline-primary age-filter-btn" 
+                    data-age-filter="46-60">
+                46-60 tuổi
+            </button>
+            <button type="button" 
+                    class="btn btn-sm btn-outline-primary age-filter-btn" 
+                    data-age-filter="tren60">
+                Trên 60 tuổi
+            </button>
+        </div>
+        <div class="mt-2" id="ageFilterInfo" style="display: none;">
+            <span class="text-info">
+                <i class="bi bi-info-circle"></i> Đang highlight: <strong id="ageFilterLabel"></strong>
+            </span>
+        </div>
+    </div>
+</div>
+
 @if (Model.KhachHangs == null || !Model.KhachHangs.Any())
 {
     <div class="alert alert-info">
@@ -25,13 +76,28 @@ else
             <tbody>
                 @foreach (var kh in Model.KhachHangs)
                 {
-                    <tr>
-                        <td><span class="badge bg-secondary">@kh.UserId</span></td>
-                        <td><strong>@kh.HoTen</strong></td>
+                    <tr class="khachhang-row" 
+                        data-user-id="@kh.UserId"
+                        data-tuoi="@(kh.Tuoi?.ToString() ?? "")"
+                        style="cursor: pointer;">
+                        <td><span class="badge bg-secondary ma-kh-badge">@kh.UserId</span></td>
+                        <td>
+                            <strong>@kh.HoTen</strong>
+                            <i class="bi bi-check-circle-fill text-primary ms-1 selected-icon" style="display: none;"></i>
+                        </td>
                         <td>@kh.Email</td>
                         <td>@kh.SoDienThoai</td>
                         <td>@(kh.NgaySinh?.ToString("dd/MM/yyyy") ?? "—")</td>
-                        <td>@(kh.Tuoi?.ToString() ?? "—")</td>
+                        <td>
+                            @if (kh.Tuoi.HasValue)
+                            {
+                                <span class="age-value">@kh.Tuoi.Value</span>
+                            }
+                            else
+                            {
+                                <span>—</span>
+                            }
+                        </td>
                         <td>
                             @if (kh.TrangThai == AdminDashboard.Models.TrangThaiNguoiDung.HoatDong)
                             {
@@ -43,7 +109,8 @@ else
                             }
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-danger" onclick="xoaKhachHang('@kh.UserId', '@kh.HoTen')">
+                            <button class="btn btn-sm btn-danger" 
+                                    onclick="event.stopPropagation(); xoaKhachHang('@kh.UserId', '@kh.HoTen')">
                                 <i class="bi bi-trash"></i> Xóa
                             </button>
                         </td>
@@ -106,4 +173,176 @@ else
         </div>
     }
 }
+
+<style>
+    .age-filter-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .age-filter-buttons .btn {
+        margin: 0;
+    }
+
+    .selected-row {
+        background-color: #e7f3ff !important;
+        border-left: 4px solid #0d6efd;
+        font-weight: 600;
+    }
+
+    .age-highlight {
+        background-color: #fff3cd !important;
+        border-left: 4px solid #ffc107;
+    }
+
+    .age-highlight:hover {
+        background-color: #ffe69c !important;
+    }
+
+    .selected-row:hover {
+        background-color: #d0e7ff !important;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        transform: scale(1.01);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .age-value.highlight {
+        font-weight: bold;
+        color: #0d6efd;
+    }
+</style>
+
+<script>
+    let selectedUserId = null;
+    let selectedAgeFilter = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Xử lý click vào row để select
+        document.querySelectorAll('.khachhang-row').forEach(row => {
+            row.addEventListener('click', function(e) {
+                // Không select nếu click vào button
+                if (e.target.closest('button')) return;
+
+                const userId = this.getAttribute('data-user-id');
+                
+                // Remove previous selection
+                document.querySelectorAll('.khachhang-row').forEach(r => {
+                    r.classList.remove('selected-row');
+                    r.querySelector('.selected-icon')?.style.setProperty('display', 'none');
+                });
+
+                // Toggle selection
+                if (selectedUserId === userId) {
+                    selectedUserId = null;
+                } else {
+                    selectedUserId = userId;
+                    this.classList.add('selected-row');
+                    this.querySelector('.selected-icon')?.style.setProperty('display', 'inline');
+                }
+            });
+        });
+
+        // Xử lý filter theo độ tuổi
+        document.querySelectorAll('.age-filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const filter = this.getAttribute('data-age-filter');
+                
+                // Update button states
+                document.querySelectorAll('.age-filter-btn').forEach(b => {
+                    b.classList.remove('btn-primary');
+                    b.classList.add('btn-outline-primary');
+                });
+                
+                if (selectedAgeFilter === filter) {
+                    // Toggle off
+                    selectedAgeFilter = null;
+                    this.classList.remove('btn-primary');
+                    this.classList.add('btn-outline-primary');
+                    document.getElementById('ageFilterInfo').style.display = 'none';
+                } else {
+                    // Set new filter
+                    selectedAgeFilter = filter;
+                    this.classList.remove('btn-outline-primary');
+                    this.classList.add('btn-primary');
+                    
+                    // Show filter info
+                    const labels = {
+                        'all': 'Tất Cả',
+                        'duoi18': 'Dưới 18 tuổi',
+                        '18-25': '18-25 tuổi',
+                        '26-35': '26-35 tuổi',
+                        '36-45': '36-45 tuổi',
+                        '46-60': '46-60 tuổi',
+                        'tren60': 'Trên 60 tuổi'
+                    };
+                    document.getElementById('ageFilterLabel').textContent = labels[filter] || '';
+                    document.getElementById('ageFilterInfo').style.display = 'block';
+                }
+                
+                // Reset selection when filtering
+                selectedUserId = null;
+                document.querySelectorAll('.khachhang-row').forEach(r => {
+                    r.classList.remove('selected-row');
+                    r.querySelector('.selected-icon')?.style.setProperty('display', 'none');
+                });
+                
+                // Apply highlight
+                applyAgeHighlight();
+            });
+        });
+    });
+
+    function isInAgeRange(tuoi, filter) {
+        if (!tuoi || tuoi === '') return false;
+        const age = parseInt(tuoi);
+        
+        switch(filter) {
+            case 'duoi18': return age < 18;
+            case '18-25': return age >= 18 && age <= 25;
+            case '26-35': return age >= 26 && age <= 35;
+            case '36-45': return age >= 36 && age <= 45;
+            case '46-60': return age >= 46 && age <= 60;
+            case 'tren60': return age > 60;
+            default: return false;
+        }
+    }
+
+    function applyAgeHighlight() {
+        document.querySelectorAll('.khachhang-row').forEach(row => {
+            const tuoi = row.getAttribute('data-tuoi');
+            const ageValue = row.querySelector('.age-value');
+            const maKhBadge = row.querySelector('.ma-kh-badge');
+            
+            // Remove previous highlight
+            row.classList.remove('age-highlight');
+            if (ageValue) {
+                ageValue.classList.remove('highlight');
+            }
+            if (maKhBadge) {
+                maKhBadge.classList.remove('bg-warning', 'text-dark');
+                maKhBadge.classList.add('bg-secondary');
+            }
+            
+            // Apply highlight if matches filter
+            if (selectedAgeFilter && selectedAgeFilter !== 'all' && isInAgeRange(tuoi, selectedAgeFilter)) {
+                row.classList.add('age-highlight');
+                if (ageValue) {
+                    ageValue.classList.add('highlight');
+                }
+                // Đổi màu mã KH sang vàng
+                if (maKhBadge) {
+                    maKhBadge.classList.remove('bg-secondary');
+                    maKhBadge.classList.add('bg-warning', 'text-dark');
+                }
+            }
+        });
+    }
+</script>
 

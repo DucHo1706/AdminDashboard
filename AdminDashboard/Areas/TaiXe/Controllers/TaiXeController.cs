@@ -870,30 +870,7 @@ namespace AdminDashboard.Areas.TaiXe.Controllers
                     .OrderBy(c => c.NgayDi)
                     .ThenBy(c => c.GioDi)
                     .ToListAsync();
-
-                if (!lichTaiXe.Any())
-                {
-                    return Content("<div class='alert alert-info'>Tài xế chưa có chuyến xe nào được phân công.</div>");
-                }
-
-                var html = "<table class='table table-bordered table-sm'>";
-                html += "<thead><tr><th>Ngày đi</th><th>Giờ đi</th><th>Giờ đến</th><th>Điểm đi</th><th>Điểm đến</th><th>Xe</th><th>Trạng thái</th></tr></thead><tbody>";
-
-                foreach (var c in lichTaiXe)
-                {
-                    html += $"<tr>" +
-                            $"<td>{c.NgayDi:dd/MM/yyyy}</td>" +
-                            $"<td>{c.GioDi:hh\\:mm}</td>" +
-                            $"<td>{c.GioDenDuKien:hh\\:mm}</td>" +
-                            $"<td>{c.LoTrinh?.TramDiNavigation?.TenTram ?? "N/A"}</td>" +
-                            $"<td>{c.LoTrinh?.TramToiNavigation?.TenTram ?? "N/A"}</td>" +
-                            $"<td>{c.Xe?.BienSoXe ?? "N/A"}</td>" +
-                            $"<td>{c.TrangThai}</td>" +
-                            $"</tr>";
-                }
-
-                html += "</tbody></table>";
-                return Content(html);
+                return PartialView("_LichTaiXePartial", lichTaiXe);
             }
             catch (Exception ex)
             {

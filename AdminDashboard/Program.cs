@@ -11,14 +11,22 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<Db27524Context>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlOptions => sqlOptions.EnableRetryOnFailure()
+        sqlOptions => 
+        {
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 3,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorNumbersToAdd: null);
+            sqlOptions.CommandTimeout(60); // Tăng command timeout lên 60 giây
+        }
     )
 );
 
-// ===================== ĐĂNG KÝ MVC, RAZOR, SIGNALR =====================
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
+builder.Services.AddServerSideBlazor();
 
 // ===================== ĐĂNG KÝ SERVICE =====================
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -57,12 +65,14 @@ builder.Services.AddAuthentication("CookieAuth")
         options.LogoutPath = "/Auth/Logout";
         options.AccessDeniedPath = "/Auth/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromHours(2);
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     });
 
-// ===================== XÂY DỰNG APP =====================
+
 var app = builder.Build();
 
-// ===================== MIDDLEWARE PIPELINE =====================
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -72,14 +82,22 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    RequestPath = "/_framework"
+});
+
 app.UseRouting();
 
-// ⚠️ Authentication phải trước Authorization
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-// ===================== MAP HUB & ROUTES =====================
-app.MapHub<ChatHub>("/chathub"); // ChatHub realtime
+app.MapHub<ChatHub>("/chathub"); 
+
+
+app.MapBlazorHub(); 
 
 app.MapRazorPages();
 
