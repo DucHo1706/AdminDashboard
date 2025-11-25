@@ -494,5 +494,55 @@ namespace AdminDashboard.Controllers
             return View();
         }
 
+        // ====== Account view ======
+        [HttpGet]
+        public async Task<IActionResult> AccountTaiXe()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Auth");
+
+            var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == userId);
+            return View(user);
+        }
+
+        // ====== EDIT ACCOUNT: GET (truy cập trang chỉnh sửa nếu cần) ======
+        [HttpGet]
+        public async Task<IActionResult> EditAccountTaiXe()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Auth");
+
+            var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null) return NotFound();
+
+            return View(user); // view EditAccount.cshtml dùng model NguoiDung (như bạn đã có)
+        }
+
+        // ====== EDIT ACCOUNT: POST (cập nhật) ======
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditAccountTaiXe(NguoiDung model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Json(new { success = false, message = "Dữ liệu không hợp lệ." });
+            }
+
+            var user = await _context.NguoiDung.FindAsync(model.UserId);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy tài khoản." });
+            }
+
+            user.HoTen = model.HoTen;
+            user.Email = model.Email;
+            user.SoDienThoai = model.SoDienThoai;
+            user.NgaySinh = model.NgaySinh;
+
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Cập nhật thành công." });
+        }
+
     }
 }
