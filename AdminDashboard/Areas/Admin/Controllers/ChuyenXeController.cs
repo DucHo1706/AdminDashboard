@@ -169,50 +169,35 @@ namespace AdminDashboard.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteImage(int imageId)
         {
-            // BƯỚC 1: Tìm ảnh trong CSDL
             var image = await _context.ChuyenXeImage.FindAsync(imageId);
             if (image == null)
             {
                 return Json(new { success = false, message = "Không tìm thấy ảnh." });
             }
-
-            // Lưu lại URL để dùng sau khi CSDL đã xóa
             string imageUrlToDelete = image.ImageUrl;
 
             try
             {
-                // BƯỚC 2: Đánh dấu bản ghi ảnh để xóa
                 _context.ChuyenXeImage.Remove(image);
-
-                // BƯỚC 3: Lưu thay đổi vào CSDL
-                // ⭐️ NẾU CÓ LỖI, NÓ SẼ BỊ VĂNG RA Ở DÒNG NÀY ⭐️
                 await _context.SaveChangesAsync();
-
-                // BƯỚC 4: Xóa file vật lý (Cloudinary/Local)
-                // Chỉ xóa file vật lý SAU KHI đã xóa CSDL thành công
                 await _imageService.DeleteImageAsync(imageUrlToDelete);
-
                 return Json(new { success = true, message = "Xóa ảnh thành công!" });
             }
-            catch (DbUpdateException dbEx) // BƯỚC 5: BẮT LỖI RÀNG BUỘC CSDL
+            catch (DbUpdateException dbEx) 
             {
-                // Lấy thông báo lỗi chi tiết
                 string errorMessage = dbEx.InnerException?.Message ?? dbEx.Message;
 
-                // Ghi log lỗi ra Console Server (Đây là thứ chúng ta cần)
-                Console.WriteLine($"❌ LỖI RÀNG BUỘC DB KHI XÓA ẢNH: {errorMessage}");
-
-                // Trả lỗi về cho client
+                Console.WriteLine($" LỖI RÀNG BUỘC DB KHI XÓA ẢNH: {errorMessage}");
                 return Json(new
                 {
                     success = false,
                     message = "Lỗi CSDL: Không thể xóa do có ràng buộc khóa ngoại.",
-                    errorDetail = errorMessage // Gửi kèm chi tiết lỗi
+                    errorDetail = errorMessage 
                 });
             }
-            catch (Exception ex) // Bắt các lỗi chung khác
+            catch (Exception ex) 
             {
-                Console.WriteLine($"❌ LỖI KHÁC KHI XÓA ẢNH: {ex.Message}");
+                Console.WriteLine($" LỖI KHÁC KHI XÓA ẢNH: {ex.Message}");
                 return Json(new { success = false, message = "Có lỗi không xác định xảy ra." });
             }
         }
@@ -423,111 +408,82 @@ namespace AdminDashboard.Areas.Admin.Controllers
 
             var chuyenXeCanPhanCong = await _context.ChuyenXe
                 .Include(c => c.Xe)
-            .Include(c => c.LoTrinh) // Tải Lộ Trình
-                .ThenInclude(lt => lt.TramDiNavigation) // Tải Trạm Đi BÊN TRONG Lộ Trình
-            .Include(c => c.LoTrinh) // Phải Include lại để ThenInclude tiếp cho thuộc tính khác
-                .ThenInclude(lt => lt.TramToiNavigation) // Tải Trạm Tới BÊN TRONG Lộ Trình
+            .Include(c => c.LoTrinh) 
+                .ThenInclude(lt => lt.TramDiNavigation) 
+            .Include(c => c.LoTrinh) 
+                .ThenInclude(lt => lt.TramToiNavigation) 
             .FirstOrDefaultAsync(c => c.ChuyenId == id);
             if (chuyenXeCanPhanCong == null) return NotFound();
-
-            // --- LOGIC TÌM TÀI XẾ RẢNH ---
-            // 1. Lấy danh sách ID của TẤT CẢ các tài xế (logic này vẫn đúng)
             var taiXeRoleId = await _context.VaiTro.Where(r => r.TenVaiTro == "TaiXe").Select(r => r.RoleId).FirstOrDefaultAsync();
             if (string.IsNullOrEmpty(taiXeRoleId))
             {
-                // Xử lý trường hợp không có vai trò tài xế
                 ViewBag.ErrorMessage = "Không tìm thấy vai trò 'TaiXe' trong hệ thống.";
                 ViewBag.AvailableDrivers = new SelectList(new List<NguoiDung>());
                 return View(chuyenXeCanPhanCong);
             }
             var allDriverIds = await _context.UserRole.Where(ur => ur.RoleId == taiXeRoleId).Select(ur => ur.UserId).ToListAsync();
-
-            // 2. Tính toán trước thời gian bắt đầu và kết thúc của chuyến xe cần phân công
             var thoiGianBatDau = chuyenXeCanPhanCong.NgayDi.Add(chuyenXeCanPhanCong.GioDi);
             var thoiGianKetThuc = chuyenXeCanPhanCong.NgayDi.Add(chuyenXeCanPhanCong.GioDenDuKien);
-
-            // 3. Lọc trước các chuyến xe có khả năng bị trùng lặp trên DATABASE
-            // Chỉ lấy các chuyến xe có tài xế và diễn ra trong cùng một ngày
             var potentialConflicts = await _context.ChuyenXe
                 .Where(cx => cx.ChuyenId != id &&
                              cx.TaiXeId != null &&
                              cx.NgayDi.Date == chuyenXeCanPhanCong.NgayDi.Date)
-                .ToListAsync(); // Tải danh sách nhỏ này về client
-
-            // 4. Lọc chi tiết các tài xế bị trùng lịch bằng C# (CLIENT-SIDE)
-            // Bây giờ, phép toán .Add() sẽ chạy trên C# và không còn lỗi
+                .ToListAsync();
             var conflictingDriverIds = potentialConflicts
                 .Where(cx => cx.NgayDi.Add(cx.GioDi) < thoiGianKetThuc &&
                              cx.NgayDi.Add(cx.GioDenDuKien) > thoiGianBatDau)
                 .Select(cx => cx.TaiXeId)
                 .Distinct()
                 .ToList();
-
-            // 5. Lấy ra danh sách các tài xế KHÔNG BỊ TRÙNG LỊCH 
             var availableDriverIds = allDriverIds.Except(conflictingDriverIds).ToList();
-
             var availableDrivers = await _context.NguoiDung
                 .Where(u => availableDriverIds.Contains(u.UserId))
                 .ToListAsync();
-
-
             ViewBag.AvailableDrivers = new SelectList(availableDrivers, "UserId", "HoTen");
             return View(chuyenXeCanPhanCong);
         }
 
-        // POST: ChuyenXe/AssignDriver/chuyen-xe-id-123
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignDriver(string ChuyenId, string TaiXeId)
         {
             if (ChuyenId == null || TaiXeId == null) return BadRequest("Thông tin không hợp lệ.");
-
             var chuyenXe = await _context.ChuyenXe.FindAsync(ChuyenId);
             if (chuyenXe == null) return NotFound();
 
-            // Gán tài xế vào chuyến
             chuyenXe.TaiXeId = TaiXeId;
-
-            // Cập nhật trạng thái chuyến xe (nếu cần)
-            // Ví dụ: Sau khi có tài xế, chuyển sang "Chờ Khởi Hành"
             if (chuyenXe.TrangThai == TrangThaiChuyenXe.DaLenLich)
             {
                 chuyenXe.TrangThai = TrangThaiChuyenXe.ChoKhoiHanh;
             }
-
             _context.Update(chuyenXe);
             await _context.SaveChangesAsync();
-
             TempData["SuccessMessage"] = "Đã phân công tài xế thành công!";
             return RedirectToAction(nameof(Index));
         }
 
         public IActionResult TimKiem(string diemDiId, string diemDenId, DateTime ngayDi)
-        {// Truy vấn CSDL để lấy các chuyến xe phù hợp
+        {
             var ketQua = _context.ChuyenXe
                 .Include(c => c.LoTrinh)
-                    .ThenInclude(lt => lt.TramDiNavigation) // Lấy thông tin trạm đi
+                    .ThenInclude(lt => lt.TramDiNavigation) 
                 .Include(c => c.LoTrinh)
-                    .ThenInclude(lt => lt.TramToiNavigation) // Lấy thông tin trạm tới
+                    .ThenInclude(lt => lt.TramToiNavigation) 
                 .Include(c => c.Xe)
-                    .ThenInclude(x => x.LoaiXe) // Lấy thông tin loại xe
+                    .ThenInclude(x => x.LoaiXe) 
                 .Where(c => c.LoTrinh.TramDi == diemDiId &&
                             c.LoTrinh.TramToi == diemDenId &&
                             c.NgayDi.Date == ngayDi.Date &&
                             c.TrangThai == TrangThaiChuyenXe.DangMoBanVe)
 
-                .OrderBy(c => c.GioDi) // Sắp xếp theo giờ đi sớm nhất
+                .OrderBy(c => c.GioDi) 
                 .ToList();
-
-            // Lấy tên trạm đi, trạm đến và ngày đi để hiển thị lại cho người dùng trên trang kết quả
             var tramDi = _context.Tram.Find(diemDiId);
             var tramDen = _context.Tram.Find(diemDenId);
 
             if (tramDi != null) ViewBag.DiemDi = tramDi.TenTram;
             if (tramDen != null) ViewBag.DiemDen = tramDen.TenTram;
             ViewBag.NgayDi = ngayDi.ToString("dd/MM/yyyy");
-
-            // Trả về View "TimKiem" và truyền danh sách kết quả tìm được
             return View(ketQua);
         }
 
