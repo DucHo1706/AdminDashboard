@@ -38,6 +38,11 @@ namespace AdminDashboard.Models
         [Required]
 
         public TrangThaiNguoiDung TrangThai { get; set; } = TrangThaiNguoiDung.HoatDong; // Sử dụng Enum
+        [StringLength(255)]
+        public string? NhaXeId { get; set; }
+
+        [ForeignKey("NhaXeId")]
+        public virtual NhaXe? NhaXe { get; set; }
 
         // Mối quan hệ nhiều-nhiều với VaiTro thông qua bảng UserRole
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();

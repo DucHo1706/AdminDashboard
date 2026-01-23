@@ -21,6 +21,11 @@ namespace AdminDashboard.Models
         public virtual LoaiXe? LoaiXe { get; set; }
 
         // Navigation property - sửa lại
+        [StringLength(255)] // Quan trọng: Phải cùng kiểu dữ liệu với NhaXeId bên bảng NhaXe
+        public string NhaXeId { get; set; }
+
+        [ForeignKey("NhaXeId")]
+        public virtual NhaXe NhaXe { get; set; }
         public virtual ICollection<Ghe>? DanhSachGhe { get; set; }
 
         [NotMapped]

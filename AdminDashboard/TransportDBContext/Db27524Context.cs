@@ -19,16 +19,32 @@ namespace AdminDashboard.TransportDBContext
         public DbSet<Ghe> Ghe { get; set; }
         public DbSet<DonHang> DonHang { get; set; }
         public DbSet<Ve> Ve { get; set; }
-        public DbSet<BaiViet> BaiViet { get; set; }
-        public DbSet<OtpCode> OtpCodes { get; set; }
-        public DbSet<TaiXe> TaiXes { get; set; }
+     
+      
         public DbSet<ChuyenXeImage> ChuyenXeImage { get; set; }
-        public DbSet<ChuyenXeImage> ChuyenXeImages { get; set; }
         public DbSet<ChuyenXe> ChuyenXes { get; set; }
-
+        public virtual DbSet<NhaXe> NhaXe { get; set; }
+        public DbSet<NhanVien> NhanVien { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            // các role mặc định ban đầu 
+            // 1. Định nghĩa danh sách các Role cần tạo
+
+            var adminId = "b9f3d6a1-5c8e-4a7d-9b2c-1e3f4a5d6c7b";
+            var chuNhaXeId = "c8e2f1a0-4d9b-3a6c-8e1f-0d2e3b4a5c6d";
+            var nhanVienId = "d7a1e0b9-3c8f-2a5e-7d0b-9c1f2e3d4a5b";
+            var taiXeId = "e6c0d9a8-2b7e-1a4d-6c9a-8b0f1e2d3c4a";
+            var khachHangId = "f5b9c8a7-1a6d-0e3c-5b8a-7a9f0e1d2c3b";
+
+            // Mồi dữ liệu với ID tĩnh
+            modelBuilder.Entity<VaiTro>().HasData(
+                new VaiTro { RoleId = adminId, TenVaiTro = "Admin" },
+                new VaiTro { RoleId = chuNhaXeId, TenVaiTro = "ChuNhaXe" },
+                new VaiTro { RoleId = nhanVienId, TenVaiTro = "NhanVien" },
+                new VaiTro { RoleId = taiXeId, TenVaiTro = "TaiXe" },
+                new VaiTro { RoleId = khachHangId, TenVaiTro = "KhachHang" }
+            );
 
             // Cấu hình khóa chính phức hợp cho bảng UserRole
             modelBuilder.Entity<UserRole>()

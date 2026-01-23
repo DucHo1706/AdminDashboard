@@ -4,8 +4,11 @@ namespace AdminDashboard.Models.TrangThai
 {
     public enum TrangThaiChuyenXe
     {
+        [Display(Name = "Chờ Admin Duyệt")]
+        ChoDuyet = -1,
+
         [Display(Name = "Đã Lên Lịch")]
-        DaLenLich = 0,
+        DaLenLich = 0, // Admin duyệt xong sẽ chuyển sang trạng thái này
 
         [Display(Name = "Đang Mở Bán Vé")]
         DangMoBanVe = 1,

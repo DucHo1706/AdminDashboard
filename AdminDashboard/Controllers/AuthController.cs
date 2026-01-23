@@ -50,6 +50,7 @@ namespace AdminDashboard.Controllers
                 return View(model);
             }
 
+           
             var user = await _context.NguoiDung
                 .FirstOrDefaultAsync(u =>
                     (u.Email.ToLower() == input || u.SoDienThoai == input) && u.MatKhau == password);
@@ -66,28 +67,56 @@ namespace AdminDashboard.Controllers
                 return View(model);
             }
 
+          
+           
             var roleName = await _context.UserRole
                 .Where(ur => ur.UserId == user.UserId)
                 .Join(_context.VaiTro, ur => ur.RoleId, r => r.RoleId, (ur, r) => r.TenVaiTro)
-                .FirstOrDefaultAsync() ?? "Khach";
+                .FirstOrDefaultAsync() ?? "KhachHang"; 
 
+         
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserId),
                 new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimTypes.Role, roleName)
+                new Claim(ClaimTypes.Role, roleName) // Quan trọng để phân quyền [Authorize(Roles="...")]
             };
+
+
+
+            if (!string.IsNullOrEmpty(user.NhaXeId))
+            {
+                // Vì NhaXeId đã là string rồi nên truyền trực tiếp vào, không cần .Value.ToString()
+                claims.Add(new Claim("NhaXeId", user.NhaXeId));
+            }
+            // ------------------------------------------
 
             var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+         
             await HttpContext.SignInAsync("CookieAuth", claimsPrincipal);
 
+       
             if (roleName == "Admin")
-                return RedirectToAction("Index", "Home");
+            {
+             
+                return RedirectToAction("Index", "Home", new { area = "Admin" });
+            }
+            else if (roleName == "ChuNhaXe")
+            {
+            
+                return RedirectToAction("Index", "Xe", new { area = "NhaXe" });
+            }
             else if (roleName == "TaiXe")
+            {
                 return RedirectToAction("LichLamViec", "TaiXe", new { area = "TaiXe" });
+            }
             else
+            {
+                // Khách hàng thường
                 return RedirectToAction("Home_User", "Home_User");
+            }
         }
 
         [HttpGet]

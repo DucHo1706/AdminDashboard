@@ -4,6 +4,7 @@ using AdminDashboard.TransportDBContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AdminDashboard.Migrations
 {
     [DbContext(typeof(Db27524Context))]
-    partial class Db27524ContextModelSnapshot : ModelSnapshot
+    [Migration("20260123065128_FixTimeType")]
+    partial class FixTimeType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -272,57 +275,6 @@ namespace AdminDashboard.Migrations
                     b.ToTable("NhaXe");
                 });
 
-            modelBuilder.Entity("AdminDashboard.Models.NhanVien", b =>
-                {
-                    b.Property<string>("NhanVienId")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("AccountId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AvatarUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CCCD")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("DangLamViec")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("HangBangLai")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("HoTen")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("NgayVaoLam")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("NhaXeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("SoBangLai")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SoDienThoai")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<int>("VaiTro")
-                        .HasColumnType("int");
-
-                    b.HasKey("NhanVienId");
-
-                    b.HasIndex("NhaXeId");
-
-                    b.ToTable("NhanVien");
-                });
-
             modelBuilder.Entity("AdminDashboard.Models.Tram", b =>
                 {
                     b.Property<string>("IdTram")
@@ -562,17 +514,6 @@ namespace AdminDashboard.Migrations
                     b.HasOne("AdminDashboard.Models.NhaXe", "NhaXe")
                         .WithMany("NhanViens")
                         .HasForeignKey("NhaXeId");
-
-                    b.Navigation("NhaXe");
-                });
-
-            modelBuilder.Entity("AdminDashboard.Models.NhanVien", b =>
-                {
-                    b.HasOne("AdminDashboard.Models.NhaXe", "NhaXe")
-                        .WithMany()
-                        .HasForeignKey("NhaXeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("NhaXe");
                 });

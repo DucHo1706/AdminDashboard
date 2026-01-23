@@ -84,30 +84,6 @@
         </div>
     </div>
 
-    <!-- Tabs Navigation -->
-    <ul class="nav nav-tabs mb-3" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link @(ActiveTab == "khachhang" ? "active" : "")" 
-                    @onclick='async () => await SetActiveTab("khachhang")'
-                    type="button" role="tab">
-                <i class="bi bi-people"></i> Khách Hàng
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link @(ActiveTab == "donhang" ? "active" : "")" 
-                    @onclick='async () => await SetActiveTab("donhang")'
-                    type="button" role="tab">
-                <i class="bi bi-cart"></i> Đơn Hàng
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link @(ActiveTab == "doanhthu" ? "active" : "")" 
-                    @onclick='async () => await SetActiveTab("doanhthu")'
-                    type="button" role="tab">
-                <i class="bi bi-graph-up"></i> Doanh Thu
-            </button>
-        </li>
-    </ul>
 
     <!-- Tab Content -->
     <div class="tab-content">
@@ -135,18 +111,7 @@
                     </div>
                 </div>
 
-                <!-- Danh sách khách hàng -->
-                <div class="card">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="bi bi-list-ul"></i> Danh Sách Khách Hàng</h5>
-                    </div>
-                    <div class="card-body">
-                        <KhachHangList 
-                            KhachHangs="KhachHangs" 
-                            DonHangPageIndex="DonHangPageIndex"
-                            OnPageChange="HandleKhachHangPageChange" />
-                    </div>
-                </div>
+               
             </div>
         }
 
@@ -225,71 +190,7 @@
                         <h6 class="mb-0"><i class="bi bi-funnel"></i> Lọc Theo Thời Gian</h6>
                     </div>
                     <div class="card-body py-3">
-                        <EditForm Model="@filterModel" OnValidSubmit="ApplyFilter">
-                            <div class="row g-3">
-                                <div class="col-md-3">
-                                    <label class="form-label">Loại Lọc</label>
-                                    <InputSelect @bind-Value="filterModel.FilterType" class="form-select" @onchange="UpdateFilterFields">
-                                        <option value="all">Tất Cả</option>
-                                        <option value="day">Theo Ngày</option>
-                                        <option value="month">Theo Tháng</option>
-                                        <option value="year">Theo Năm</option>
-                                    </InputSelect>
-                                </div>
-
-                                @if (filterModel.FilterType == "day")
-                                {
-                                    <div class="col-md-3">
-                                        <label class="form-label">Chọn Ngày</label>
-                                        <InputDate @bind-Value="filterModel.FilterDate" class="form-control" />
-                                    </div>
-                                }
-
-                                @if (filterModel.FilterType == "month")
-                                {
-                                    <div class="col-md-3">
-                                        <label class="form-label">Chọn Tháng</label>
-                                        <InputSelect @bind-Value="filterModel.FilterMonth" class="form-select">
-                                            @for (int month = 1; month <= 12; month++)
-                                            {
-                                                <option value="@month">Tháng @month</option>
-                                            }
-                                        </InputSelect>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Chọn Năm</label>
-                                        <InputSelect @bind-Value="filterModel.FilterYear" class="form-select">
-                                            @for (int year = DateTime.Now.Year; year >= DateTime.Now.Year - 5; year--)
-                                            {
-                                                <option value="@year">@year</option>
-                                            }
-                                        </InputSelect>
-                                    </div>
-                                }
-
-                                @if (filterModel.FilterType == "year")
-                                {
-                                    <div class="col-md-3">
-                                        <label class="form-label">Chọn Năm</label>
-                                        <InputSelect @bind-Value="filterModel.FilterYear" class="form-select">
-                                            @for (int year = DateTime.Now.Year; year >= DateTime.Now.Year - 5; year--)
-                                            {
-                                                <option value="@year">@year</option>
-                                            }
-                                        </InputSelect>
-                                    </div>
-                                }
-
-                                <div class="col-md-3 d-flex align-items-end">
-                                    <button type="submit" class="btn btn-primary me-2">
-                                        <i class="bi bi-search"></i> Lọc
-                                    </button>
-                                    <button type="button" class="btn btn-secondary" @onclick="ResetFilter">
-                                        <i class="bi bi-x-circle"></i> Reset
-                                    </button>
-                                </div>
-                            </div>
-                        </EditForm>
+                     
 
                         @if (FilterType != "all")
                         {
@@ -304,22 +205,6 @@
                     </div>
                 </div>
 
-                <!-- Danh sách đơn hàng -->
-                <div class="card">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="bi bi-receipt-cutoff"></i> Danh Sách Đơn Hàng</h5>
-                    </div>
-                    <div class="card-body">
-                        <DonHangList 
-                            DonHangs="DonHangs"
-                            KhachHangPageIndex="KhachHangPageIndex"
-                            FilterType="FilterType"
-                            FilterDate="FilterDate"
-                            FilterMonth="FilterMonth"
-                            FilterYear="FilterYear"
-                            OnPageChange="HandleDonHangPageChange" />
-                    </div>
-                </div>
             </div>
         }
 
@@ -672,13 +557,6 @@
     // Thống kê khách hàng theo độ tuổi
     private Dictionary<string, int> ThongKeTheoDoTuoi { get; set; } = new();
 
-    // Danh sách khách hàng (phân trang)
-    private PaginatedList<NguoiDungVM>? KhachHangs { get; set; }
-    private int KhachHangPageIndex { get; set; } = 1;
-
-    // Danh sách đơn hàng (phân trang)
-    private PaginatedList<DonHangVM>? DonHangs { get; set; }
-    private int DonHangPageIndex { get; set; } = 1;
 
     // Thống kê đơn hàng theo thời gian
     private ThongKeDonHangViewModel ThongKeDonHang { get; set; } = new();
@@ -709,334 +587,9 @@
         return Task.CompletedTask;
     }
 
-    protected override async Task OnParametersSetAsync()
-    {
-        // Skip if we're currently handling pagination to prevent reload loop
-        if (_isHandlingPagination)
-        {
-            try
-            {
-                await JSRuntime.InvokeVoidAsync("console.log", 
-                    $"⏭️ OnParametersSetAsync: Skipping because _isHandlingPagination = true");
-            }
-            catch { }
-            return;
-        }
-        
-        // Read query parameters from URL
-        var uri = new Uri(Navigation.Uri);
-        var currentUrl = uri.PathAndQuery + uri.Fragment;
-        
-        try
-        {
-            await JSRuntime.InvokeVoidAsync("console.log", 
-                $"📋 OnParametersSetAsync called - currentUrl: {currentUrl}, _lastUrl: {_lastUrl}");
-        }
-        catch { }
-        
-        // Skip reload if URL hasn't changed (prevents reload when using history.pushState)
-        if (currentUrl == _lastUrl)
-        {
-            try
-            {
-                await JSRuntime.InvokeVoidAsync("console.log", 
-                    $"⏭️ OnParametersSetAsync: URL unchanged, skipping reload");
-            }
-            catch { }
-            _lastUrl = currentUrl;
-            return;
-        }
-        
-        try
-        {
-            await JSRuntime.InvokeVoidAsync("console.log", 
-                $"🔄 OnParametersSetAsync: URL changed, reloading data");
-        }
-        catch { }
-        
-        var query = QueryHelpers.ParseQuery(uri.Query);
-        
-        // Parse page indices
-        if (query.TryGetValue("khachHangPage", out var khachHangPageValue) && 
-            int.TryParse(khachHangPageValue, out int khachHangPage) && khachHangPage > 0)
-        {
-            KhachHangPageIndex = khachHangPage;
-        }
-        
-        if (query.TryGetValue("donHangPage", out var donHangPageValue) && 
-            int.TryParse(donHangPageValue, out int donHangPage) && donHangPage > 0)
-        {
-            DonHangPageIndex = donHangPage;
-        }
-        
-        // Validate page indices after loading - will be adjusted in LoadDataAsync if needed
-        
-        // Parse filter parameters
-        if (query.TryGetValue("filterType", out var filterTypeValue))
-        {
-            FilterType = filterTypeValue.ToString();
-        }
-        else
-        {
-            FilterType = "all";
-        }
-        
-        if (query.TryGetValue("filterDate", out var filterDateValue) && 
-            DateTime.TryParse(filterDateValue, out DateTime filterDate))
-        {
-            FilterDate = filterDate;
-        }
-        else
-        {
-            FilterDate = null;
-        }
-        
-        if (query.TryGetValue("filterMonth", out var filterMonthValue) && 
-            int.TryParse(filterMonthValue, out int filterMonth) && filterMonth >= 1 && filterMonth <= 12)
-        {
-            FilterMonth = filterMonth;
-        }
-        else
-        {
-            FilterMonth = null;
-        }
-        
-        if (query.TryGetValue("filterYear", out var filterYearValue) && 
-            int.TryParse(filterYearValue, out int filterYear) && filterYear > 0)
-        {
-            FilterYear = filterYear;
-        }
-        else
-        {
-            FilterYear = null;
-        }
-        
-        // Parse hash for active tab
-        var hash = uri.Fragment;
-        if (hash == "#khachhang")
-        {
-            ActiveTab = "khachhang";
-        }
-        else if (hash == "#donhang")
-        {
-            ActiveTab = "donhang";
-        }
-        else if (hash == "#doanhthu")
-        {
-            ActiveTab = "doanhthu";
-        }
-        
-        _lastUrl = currentUrl;
-        await LoadDataAsync();
-    }
 
-    private async Task UpdateUrlAsync(int? khachHangPage = null, int? donHangPage = null, string? hash = null, bool preserveOtherPage = true)
-    {
-        var queryParams = new Dictionary<string, string?>();
-        
-        // Only update the page that was explicitly provided, preserve the other one
-        if (khachHangPage.HasValue)
-        {
-            queryParams["khachHangPage"] = khachHangPage.Value.ToString();
-            if (preserveOtherPage)
-            {
-                queryParams["donHangPage"] = DonHangPageIndex.ToString();
-            }
-        }
-        else if (donHangPage.HasValue)
-        {
-            queryParams["donHangPage"] = donHangPage.Value.ToString();
-            if (preserveOtherPage)
-            {
-                queryParams["khachHangPage"] = KhachHangPageIndex.ToString();
-            }
-        }
-        else
-        {
-            // If neither is provided, use current values
-            queryParams["khachHangPage"] = KhachHangPageIndex.ToString();
-            queryParams["donHangPage"] = DonHangPageIndex.ToString();
-        }
-
-        if (FilterType != "all")
-        {
-            queryParams["filterType"] = FilterType;
-            if (FilterDate.HasValue)
-            {
-                queryParams["filterDate"] = FilterDate.Value.ToString("yyyy-MM-dd");
-            }
-            if (FilterMonth.HasValue)
-            {
-                queryParams["filterMonth"] = FilterMonth.Value.ToString();
-            }
-            if (FilterYear.HasValue)
-            {
-                queryParams["filterYear"] = FilterYear.Value.ToString();
-            }
-        }
-
-        var newUrl = QueryHelpers.AddQueryString("/Admin/Statistics", queryParams);
-        if (!string.IsNullOrEmpty(hash))
-        {
-            newUrl += hash;
-        }
-        
-        // Use JavaScript to update URL without triggering navigation
-        try
-        {
-            await JSRuntime.InvokeVoidAsync("window.history.pushState", null, "", newUrl);
-            
-            // Parse newUrl to match format used in OnParametersSetAsync (PathAndQuery + Fragment)
-            var uri = new Uri(Navigation.BaseUri + newUrl.TrimStart('/'));
-            _lastUrl = uri.PathAndQuery + uri.Fragment;
-            
-            try
-            {
-                await JSRuntime.InvokeVoidAsync("console.log", 
-                    $"🔗 UpdateUrlAsync: Set URL to {newUrl}, _lastUrl = {_lastUrl}");
-            }
-            catch { }
-        }
-        catch
-        {
-            // Fallback to Navigation.NavigateTo if JS fails
-            Navigation.NavigateTo(newUrl, forceLoad: false);
-        }
-    }
-
-    private async Task HandleKhachHangPageChange(int page)
-    {
-        // Set flag to prevent OnParametersSetAsync from reloading
-        _isHandlingPagination = true;
-        
-        try
-        {
-            await JSRuntime.InvokeVoidAsync("console.log", 
-                $"🟢 HandleKhachHangPageChange START - page: {page}, _isHandlingPagination: {_isHandlingPagination}");
-            
-            IsLoading = true;
-            ErrorMessage = string.Empty;
-            
-            // Validate page number - must be at least 1
-            if (page < 1)
-            {
-                page = 1;
-            }
-            
-            KhachHangPageIndex = page;
-            
-            await JSRuntime.InvokeVoidAsync("console.log", $"🔄 Loading khachhang page {page}...");
-            
-            // CHỈ load danh sách khách hàng, KHÔNG load đơn hàng
-            await LoadDanhSachKhachHang(page);
-            
-            if (KhachHangs != null)
-            {
-                // Validate page against TotalPages - if page > TotalPages, redirect to last page
-                if (KhachHangs.TotalPages > 0 && page > KhachHangs.TotalPages)
-                {
-                    await JSRuntime.InvokeVoidAsync("console.log", 
-                        $"⚠️ Page {page} exceeds TotalPages {KhachHangs.TotalPages}, redirecting to page {KhachHangs.TotalPages}");
-                    page = KhachHangs.TotalPages;
-                    KhachHangPageIndex = page;
-                    await LoadDanhSachKhachHang(page);
-                }
-                
-                await JSRuntime.InvokeVoidAsync("console.log", 
-                    $"✅ Loaded khachhang page {page}: {KhachHangs.Count} items, Total: {KhachHangs.TotalCount}, TotalPages: {KhachHangs.TotalPages}");
-            }
-            else
-            {
-                await JSRuntime.InvokeVoidAsync("console.log", $"❌ KhachHangs is null after loading page {page}");
-            }
-            
-            // Update URL and _lastUrl BEFORE OnParametersSetAsync can be triggered
-            // Only update khachHangPage, preserve donHangPage
-            await UpdateUrlAsync(khachHangPage: page, hash: "#khachhang", preserveOtherPage: true);
-            
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = $"Lỗi khi tải trang {page}: {ex.Message}";
-            await JSRuntime.InvokeVoidAsync("console.error", $"❌ Error loading khachhang page {page}:", ex.Message);
-            StateHasChanged();
-        }
-        finally
-        {
-            IsLoading = false;
-            // Reset flag after a short delay to allow OnParametersSetAsync to process next time
-            await Task.Delay(100);
-            _isHandlingPagination = false;
-        }
-    }
-
-    private async Task HandleDonHangPageChange(int page)
-    {
-        // Set flag to prevent OnParametersSetAsync from reloading
-        _isHandlingPagination = true;
-        
-        try
-        {
-            await JSRuntime.InvokeVoidAsync("console.log", 
-                $"🟠 HandleDonHangPageChange START - page: {page}, _isHandlingPagination: {_isHandlingPagination}");
-            
-            IsLoading = true;
-            ErrorMessage = string.Empty;
-            
-            // Validate page number - must be at least 1
-            if (page < 1)
-            {
-                page = 1;
-            }
-            
-            DonHangPageIndex = page;
-            
-            await JSRuntime.InvokeVoidAsync("console.log", $"🔄 Loading donhang page {page}...");
-            
-            // CHỈ load danh sách đơn hàng, KHÔNG load khách hàng
-            await LoadDanhSachDonHang(page);
-            
-            if (DonHangs != null)
-            {
-                // Validate page against TotalPages - if page > TotalPages, redirect to last page
-                if (DonHangs.TotalPages > 0 && page > DonHangs.TotalPages)
-                {
-                    await JSRuntime.InvokeVoidAsync("console.log", 
-                        $"⚠️ Page {page} exceeds TotalPages {DonHangs.TotalPages}, redirecting to page {DonHangs.TotalPages}");
-                    page = DonHangs.TotalPages;
-                    DonHangPageIndex = page;
-                    await LoadDanhSachDonHang(page);
-                }
-                
-                await JSRuntime.InvokeVoidAsync("console.log", 
-                    $"✅ Loaded donhang page {page}: {DonHangs.Count} items, Total: {DonHangs.TotalCount}, TotalPages: {DonHangs.TotalPages}");
-            }
-            else
-            {
-                await JSRuntime.InvokeVoidAsync("console.log", $"❌ DonHangs is null after loading page {page}");
-            }
-            
-            // Update URL and _lastUrl BEFORE OnParametersSetAsync can be triggered
-            // Only update donHangPage, preserve khachHangPage
-            await UpdateUrlAsync(donHangPage: page, hash: "#donhang", preserveOtherPage: true);
-            
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = $"Lỗi khi tải trang {page}: {ex.Message}";
-            await JSRuntime.InvokeVoidAsync("console.error", $"❌ Error loading donhang page {page}:", ex.Message);
-            StateHasChanged();
-        }
-        finally
-        {
-            IsLoading = false;
-            // Reset flag after a short delay to allow OnParametersSetAsync to process next time
-            await Task.Delay(100);
-            _isHandlingPagination = false;
-        }
-    }
+  
+  
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -1069,99 +622,6 @@
         }
     }
 
-    private async Task LoadDataAsync()
-    {
-        // Don't set IsLoading here if already set by caller (SetActiveTab, etc.)
-        if (!IsLoading)
-        {
-            IsLoading = true;
-        }
-        ErrorMessage = string.Empty;
-
-        try
-        {
-            await JSRuntime.InvokeVoidAsync("console.log", $"📥 LoadDataAsync called for ActiveTab: {ActiveTab}");
-            
-            // Load tổng quan luôn vì hiển thị ở trên cùng
-            await LoadTongQuanThongKe();
-            
-            // Load data theo tab đang active (chạy tuần tự vì DbContext không thread-safe)
-            if (ActiveTab == "khachhang")
-            {
-                await JSRuntime.InvokeVoidAsync("console.log", "📋 Loading khachhang data...");
-                await LoadThongKeKhachHangTheoDoTuoi();
-                await LoadDanhSachKhachHang(KhachHangPageIndex);
-                
-                // Validate and adjust page index if needed
-                if (KhachHangs != null && KhachHangs.TotalPages > 0 && KhachHangPageIndex > KhachHangs.TotalPages)
-                {
-                    await JSRuntime.InvokeVoidAsync("console.log", 
-                        $"⚠️ KhachHangPageIndex {KhachHangPageIndex} > TotalPages {KhachHangs.TotalPages}, adjusting to {KhachHangs.TotalPages}");
-                    KhachHangPageIndex = KhachHangs.TotalPages;
-                    await LoadDanhSachKhachHang(KhachHangPageIndex);
-                }
-            }
-            else if (ActiveTab == "donhang")
-            {
-                await JSRuntime.InvokeVoidAsync("console.log", "📦 Loading donhang data...");
-                await LoadThongKeDonHang();
-                await LoadDanhSachDonHang(DonHangPageIndex);
-                
-                // Validate and adjust page index if needed
-                if (DonHangs != null && DonHangs.TotalPages > 0 && DonHangPageIndex > DonHangs.TotalPages)
-                {
-                    await JSRuntime.InvokeVoidAsync("console.log", 
-                        $"⚠️ DonHangPageIndex {DonHangPageIndex} > TotalPages {DonHangs.TotalPages}, adjusting to {DonHangs.TotalPages}");
-                    DonHangPageIndex = DonHangs.TotalPages;
-                    await LoadDanhSachDonHang(DonHangPageIndex);
-                }
-            }
-            else if (ActiveTab == "doanhthu")
-            {
-                await JSRuntime.InvokeVoidAsync("console.log", "💰 Loading doanhthu data...");
-                await LoadThongKeDonHang();
-            }
-            else
-            {
-                await JSRuntime.InvokeVoidAsync("console.log", "📚 Loading all data (default)...");
-                // Default tab (khachhang) - load tất cả
-                await LoadThongKeKhachHangTheoDoTuoi();
-                await LoadThongKeDonHang();
-                await LoadDanhSachKhachHang(KhachHangPageIndex);
-                
-                // Validate and adjust page indices if needed
-                if (KhachHangs != null && KhachHangs.TotalPages > 0 && KhachHangPageIndex > KhachHangs.TotalPages)
-                {
-                    KhachHangPageIndex = KhachHangs.TotalPages;
-                    await LoadDanhSachKhachHang(KhachHangPageIndex);
-                }
-                
-                await LoadDanhSachDonHang(DonHangPageIndex);
-                
-                if (DonHangs != null && DonHangs.TotalPages > 0 && DonHangPageIndex > DonHangs.TotalPages)
-                {
-                    DonHangPageIndex = DonHangs.TotalPages;
-                    await LoadDanhSachDonHang(DonHangPageIndex);
-                }
-            }
-        }
-        catch (DbUpdateException ex)
-        {
-            HandleDatabaseError(ex);
-        }
-        catch (SqlException ex)
-        {
-            HandleSqlError(ex);
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = $"Lỗi không xác định: {ex.Message}";
-        }
-        finally
-        {
-            IsLoading = false;
-        }
-    }
 
     private async Task LoadTongQuanThongKe()
     {
@@ -1266,70 +726,6 @@
         }
     }
 
-    private async Task LoadDanhSachKhachHang(int pageIndex)
-    {
-        try
-        {
-            await JSRuntime.InvokeVoidAsync("console.log", $"📥 LoadDanhSachKhachHang called with pageIndex: {pageIndex}");
-            
-            var khachHangRoleId = await Context.VaiTro
-                .Where(r => r.TenVaiTro == KHACH_HANG_ROLE)
-                .Select(r => r.RoleId)
-                .FirstOrDefaultAsync();
-
-            if (khachHangRoleId == null)
-            {
-                KhachHangs = PaginatedList<NguoiDungViewModel>.Empty(pageIndex, PAGE_SIZE);
-                await JSRuntime.InvokeVoidAsync("console.log", $"⚠️ khachHangRoleId is null, returning empty list");
-                return;
-            }
-
-            var query = Context.UserRole
-                .Where(ur => ur.RoleId == khachHangRoleId)
-                .Join(Context.NguoiDung,
-                    ur => ur.UserId,
-                    nd => nd.UserId,
-                    (ur, nd) => nd)
-                .Select(nd => new NguoiDungVM
-                {
-                    UserId = nd.UserId,
-                    HoTen = nd.HoTen,
-                    Email = nd.Email,
-                    SoDienThoai = nd.SoDienThoai ?? "—",
-                    NgaySinh = nd.NgaySinh,
-                    Tuoi = nd.NgaySinh != null ?
-                        DateTime.Now.Year - nd.NgaySinh.Value.Year -
-                        (DateTime.Now.DayOfYear < nd.NgaySinh.Value.DayOfYear ? 1 : 0) : (int?)null,
-                    TrangThai = nd.TrangThai
-                })
-                .OrderBy(nd => nd.HoTen);
-
-            KhachHangs = await PaginationService.CreatePagedListAsync(query, pageIndex, PAGE_SIZE);
-            
-            if (KhachHangs != null)
-            {
-                await JSRuntime.InvokeVoidAsync("console.log", 
-                    $"✅ LoadDanhSachKhachHang result: requested page {pageIndex}, got page {KhachHangs.PageIndex}, Total: {KhachHangs.TotalCount}, TotalPages: {KhachHangs.TotalPages}, Count: {KhachHangs.Count}");
-                
-                // If PageIndex differs from requested pageIndex, update it
-                if (KhachHangs.PageIndex != pageIndex)
-                {
-                    await JSRuntime.InvokeVoidAsync("console.log", 
-                        $"⚠️ PageIndex mismatch: requested {pageIndex}, got {KhachHangs.PageIndex}");
-                }
-            }
-            else
-            {
-                await JSRuntime.InvokeVoidAsync("console.log", $"❌ LoadDanhSachKhachHang returned null");
-            }
-        }
-        catch (Exception ex)
-        {
-            await JSRuntime.InvokeVoidAsync("console.error", $"❌ Error in LoadDanhSachKhachHang:", ex.Message);
-            throw new Exception($"Lỗi khi tải danh sách khách hàng: {ex.Message}", ex);
-        }
-    }
-
     private async Task LoadThongKeDonHang()
     {
         try
@@ -1423,54 +819,6 @@
         }
     }
 
-    private async Task LoadDanhSachDonHang(int pageIndex)
-    {
-        try
-        {
-            var query = Context.DonHang
-                .Include(d => d.nguoiDung)
-                .Include(d => d.ChuyenXe)
-                .AsQueryable();
-
-            // Áp dụng filter
-            if (FilterType == "day" && FilterDate.HasValue)
-            {
-                query = query.Where(d => d.NgayDat.Date == FilterDate.Value.Date);
-            }
-            else if (FilterType == "month" && FilterMonth.HasValue && FilterYear.HasValue)
-            {
-                var startOfMonth = new DateTime(FilterYear.Value, FilterMonth.Value, 1);
-                var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
-                query = query.Where(d => d.NgayDat >= startOfMonth && d.NgayDat <= endOfMonth);
-            }
-            else if (FilterType == "year" && FilterYear.HasValue)
-            {
-                var startOfYear = new DateTime(FilterYear.Value, 1, 1);
-                var endOfYear = new DateTime(FilterYear.Value, 12, 31);
-                query = query.Where(d => d.NgayDat >= startOfYear && d.NgayDat <= endOfYear);
-            }
-
-            var donHangQuery = query
-                .Select(d => new DonHangVM
-                {
-                    DonHangId = d.DonHangId,
-                    KhachHangId = d.IDKhachHang,
-                    KhachHangTen = d.nguoiDung.HoTen,
-                    ChuyenId = d.ChuyenId,
-                    NgayDat = d.NgayDat,
-                    TongTien = d.TongTien,
-                    TrangThaiThanhToan = d.TrangThaiThanhToan,
-                    ThoiGianHetHan = d.ThoiGianHetHan
-                })
-                .OrderByDescending(d => d.NgayDat);
-
-            DonHangs = await PaginationService.CreatePagedListAsync(donHangQuery, pageIndex, PAGE_SIZE);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Lỗi khi tải danh sách đơn hàng: {ex.Message}", ex);
-        }
-    }
 
     private void HandleDatabaseError(DbUpdateException ex)
     {
@@ -1504,99 +852,14 @@
         }
     }
 
-    private async Task SetActiveTab(string tab)
-    {
-        if (ActiveTab == tab)
-        {
-            await JSRuntime.InvokeVoidAsync("console.log", $"⏭️ Tab {tab} already active, skipping reload");
-            return; // Already on this tab, no need to reload
-        }
-            
-        try
-        {
-            await JSRuntime.InvokeVoidAsync("console.log", $"🔄 Switching to tab: {tab} (from {ActiveTab})");
-            IsLoading = true;
-            ErrorMessage = string.Empty;
-            
-            // Set ActiveTab BEFORE loading data
-            ActiveTab = tab;
-            await JSRuntime.InvokeVoidAsync("console.log", $"✅ ActiveTab set to: {ActiveTab}");
-            
-            // Update URL hash
-            await UpdateUrlAsync(hash: $"#{tab}");
-            
-            // Reload data for the active tab
-            await JSRuntime.InvokeVoidAsync("console.log", $"📊 Loading data for tab: {ActiveTab}");
-            await LoadDataAsync();
-            
-            // Verify data was loaded
-            if (ActiveTab == "khachhang" && KhachHangs != null)
-            {
-                await JSRuntime.InvokeVoidAsync("console.log", 
-                    $"✅ KhachHangs loaded: {KhachHangs.Count} items, Total: {KhachHangs.TotalCount}");
-            }
-            else if (ActiveTab == "donhang" && DonHangs != null)
-            {
-                await JSRuntime.InvokeVoidAsync("console.log", 
-                    $"✅ DonHangs loaded: {DonHangs.Count} items, Total: {DonHangs.TotalCount}");
-            }
-            else
-            {
-                await JSRuntime.InvokeVoidAsync("console.log", 
-                    $"⚠️ Data not loaded for tab: {ActiveTab}");
-            }
-            
-            // Update _lastUrl after loading to prevent OnParametersSetAsync from reloading
-            var uri = new Uri(Navigation.Uri);
-            _lastUrl = uri.PathAndQuery + uri.Fragment;
-            await JSRuntime.InvokeVoidAsync("console.log", $"🔗 URL updated: {_lastUrl}");
-            
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = $"Lỗi khi chuyển tab: {ex.Message}";
-            await JSRuntime.InvokeVoidAsync("console.error", $"❌ Error switching tab:", ex.Message);
-            StateHasChanged();
-        }
-        finally
-        {
-            IsLoading = false;
-        }
-    }
-
     private void UpdateFilterFields()
     {
         // This will be handled by the conditional rendering
         StateHasChanged();
     }
 
-    private async Task ApplyFilter()
-    {
-        FilterType = filterModel.FilterType;
-        FilterDate = filterModel.FilterDate;
-        FilterMonth = filterModel.FilterMonth;
-        FilterYear = filterModel.FilterYear ?? DateTime.Now.Year;
-        DonHangPageIndex = 1;
+   
 
-        await LoadThongKeDonHang();
-        await LoadDanhSachDonHang(DonHangPageIndex);
-        ActiveTab = "donhang";
-    }
-
-    private async Task ResetFilter()
-    {
-        FilterType = "all";
-        FilterDate = null;
-        FilterMonth = null;
-        FilterYear = DateTime.Now.Year;
-        DonHangPageIndex = 1;
-
-        filterModel = new FilterModel { FilterType = "all", FilterYear = DateTime.Now.Year };
-
-        await LoadThongKeDonHang();
-        await LoadDanhSachDonHang(DonHangPageIndex);
-    }
 
     public void Dispose()
     {

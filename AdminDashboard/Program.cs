@@ -34,7 +34,8 @@ builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IVnpayService, VnpayService>();
 builder.Services.AddScoped<IPaginationService, PaginationService>();
 builder.Services.AddHttpClient();
-
+builder.Services.AddScoped<AdminDashboard.Services.IChuyenXeService, AdminDashboard.Services.ChuyenXeService>();
+builder.Services.AddScoped<AdminDashboard.Services.INhanVienService, AdminDashboard.Services.NhanVienService>();
 // ===================== CLOUDINARY / LOCAL IMAGE SERVICE =====================
 var cloudinaryConfig = builder.Configuration.GetSection("Cloudinary");
 var cloudName = cloudinaryConfig["CloudName"];
@@ -49,12 +50,12 @@ if (!string.IsNullOrEmpty(cloudName) &&
     var cloudinary = new Cloudinary(account);
     builder.Services.AddSingleton(cloudinary);
     builder.Services.AddScoped<IImageService, CloudinaryImageService>();
-    Console.WriteLine($"✅ Đã đăng ký Cloudinary service: {cloudName}");
+ 
 }
 else
 {
     builder.Services.AddScoped<IImageService, LocalImageService>();
-    Console.WriteLine("⚠️ Đang dùng LocalImageService - chỉ nên dùng cho development");
+    
 }
 
 // ===================== COOKIE AUTHENTICATION =====================
@@ -122,10 +123,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home_User}/{action=Home_User}/{id?}"
 );
 
-app.MapControllerRoute(
-    name: "chat_user",
-    pattern: "{controller=ChatUser}/{action=Index}/{id?}"
-);
 
 
 app.Run();
