@@ -1,0 +1,138 @@
+﻿@model AdminDashboard.Models.ViewModels.TaoNhanVienRequest
+@{
+    ViewData["Title"] = "Thêm Nhân Viên Mới";
+}
+
+<div class="container-fluid px-4">
+    <h2 class="mt-4 text-uppercase fw-bold text-primary">Thêm Nhân Sự</h2>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-action="Index">Danh sách</a></li>
+        <li class="breadcrumb-item active">Thêm mới</li>
+    </ol>
+
+    <div class="row justify-content-center">
+        <div class="col-xl-10">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="text-center font-weight-light my-2 fw-bold">THIẾT LẬP HỒ SƠ & TÀI KHOẢN</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="row">
+                            <div class="col-md-5 border-end pe-md-4">
+                                <h6 class="text-uppercase text-muted fw-bold mb-3 small"><i class="fas fa-user-lock me-2"></i>Tài khoản đăng nhập</h6>
+
+                                <div class="form-floating mb-3">
+                                    <select asp-for="VaiTro" class="form-select fw-bold text-primary" id="ddlVaiTro">
+                                        <option value="1">Tài xế (Lái xe)</option>
+                                        <option value="2">Nhân viên bán vé</option>
+                                    </select>
+                                    <label for="ddlVaiTro">Vị trí công việc</label>
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Email" class="form-control" placeholder="name@example.com" />
+                                    <label>Email (Tên đăng nhập)</label>
+                                    <span asp-validation-for="Email" class="text-danger small"></span>
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    <input asp-for="MatKhau" type="password" class="form-control" value="123456" placeholder="Password" />
+                                    <label>Mật khẩu mặc định</label>
+                                    <span asp-validation-for="MatKhau" class="text-danger small"></span>
+                                </div>
+
+                                <div class="alert alert-info d-flex align-items-center small mt-4">
+                                    <i class="fas fa-info-circle fa-2x me-3"></i>
+                                    <div>
+                                        Nhân viên sẽ dùng <b>Email</b> và <b>Mật khẩu</b> này để đăng nhập vào hệ thống làm việc.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-7 ps-md-4">
+                                <h6 class="text-uppercase text-muted fw-bold mb-3 small"><i class="fas fa-id-card me-2"></i>Hồ sơ cá nhân</h6>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-7">
+                                        <div class="form-floating mb-3 mb-md-0">
+                                            <input asp-for="HoTen" class="form-control" placeholder="Họ tên" />
+                                            <label>Họ và tên</label>
+                                            <span asp-validation-for="HoTen" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="form-floating">
+                                            <input asp-for="SoDienThoai" class="form-control" placeholder="SĐT" />
+                                            <label>Số điện thoại</label>
+                                            <span asp-validation-for="SoDienThoai" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    <input asp-for="CCCD" class="form-control" placeholder="CCCD" />
+                                    <label>Số CCCD / CMND</label>
+                                </div>
+
+                                <div id="divTaiXe" class="card bg-light mb-3 border-warning" style="display:none;">
+                                    <div class="card-body py-2">
+                                        <div class="text-warning fw-bold small text-uppercase mb-2"><i class="fas fa-steering-wheel"></i> Bằng lái xe (Bắt buộc)</div>
+                                        <div class="row g-2">
+                                            <div class="col-8">
+                                                <input asp-for="SoBangLai" class="form-control form-control-sm" placeholder="Số bằng lái..." />
+                                            </div>
+                                            <div class="col-4">
+                                                <input asp-for="HangBangLai" class="form-control form-control-sm" placeholder="Hạng (E, FC...)" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small">Ảnh chân dung</label>
+                                    <input asp-for="Avatar" type="file" class="form-control" accept="image/*" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
+                            <a class="text-decoration-none" asp-action="Index"><i class="fas fa-arrow-left me-1"></i> Quay lại</a>
+                            <button type="submit" class="btn btn-primary btn-lg px-5 shadow fw-bold">
+                                <i class="fas fa-save me-2"></i> LƯU HỒ SƠ
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var ddl = document.getElementById("ddlVaiTro");
+            var divTaiXe = document.getElementById("divTaiXe");
+
+            function toggleFields() {
+                if (ddl.value == "1") {
+                    divTaiXe.style.display = "block";
+                    setTimeout(() => divTaiXe.classList.add("show"), 10);
+                } else {
+                    divTaiXe.style.display = "none";
+                    divTaiXe.classList.remove("show");
+                }
+            }
+
+            toggleFields();
+            ddl.addEventListener("change", toggleFields);
+        });
+    </script>
+}

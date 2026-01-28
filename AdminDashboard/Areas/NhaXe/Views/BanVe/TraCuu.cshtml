@@ -1,0 +1,213 @@
+﻿@{
+    ViewData["Title"] = "Tra Cứu & Đổi Vé";
+}
+
+<style>
+    .seat-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        max-width: 350px;
+        margin: 20px auto;
+    }
+
+    .seat {
+        height: 45px;
+        border: 2px solid #ccc;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        cursor: pointer;
+        background: white;
+    }
+
+        .seat.sold {
+            background-color: #dc3545;
+            color: white;
+            border-color: #dc3545;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        /* Ghế đã bán */
+        .seat.current {
+            background-color: #ffc107;
+            color: black;
+            border-color: #ffc107;
+            pointer-events: none;
+        }
+        /* Ghế hiện tại của khách */
+        .seat.selected {
+            background-color: #198754;
+            color: white;
+            border-color: #198754;
+            box-shadow: 0 0 10px #198754;
+        }
+        /* Ghế đang chọn đổi */
+        .seat:hover:not(.sold):not(.current) {
+            border-color: #0d6efd;
+            background: #e3f2fd;
+        }
+</style>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-5">
+            <div class="card shadow border-0 mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-search me-2"></i> Tra Cứu Vé</h5>
+                </div>
+                <div class="card-body">
+                    <div class="input-group mb-3">
+                        <input type="text" id="keyword" class="form-control" placeholder="Nhập Mã vé hoặc SĐT..." />
+                        <button class="btn btn-dark" onclick="timVe()"><i class="fas fa-search"></i> Tìm</button>
+                    </div>
+
+                    <div id="error-msg" class="alert alert-danger d-none"></div>
+
+                    <div id="result-area" class="d-none">
+                        <div class="alert alert-light border">
+                            <h6 class="text-primary fw-bold mb-3">Thông tin vé hiện tại:</h6>
+                            <p class="mb-1"><strong>Khách:</strong> <span id="lblTenKhach"></span></p>
+                            <p class="mb-1"><strong>SĐT:</strong> <span id="lblSdt"></span></p>
+                            <p class="mb-1"><strong>Ghế hiện tại:</strong> <span class="badge bg-warning text-dark fs-6" id="lblSoGhe"></span></p>
+                            <p class="mb-0"><strong>Trạng thái:</strong> <span id="lblTrangThai"></span></p>
+                        </div>
+
+                        <hr />
+
+                        <div class="mb-3">
+                            <label class="fw-bold text-success">Ghế mới muốn đổi:</label>
+                            <input type="text" id="txtGheMoi" class="form-control fw-bold text-center text-success fs-4" readonly placeholder="---" />
+                            <small class="text-muted fst-italic">* Vui lòng chọn ghế Trống trên sơ đồ bên cạnh</small>
+                        </div>
+
+                        <input type="hidden" id="hdVeId" />
+                        <input type="hidden" id="hdChuyenId" />
+
+                        <button class="btn btn-success w-100 fw-bold" onclick="doiGhe()">
+                            <i class="fas fa-exchange-alt me-2"></i> XÁC NHẬN ĐỔI GHẾ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card shadow border-0 h-100" id="map-card" style="display:none;">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0 fw-bold text-uppercase">Sơ đồ ghế chuyến xe</h6>
+                </div>
+                <div class="card-body bg-light text-center">
+                    <div class="d-flex justify-content-center gap-3 mb-3 small">
+                        <div><span class="badge bg-white text-dark border">Trống</span></div>
+                        <div><span class="badge bg-danger">Đã bán</span></div>
+                        <div><span class="badge bg-warning text-dark">Ghế cũ</span></div>
+                        <div><span class="badge bg-success">Đang chọn</span></div>
+                    </div>
+
+                    <div id="seat-map-container" class="seat-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // 1. Hàm tìm vé
+        function timVe() {
+            var kw = $('#keyword').val();
+            if (!kw) return alert("Vui lòng nhập thông tin tìm kiếm");
+
+            $('#result-area').addClass('d-none');
+            $('#map-card').hide();
+            $('#error-msg').addClass('d-none');
+
+            $.get('/NhaXe/BanVe/TimKiemVe?keyword=' + kw, function (res) {
+                if (res.success) {
+                    // Điền thông tin
+                    $('#lblTenKhach').text(res.data.tenKhach);
+                    $('#lblSdt').text(res.data.sdt);
+                    $('#lblSoGhe').text(res.data.soGhe);
+                    $('#lblTrangThai').text(res.data.trangThai);
+                    $('#hdVeId').val(res.data.gheID);
+                    $('#hdChuyenId').val(res.data.chuyenId);
+
+                    // Hiển thị khu vực kết quả
+                    $('#result-area').removeClass('d-none');
+
+                    // --- GỌI HÀM VẼ SƠ ĐỒ GHẾ ---
+                    loadSoDoGhe(res.data.chuyenId, res.data.soGhe);
+                } else {
+                    $('#error-msg').text(res.message).removeClass('d-none');
+                }
+            });
+        }
+
+        // 2. Hàm tải và vẽ sơ đồ ghế
+        function loadSoDoGhe(chuyenId, gheHienTai) {
+            $('#map-card').show();
+            $('#seat-map-container').html('<div class="text-center w-100"><div class="spinner-border text-primary"></div></div>');
+
+            $.get('/NhaXe/BanVe/GetSoDoGheJSON?chuyenId=' + chuyenId, function (res) {
+                if (res.success) {
+                    var html = '';
+                    var tongGhe = res.tongSoGhe || 40;
+                    var veDaBan = res.veDaBan || [];
+
+                    for (var i = 1; i <= tongGhe; i++) {
+                        var soGhe = i.toString().padStart(2, '0'); // Tạo số 01, 02...
+
+                        var statusClass = "";
+
+                        // Kiểm tra ghế này có ai mua chưa
+                        var isSold = veDaBan.some(v => v.soGhe == soGhe);
+
+                        if (soGhe == gheHienTai) {
+                            statusClass = "current"; // Ghế hiện tại của khách -> Màu vàng
+                        } else if (isSold) {
+                            statusClass = "sold"; // Ghế người khác mua -> Màu đỏ
+                        }
+
+                        html += `<div class="seat ${statusClass}" onclick="chonGheDoi(this, '${soGhe}')">${soGhe}</div>`;
+                    }
+                    $('#seat-map-container').html(html);
+                }
+            });
+        }
+
+        // 3. Hàm chọn ghế trên sơ đồ
+        function chonGheDoi(el, soGhe) {
+            // Nếu ghế đỏ hoặc ghế vàng thì không cho chọn
+            if ($(el).hasClass('sold') || $(el).hasClass('current')) return;
+
+            // Xóa chọn cũ
+            $('.seat.selected').removeClass('selected');
+
+            // Chọn mới
+            $(el).addClass('selected');
+            $('#txtGheMoi').val(soGhe); // Điền vào ô input
+        }
+
+        // 4. Hàm xác nhận đổi
+        function doiGhe() {
+            var veId = $('#hdVeId').val();
+            var gheMoi = $('#txtGheMoi').val();
+
+            if (!gheMoi || gheMoi === "---") { alert("Vui lòng chọn ghế mới trên sơ đồ!"); return; }
+
+            if (confirm("Xác nhận đổi sang ghế " + gheMoi + "?")) {
+                $.post('/NhaXe/BanVe/DoiGhe', { veId: veId, soGheMoi: gheMoi }, function (res) {
+                    if (res.success) {
+                        alert(res.message);
+                        location.reload();
+                    } else {
+                        alert("Lỗi: " + res.message);
+                    }
+                });
+            }
+        }
+    </script>
+}

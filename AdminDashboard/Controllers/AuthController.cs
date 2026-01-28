@@ -50,6 +50,7 @@ namespace AdminDashboard.Controllers
                 return View(model);
             }
 
+           
             var user = await _context.NguoiDung
                 .FirstOrDefaultAsync(u =>
                     (u.Email.ToLower() == input || u.SoDienThoai == input) && u.MatKhau == password);
@@ -66,28 +67,60 @@ namespace AdminDashboard.Controllers
                 return View(model);
             }
 
+          
+           
             var roleName = await _context.UserRole
                 .Where(ur => ur.UserId == user.UserId)
                 .Join(_context.VaiTro, ur => ur.RoleId, r => r.RoleId, (ur, r) => r.TenVaiTro)
-                .FirstOrDefaultAsync() ?? "Khach";
+                .FirstOrDefaultAsync() ?? "KhachHang"; 
 
+         
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserId),
                 new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimTypes.Role, roleName)
+                new Claim(ClaimTypes.Role, roleName) // Quan trọng để phân quyền [Authorize(Roles="...")]
             };
+
+
+
+            if (!string.IsNullOrEmpty(user.NhaXeId))
+            {
+                // Vì NhaXeId đã là string rồi nên truyền trực tiếp vào, không cần .Value.ToString()
+                claims.Add(new Claim("NhaXeId", user.NhaXeId));
+            }
+            // ------------------------------------------
 
             var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+         
             await HttpContext.SignInAsync("CookieAuth", claimsPrincipal);
 
+       
             if (roleName == "Admin")
-                return RedirectToAction("Index", "Home");
+            {
+             
+                return RedirectToAction("Index", "Home", new { area = "Admin" });
+            }
+            else if (roleName == "ChuNhaXe")
+            {
+            
+                return RedirectToAction("Index", "Xe", new { area = "NhaXe" });
+            }
             else if (roleName == "TaiXe")
+            {
                 return RedirectToAction("LichLamViec", "TaiXe", new { area = "TaiXe" });
+            }
+            else if (roleName == "NhanVienBanVe")
+            {
+                return RedirectToAction("Index", "BanVe", new { area = "NhaXe" });
+            }
             else
+            {
+                // Khách hàng thường
                 return RedirectToAction("Home_User", "Home_User");
+            }
         }
 
         [HttpGet]
@@ -180,10 +213,8 @@ namespace AdminDashboard.Controllers
             var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null) return NotFound();
 
-            return View(user); // view EditAccount.cshtml dùng model NguoiDung (như bạn đã có)
+            return View(user); 
         }
-
-        // ====== EDIT ACCOUNT: POST (cập nhật) ======
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditAccount(NguoiDung model)
@@ -192,20 +223,16 @@ namespace AdminDashboard.Controllers
             {
                 return Json(new { success = false, message = "Dữ liệu không hợp lệ." });
             }
-
             var user = await _context.NguoiDung.FindAsync(model.UserId);
             if (user == null)
             {
                 return Json(new { success = false, message = "Không tìm thấy tài khoản." });
             }
-
             user.HoTen = model.HoTen;
             user.Email = model.Email;
             user.SoDienThoai = model.SoDienThoai;
             user.NgaySinh = model.NgaySinh;
-
             await _context.SaveChangesAsync();
-
             return Json(new { success = true, message = "Cập nhật thành công." });
         }
 
@@ -215,7 +242,7 @@ namespace AdminDashboard.Controllers
             return Request.Headers != null && Request.Headers["X-Requested-With"] == "XMLHttpRequest";
         }
 
-        // ====== RESET PASSWORD ======
+
         [HttpGet]
         public async Task<IActionResult> ResetPassword()
         {
@@ -234,7 +261,6 @@ namespace AdminDashboard.Controllers
             ViewBag.Phone = user.SoDienThoai ?? "Không có số điện thoại";
             return View();
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(string oldPassword, string newPassword, string confirmPassword)
@@ -244,39 +270,28 @@ namespace AdminDashboard.Controllers
             {
                 return RedirectToAction("Login", "Auth");
             }
-
             var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null)
             {
                 return RedirectToAction("Login", "Auth");
             }
-
             ViewBag.Phone = user.SoDienThoai ?? "Không có số điện thoại";
-
-            // Kiểm tra mật khẩu cũ có đúng không
             if (user.MatKhau != oldPassword)
             {
                 ViewBag.Error = "Mật khẩu cũ không chính xác.";
                 return View();
             }
-
-            // Kiểm tra mật khẩu mới có khớp xác nhận không
             if (newPassword != confirmPassword)
             {
                 ViewBag.Error = "Mật khẩu xác nhận không khớp.";
                 return View();
             }
-
-            // Kiểm tra độ dài hoặc độ mạnh của mật khẩu (tuỳ chọn)
             if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
             {
                 ViewBag.Error = "Mật khẩu mới phải có ít nhất 6 ký tự.";
                 return View();
             }
-
-            // ✅ Cập nhật mật khẩu mới
             user.MatKhau = newPassword;
-
             try
             {
                 await _context.SaveChangesAsync();
@@ -295,11 +310,10 @@ namespace AdminDashboard.Controllers
         {
             return View();
         }
-        [Authorize] // Đảm bảo người dùng phải đăng nhập
+        [Authorize] 
         [HttpGet]
         public async Task<IActionResult> History()
-        {
-          
+        {       
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
@@ -315,8 +329,6 @@ namespace AdminDashboard.Controllers
                         .ThenInclude(lt => lt.TramToiNavigation) 
                 .OrderByDescending(d => d.NgayDat) 
                 .ToListAsync();
-
-    
             return View(tatCaDonHangCuaNguoiDung);
         }
         [HttpPost]
@@ -326,32 +338,22 @@ namespace AdminDashboard.Controllers
             {
                 return View(model);
             }
-
-            // Kiểm tra email có tồn tại trong hệ thống không
             var user = await _context.NguoiDung
                 .FirstOrDefaultAsync(u => u.Email.ToLower() == model.Email.ToLower());
-
             if (user == null)
             {
                 ModelState.AddModelError("Email", "Email này không tồn tại trong hệ thống.");
                 return View(model);
             }
-
             try
             {
-                // Tạo mã OTP
                 var otpCode = await _otpService.GenerateOtpAsync(model.Email);
-
-                // Gửi email OTP
                 var emailSent = await _emailService.SendOtpEmailAsync(model.Email, otpCode);
-
                 if (emailSent)
                 {
-                    // Lưu thời gian tạo OTP vào TempData
                     var otpCreatedTime = DateTime.Now;
                     TempData["OtpCreatedTime"] = otpCreatedTime.ToString("O");
-                    TempData["OtpExpiresIn"] = 180; // 3 phút = 180 giây
-                    
+                    TempData["OtpExpiresIn"] = 180;              
                     TempData["SuccessMessage"] = "Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.";
                     return RedirectToAction("VerifyOtp", new { email = model.Email });
                 }
@@ -450,33 +452,24 @@ namespace AdminDashboard.Controllers
             {
                 return View(model);
             }
-
             try
             {
-                // Xác minh OTP và đánh dấu đã sử dụng
                 var isValidOtp = await _otpService.VerifyOtpAsync(model.Email, model.OtpCode, "ResetPassword", markAsUsed: true);
 
                 if (!isValidOtp)
                 {
-                    // OTP hết hạn - redirect về trang ForgotPass với thông báo
                     TempData["ErrorMessage"] = "Mã OTP đã hết hạn. Vui lòng yêu cầu mã OTP mới.";
                     return RedirectToAction("ForgotPass");
                 }
-
-                // Tìm user và cập nhật mật khẩu
                 var user = await _context.NguoiDung
                     .FirstOrDefaultAsync(u => u.Email.ToLower() == model.Email.ToLower());
-
                 if (user == null)
                 {
                     ModelState.AddModelError("", "Không tìm thấy tài khoản.");
                     return View(model);
                 }
-
-                // Cập nhật mật khẩu mới
                 user.MatKhau = model.NewPassword;
                 await _context.SaveChangesAsync();
-
                 TempData["SuccessMessage"] = "Đặt lại mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới.";
                 return RedirectToAction("Login");
             }

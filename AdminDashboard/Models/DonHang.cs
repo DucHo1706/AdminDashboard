@@ -8,9 +8,8 @@ namespace AdminDashboard.Models
         [Key]
         [StringLength(255)]
         public string DonHangId { get; set; }
-
-        [Required, StringLength(255)]
-        public string IDKhachHang { get; set; }
+        [StringLength(255)]
+        public string? IDKhachHang { get; set; }
 
         [Required, StringLength(255)]
         public string ChuyenId { get; set; }
@@ -26,11 +25,21 @@ namespace AdminDashboard.Models
 
         public DateTime ThoiGianHetHan { get; set; }
 
+        [StringLength(100)]
+        public string? HoTenNguoiDat { get; set; } 
+
+        [StringLength(20)]
+        public string? SdtNguoiDat { get; set; }  
+
+        [StringLength(100)]
+        public string? EmailNguoiDat { get; set; } 
+
+        public string? GhiChu { get; set; }     
 
         [ForeignKey(nameof(IDKhachHang))]
-        public NguoiDung nguoiDung { get; set; }
+        public virtual NguoiDung? nguoiDung { get; set; }
 
         [ForeignKey(nameof(ChuyenId))]
-        public ChuyenXe ChuyenXe { get; set; }
+        public virtual ChuyenXe ChuyenXe { get; set; }
     }
 }

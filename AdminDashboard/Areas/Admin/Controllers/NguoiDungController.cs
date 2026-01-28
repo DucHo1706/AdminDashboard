@@ -10,7 +10,7 @@ namespace AdminDashboard.Areas.Admin.Controllers
 {
     // Áp dụng Area và Authorization cho toàn bộ Controller
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     public class NguoiDungController : Controller
     {
         // Khai báo field private như bình thường, không dùng attributes

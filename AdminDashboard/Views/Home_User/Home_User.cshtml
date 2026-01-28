@@ -1,24 +1,12 @@
 @model IEnumerable<AdminDashboard.Models.ChuyenXe>
 @{
     Layout = "_Layout_User";
-    ViewData["Title"] = "Home_User";
+    ViewData["Title"] = "Trang Chủ";
 }
-<!DOCTYPE html>
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"]</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+@section Styles {
     <style>
-        body {
-            background: url('https://img1.kienthucvui.vn/uploads/2021/01/13/phong-canh-thun-lung-bac-son-viet-nam-dep-nhu-tranh-ve_030119832.jpg') no-repeat center center fixed;
-            background-size: cover;
-            height: 100vh;
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-        }
+        /* CSS riêng cho trang chủ */
         .banner {
             padding: 30px 0;
         }
@@ -73,6 +61,7 @@
                 background-color: #FF9933;
             }
 
+        /* Card chuyến xe */
         .trip-result-card {
             border: 1px solid #f0e9e9;
             transition: all 0.3s ease;
@@ -135,10 +124,6 @@
             padding: 30px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             margin-top: 40px;
-        }
-
-        .banner {
-            padding: 30px 0;
         }
 
         .card-custom {
@@ -208,25 +193,29 @@
                 transform: scale(1.1);
             }
 
-        /* 🔥 Loading Spinner */
-.loading-spinner {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 180px;
-}
+        .loading-spinner {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 180px;
+        }
 
-.pl__ring2, .pl__ring4, .pl__ring6 {
-    animation: spinner-rotation 1.4s linear infinite;
-}
+        .pl__ring2, .pl__ring4, .pl__ring6 {
+            animation: spinner-rotation 1.4s linear infinite;
+        }
 
-@@keyframes spinner-rotation {
-    0% { stroke-dashoffset: 0; }
-    100% { stroke-dashoffset: -659; }
-}
+        @@keyframes spinner-rotation {
+            0% {
+                stroke-dashoffset: 0;
+            }
 
-        /* Style cho Route Cards (như hình 2) */
+            100% {
+                stroke-dashoffset: -659;
+            }
+        }
+
+        /* Route Cards */
         .route-card {
             background: #ffffff;
             border-radius: 15px;
@@ -238,10 +227,10 @@
             flex-direction: column;
         }
 
-        .route-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
+            .route-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            }
 
         .route-card-header {
             position: relative;
@@ -262,14 +251,14 @@
             transition: opacity 0.2s ease;
         }
 
-        .route-card-header-link:hover {
-            opacity: 0.9;
-            text-decoration: none;
-        }
+            .route-card-header-link:hover {
+                opacity: 0.9;
+                text-decoration: none;
+            }
 
-        .route-card-header-link:hover .route-card-overlay {
-            background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7));
-        }
+                .route-card-header-link:hover .route-card-overlay {
+                    background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7));
+                }
 
         .route-card-overlay {
             background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.6));
@@ -284,19 +273,19 @@
             align-items: center;
         }
 
-        .route-card-overlay h3 {
-            font-size: 14px;
-            font-weight: 500;
-            margin: 0 0 8px 0;
-            opacity: 0.9;
-        }
+            .route-card-overlay h3 {
+                font-size: 14px;
+                font-weight: 500;
+                margin: 0 0 8px 0;
+                opacity: 0.9;
+            }
 
-        .route-card-overlay h4 {
-            font-size: 22px;
-            font-weight: 700;
-            margin: 0;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
+            .route-card-overlay h4 {
+                font-size: 22px;
+                font-weight: 700;
+                margin: 0;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            }
 
         .route-card-body {
             padding: 20px;
@@ -315,13 +304,13 @@
             position: relative;
         }
 
-        .route-item-link:hover {
-            background-color: #f8f9fa;
-            text-decoration: none;
-            color: inherit;
-            transform: translateX(4px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
+            .route-item-link:hover {
+                background-color: #f8f9fa;
+                text-decoration: none;
+                color: inherit;
+                transform: translateX(4px);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
 
         .route-item {
             padding: 0;
@@ -361,267 +350,204 @@
             border: none;
             border-top: 1px solid #e9ecef;
         }
-
     </style>
-</head>
-<body>
-    <div class="banner">
-        @await Component.InvokeAsync("Slider")
-    </div>
-    <button id="scrollTopBtn" title="Lên đầu trang"><i class="bi bi-arrow-up"></i></button>
+}
 
-    <div class="container my-5">
-        <h2 class="text-center mb-4" style="color: white; font-weight:bold; text-shadow: 1px 1px 2px black;">Đặt Vé Xe Khách Nhanh Chóng</h2>
+<div class="banner">
+    @await Component.InvokeAsync("Slider")
+</div>
 
-        <form id="formTimChuyen" asp-page="/TimKiem" method="get" class="search-box">
-            <div class="search-item">
-                <i class="bi bi-geo-alt-fill fs-4 me-3"></i>
-                <select name="DiemDiId" class="form-select" asp-items="ViewBag.DanhSachTram">
-                    <option value="" disabled selected>Chọn điểm đi</option>
-                </select>
+<button id="scrollTopBtn" title="Lên đầu trang"><i class="bi bi-arrow-up"></i></button>
+
+<div class="container my-5">
+    <h2 class="text-center mb-4" style="color: white; font-weight:bold; text-shadow: 1px 1px 2px black;">Đặt Vé Xe Khách Nhanh Chóng</h2>
+
+    <form id="formTimChuyen" asp-page="/TimKiem" method="get" class="search-box">
+        <div class="search-item">
+            <i class="bi bi-geo-alt-fill fs-4 me-3"></i>
+            <select name="DiemDiId" class="form-select" asp-items="ViewBag.DanhSachTram">
+                <option value="" disabled selected>Chọn điểm đi</option>
+            </select>
+        </div>
+        <div class="search-item">
+            <i class="bi bi-geo-alt fs-4 me-3"></i>
+            <select name="DiemDenId" class="form-select" asp-items="ViewBag.DanhSachTram">
+                <option value="" disabled selected>Chọn điểm đến</option>
+            </select>
+        </div>
+        <div class="search-item">
+            <i class="bi bi-calendar-event fs-4 me-3"></i>
+            <input type="date" name="NgayDi" id="ngayDiInput" class="form-control" placeholder="Chọn ngày đi" />
+        </div>
+        <button type="submit" class="btn btn-search px-4 py-3">
+            <i class="bi bi-search me-1"></i> Tìm Kiếm
+        </button>
+    </form>
+
+    @if (ViewBag.RoutesByDeparture != null && ((List<AdminDashboard.Models.ViewModels.TuyenXeViewModel>)ViewBag.RoutesByDeparture).Any())
+    {
+        <div class="container mt-5">
+            <div class="text-center mb-4">
+                <h2 style="color: white; font-weight: bold; text-shadow: 1px 1px 2px black;">Được khách hàng tin tưởng và lựa chọn</h2>
             </div>
-            <div class="search-item">
-                <i class="bi bi-geo-alt fs-4 me-3"></i>
-                <select name="DiemDenId" class="form-select" asp-items="ViewBag.DanhSachTram">
-                    <option value="" disabled selected>Chọn điểm đến</option>
-                </select>
-            </div>
-            <div class="search-item">
-                <i class="bi bi-calendar-event fs-4 me-3"></i>
-                <input type="date" name="NgayDi" id="ngayDiInput" class="form-control" placeholder="Chọn ngày đi" />
-            </div>
-                        <button type="submit" class="btn btn-search px-4 py-3">
-                <i class="bi bi-search me-1"></i> Tìm Kiếm
-            </button>
-        </form>
-
-        <script>
-            (function() {
-                const input = document.getElementById('ngayDiInput');
-                if (!input) return;
-                const today = new Date();
-                input.value = today.toISOString().split('T')[0];
-                input.min = today.toISOString().split('T')[0];
-                const maxDate = new Date();
-                maxDate.setDate(today.getDate() + 60);
-                input.max = maxDate.toISOString().split('T')[0];
-            })();
-
-            // Tự động tính giờ đến khi chọn giờ đi (nếu người dùng chưa chọn giờ đến)
-            document.getElementById('gioDiSelect')?.addEventListener('change', function() {
-                const gioDiSelect = document.getElementById('gioDiSelect');
-                const gioDenSelect = document.getElementById('gioDenSelect');
-                
-                if (gioDiSelect.value && !gioDenSelect.value) {
-                    // Tự động tính +4 giờ (nhưng không set, chỉ để tham khảo)
-                    const [hour] = gioDiSelect.value.split(':').map(Number);
-                    const gioDenTuDong = (hour + 4) % 24;
-                    // Option "Tự động (+4 giờ)" đã có sẵn, không cần set giá trị
-                }
-            });
-        </script>
-
-        <!-- Hiển thị tuyến xe theo điểm đi (dạng card như hình 2) -->
-        @if (ViewBag.RoutesByDeparture != null && ((List<AdminDashboard.Models.ViewModels.TuyenXeViewModel>)ViewBag.RoutesByDeparture).Any())
-        {
-            <div class="container mt-5">
-                <div class="text-center mb-4">
-                    <h2 style="color: white; font-weight: bold; text-shadow: 1px 1px 2px black;">Được khách hàng tin tưởng và lựa chọn</h2>
-                </div>
-                <div class="row g-4">
-                    @foreach (var tuyen in (List<AdminDashboard.Models.ViewModels.TuyenXeViewModel>)ViewBag.RoutesByDeparture)
-                    {
-                        <div class="col-lg-4 col-md-6">
-                            <div class="route-card">
-                                @if (tuyen.TuyenXe != null && tuyen.TuyenXe.Any())
-                                {
-                                    var firstItem = tuyen.TuyenXe.First();
-                                    <a asp-action="ChonGhe" 
-                                       asp-controller="Booking" 
-                                       asp-route-chuyenId="@firstItem.ChuyenId"
-                                       class="route-card-header-link">
-                                        <div class="route-card-header" style="background-image: url('/images/slider/hcm.png');">
-                                            <div class="route-card-overlay">
-                                                <h3>Tuyến xe từ</h3>
-                                                <h4>@tuyen.TenTram</h4>
-                                            </div>
-                                        </div>
-                                    </a>
-                                }
-                                else
-                                {
+            <div class="row g-4">
+                @foreach (var tuyen in (List<AdminDashboard.Models.ViewModels.TuyenXeViewModel>)ViewBag.RoutesByDeparture)
+                {
+                    <div class="col-lg-4 col-md-6">
+                        <div class="route-card">
+                            @if (tuyen.TuyenXe != null && tuyen.TuyenXe.Any())
+                            {
+                                var firstItem = tuyen.TuyenXe.First();
+                                <a asp-action="ChonGhe" asp-controller="Booking" asp-route-chuyenId="@firstItem.ChuyenId" class="route-card-header-link">
                                     <div class="route-card-header" style="background-image: url('/images/slider/hcm.png');">
                                         <div class="route-card-overlay">
                                             <h3>Tuyến xe từ</h3>
                                             <h4>@tuyen.TenTram</h4>
                                         </div>
                                     </div>
-                                }
-                                <div class="route-card-body">
-                                    @foreach (var item in tuyen.TuyenXe)
-                                    {
-                                        <a asp-action="ChonGhe" 
-                                           asp-controller="Booking" 
-                                           asp-route-chuyenId="@item.ChuyenId"
-                                           class="route-item-link">
-                                            <div class="route-item">
-                                                <div class="route-item-main">
-                                                    <div class="route-item-header">
-                                                        <span class="route-destination">@item.DiemDen</span>
-                                                        <span class="route-price-inline">@string.Format("{0:N0}", item.GiaVe)₫</span>
-                                                    </div>
-                                                    <div class="route-details">
-                                                        @{
-                                                            var totalHours = (item.GioDenDuKien - item.GioDi).TotalHours;
-                                                            var khoangCach = totalHours > 0 ? (int)(totalHours * 50) : 0; // Ước lượng: 50km/giờ
-                                                            var thoiGianText = totalHours >= 1 
-                                                                ? $"{(int)totalHours} giờ" 
-                                                                : $"{(int)((item.GioDenDuKien - item.GioDi).TotalMinutes)} phút";
-                                                        }
-                                                        @khoangCach km - @thoiGianText - @item.NgayDi.ToString("dd/MM/yyyy")
-                                                    </div>
+                                </a>
+                            }
+                            else
+                            {
+                                <div class="route-card-header" style="background-image: url('/images/slider/hcm.png');">
+                                    <div class="route-card-overlay">
+                                        <h3>Tuyến xe từ</h3>
+                                        <h4>@tuyen.TenTram</h4>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="route-card-body">
+                                @foreach (var item in tuyen.TuyenXe)
+                                {
+                                    <a asp-action="ChonGhe" asp-controller="Booking" asp-route-chuyenId="@item.ChuyenId" class="route-item-link">
+                                        <div class="route-item">
+                                            <div class="route-item-main">
+                                                <div class="route-item-header">
+                                                    <span class="route-destination">@item.DiemDen</span>
+                                                    <span class="route-price-inline">@string.Format("{0:N0}", item.GiaVe)₫</span>
+                                                </div>
+                                                <div class="route-details">
+                                                    @{
+                                                        var totalHours = (item.GioDenDuKien - item.GioDi).TotalHours;
+                                                        var khoangCach = totalHours > 0 ? (int)(totalHours * 50) : 0;
+                                                        var thoiGianText = totalHours >= 1 ? $"{(int)totalHours} giờ" : $"{(int)((item.GioDenDuKien - item.GioDi).TotalMinutes)} phút";
+                                                    }
+                                                    @khoangCach km - @thoiGianText - @item.NgayDi.ToString("dd/MM/yyyy")
                                                 </div>
                                             </div>
-                                        </a>
-                                        @if (item != tuyen.TuyenXe.Last())
-                                        {
-                                            <hr class="route-divider" />
-                                        }
+                                        </div>
+                                    </a>
+                                    @if (item != tuyen.TuyenXe.Last())
+                                    {
+                                        <hr class="route-divider" />
                                     }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <div id="DanhSachChuyenXe" class="mt-5" style="@(ViewBag.RoutesByDeparture != null && ((List<AdminDashboard.Models.ViewModels.TuyenXeViewModel>)ViewBag.RoutesByDeparture).Any() ? "display: none;" : "")">
+        @if (Model != null && Model.Any())
+        {
+            <div class="row">
+                @foreach (var chuyen in Model)
+                {
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 trip-result-card">
+                            @{
+                                var imageUrl = chuyen.Images?.FirstOrDefault()?.ImageUrl ?? "/images/default-bus-image.png";
+                            }
+                            <img src="@imageUrl" class="card-img-top" alt="Ảnh chuyến xe" style="height: 200px; object-fit: cover;">
+                            <div class="card-body">
+                                <div class="card-content-wrapper">
+                                    <h5 class="card-title">
+                                        <span class="station-name">@chuyen.LoTrinh.TramDiNavigation.TenTram</span>
+                                        <i class="bi bi-arrow-right-short"></i>
+                                        <span class="station-name">@chuyen.LoTrinh.TramToiNavigation.TenTram</span>
+                                    </h5>
+                                    <p class="card-text text-muted mt-3">
+                                        <strong>Ngày đi:</strong> @chuyen.NgayDi.ToString("dd/MM/yyyy") <br />
+                                        <strong>Giờ đi:</strong> @chuyen.GioDi.ToString(@"hh\:mm") <br />
+                                        <strong>Giờ đến:</strong> @chuyen.GioDenDuKien.ToString(@"hh\:mm") <br />
+                                        <strong>Xe:</strong> @chuyen.Xe.BienSoXe <br />
+                                        <strong>Trạng thái:</strong> @chuyen.TrangThai
+                                    </p>
+                                </div>
+                                <div class="card-footer-action">
+                                    <a asp-action="ChonGhe" asp-controller="Booking" asp-route-chuyenId="@chuyen.ChuyenId" class="btn btn-chon-chuyen">Chọn chuyến</a>
                                 </div>
                             </div>
                         </div>
-                    }
-                </div>
+                    </div>
+                }
             </div>
         }
-
-        <!-- Hiển thị danh sách chuyến xe đầy đủ (fallback nếu không có RoutesByDeparture) -->
-        <div id="DanhSachChuyenXe" class="mt-5" style="@(ViewBag.RoutesByDeparture != null && ((List<AdminDashboard.Models.ViewModels.TuyenXeViewModel>)ViewBag.RoutesByDeparture).Any() ? "display: none;" : "")">
-            @if (Model != null && Model.Any())
-            {
-                <div class="row">
-                    @foreach (var chuyen in Model)
-                    {
-                        <div class="col-md-4 mb-4">
-                            <div class="card h-100 trip-result-card">
-                                @{
-                                    var imageUrl = chuyen.Images?.FirstOrDefault()?.ImageUrl ?? "/images/default-bus-image.png";
-                                }
-                                <img src="@imageUrl" class="card-img-top" alt="Ảnh chuyến xe" style="height: 200px; object-fit: cover;">
-                                <div class="card-body">
-                                    <div class="card-content-wrapper">
-                                        <h5 class="card-title">
-                                            <span class="station-name">@chuyen.LoTrinh.TramDiNavigation.TenTram</span>
-                                            <i class="bi bi-arrow-right-short"></i>
-                                            <span class="station-name">@chuyen.LoTrinh.TramToiNavigation.TenTram</span>
-                                        </h5>
-                                        <p class="card-text text-muted mt-3">
-                                            <strong>Ngày đi:</strong> @chuyen.NgayDi.ToString("dd/MM/yyyy") <br />
-                                            <strong>Giờ đi:</strong> @chuyen.GioDi.ToString(@"hh\:mm") <br />
-                                            <strong>Giờ đến:</strong> @chuyen.GioDenDuKien.ToString(@"hh\:mm") <br />
-                                            <strong>Xe:</strong> @chuyen.Xe.BienSoXe <br />
-                                            <strong>Trạng thái:</strong> @chuyen.TrangThai
-                                        </p>
-                                    </div>
-                                    <div class="card-footer-action">
-                                        <a asp-action="ChonGhe"
-                                           asp-controller="Booking"
-                                           asp-route-chuyenId="@chuyen.ChuyenId"
-                                           class="btn btn-chon-chuyen">
-                                            Chọn chuyến
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
-            }
-            else if (Model != null)
-            {
-                <div class="alert alert-info text-center mt-4">
-                    Không tìm thấy chuyến xe nào phù hợp.
-                </div>
-            }
-        </div>
+        else if (Model != null)
+        {
+            <div class="alert alert-info text-center mt-4">Không tìm thấy chuyến xe nào phù hợp.</div>
+        }
     </div>
+</div>
 
-    <div class="container mt-5 background">
-        <h2 class="text-center mb-4">ĐIỂM NỔI BẬT</h2>
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            <div class="col">
-                <div class="card card-custom">
-                    <img src="https://st.redbus.in/Images/rdc/36million.svg" class="card-img-top" alt="Khách hàng">
-                    <div class="card-body">
-                        <h5 class="card-title">100+ triệu</h5>
-                        <p class="card-text">Khách hàng hài lòng trên toàn cầu</p>
-                    </div>
-                </div>
+<div class="container mt-5 background">
+    <h2 class="text-center mb-4">ĐIỂM NỔI BẬT</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <div class="col">
+            <div class="card card-custom">
+                <img src="https://st.redbus.in/Images/rdc/36million.svg" class="card-img-top" alt="Khách hàng">
+                <div class="card-body"><h5 class="card-title">100+ triệu</h5><p class="card-text">Khách hàng hài lòng trên toàn cầu</p></div>
             </div>
-            <div class="col">
-                <div class="card card-custom">
-                    <img src="https://st.redbus.in/Images/rdc/3500worldwide.svg" class="card-img-top" alt="Bus">
-                    <div class="card-body">
-                        <h5 class="card-title">Hơn 9.000</h5>
-                        <p class="card-text">Các nhà xe tin cậy chương trình của chúng tôi</p>
-                    </div>
-                </div>
+        </div>
+        <div class="col">
+            <div class="card card-custom">
+                <img src="https://st.redbus.in/Images/rdc/3500worldwide.svg" class="card-img-top" alt="Bus">
+                <div class="card-body"><h5 class="card-title">Hơn 9.000</h5><p class="card-text">Các nhà xe tin cậy chương trình của chúng tôi</p></div>
             </div>
-            <div class="col">
-                <div class="card card-custom">
-                    <img src="https://st.redbus.in/Images/rdc/100000-booked-perday.svg" class="card-img-top" alt="Đặt vé">
-                    <div class="card-body">
-                        <h5 class="card-title">Hơn 2.000.000</h5>
-                        <p class="card-text">Vé được đặt mỗi ngày</p>
-                    </div>
-                </div>
+        </div>
+        <div class="col">
+            <div class="card card-custom">
+                <img src="https://st.redbus.in/Images/rdc/100000-booked-perday.svg" class="card-img-top" alt="Đặt vé">
+                <div class="card-body"><h5 class="card-title">Hơn 2.000.000</h5><p class="card-text">Vé được đặt mỗi ngày</p></div>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="container py-5 background">
-        <div class="text-center mb-5">
-            <h2 class="section-title">GOSIX – ĐI NHANH SỐNG TRỌN</h2>
-            <p class="text-muted">Được khách hàng tin tưởng và lựa chọn</p>
+<div class="container py-5 background">
+    <div class="text-center mb-5">
+        <h2 class="section-title">GOSIX – ĐI NHANH SỐNG TRỌN</h2>
+        <p class="text-muted">Được khách hàng tin tưởng và lựa chọn</p>
+    </div>
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <div class="info-item"><div class="info-icon"><img src="https://cdn.futabus.vn/futa-busline-cms-dev/Group_662c4422ba/Group_662c4422ba.svg" alt="Icon" class="img-fluid" style="width:40px;"></div><div class="info-text"><h4>Hơn 40 Triệu <span class="fw-normal">Lượt khách</span></h4><p>GOSIX phục vụ hơn 40 triệu lượt khách bình quân 1 năm trên toàn quốc</p></div></div>
+            <div class="info-item"><div class="info-icon"><img src="https://cdn.futabus.vn/futa-busline-cms-dev/Store_55c0da8bd7/Store_55c0da8bd7.svg" alt="Icon" class="img-fluid" style="width:40px;"></div><div class="info-text"><h4>Hơn 350 <span class="fw-normal">Phòng vé – Bưu cục</span></h4><p>GOSIX có hơn 350 phòng vé, trạm trung chuyển, bến xe,... trên toàn hệ thống</p></div></div>
+            <div class="info-item"><div class="info-icon"><img src="https://cdn.futabus.vn/futa-busline-cms-dev/Group_2_75b5ed1dfd/Group_2_75b5ed1dfd.svg" alt="Icon" class="img-fluid" style="width:40px;"></div><div class="info-text"><h4>Hơn 6,500 <span class="fw-normal">Chuyến xe</span></h4><p>GOSIX phục vụ hơn 6,500 chuyến xe đường dài và liên tỉnh mỗi ngày</p></div></div>
         </div>
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <div class="info-item">
-                    <div class="info-icon">
-                        <img src="https://cdn.futabus.vn/futa-busline-cms-dev/Group_662c4422ba/Group_662c4422ba.svg" alt="Icon" class="img-fluid" style="width:40px;">
-                    </div>
-                    <div class="info-text">
-                        <h4>Hơn 40 Triệu <span class="fw-normal">Lượt khách</span></h4>
-                        <p>GOSIX phục vụ hơn 40 triệu lượt khách bình quân 1 năm trên toàn quốc</p>
-                    </div>
-                </div>
-                <div class="info-item">
-                    <div class="info-icon">
-                        <img src="https://cdn.futabus.vn/futa-busline-cms-dev/Store_55c0da8bd7/Store_55c0da8bd7.svg" alt="Icon" class="img-fluid" style="width:40px;">
-                    </div>
-                    <div class="info-text">
-                        <h4>Hơn 350 <span class="fw-normal">Phòng vé – Bưu cục</span></h4>
-                        <p>GOSIX có hơn 350 phòng vé, trạm trung chuyển, bến xe,... trên toàn hệ thống</p>
-                    </div>
-                </div>
-                <div class="info-item">
-                    <div class="info-icon">
-                        <img src="https://cdn.futabus.vn/futa-busline-cms-dev/Group_2_75b5ed1dfd/Group_2_75b5ed1dfd.svg" alt="Icon" class="img-fluid" style="width:40px;">
-                    </div>
-                    <div class="info-text">
-                        <h4>Hơn 6,500 <span class="fw-normal">Chuyến xe</span></h4>
-                        <p>GOSIX phục vụ hơn 6,500 chuyến xe đường dài và liên tỉnh mỗi ngày</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 text-center">
-                <img src="https://cdn.futabus.vn/futa-busline-cms-dev/image_f922bef1bb/image_f922bef1bb.svg"
-                     alt="Minh họa" class="img-fluid" style="max-width: 90%;">
-            </div>
+        <div class="col-md-6 text-center">
+            <img src="https://cdn.futabus.vn/futa-busline-cms-dev/image_f922bef1bb/image_f922bef1bb.svg" alt="Minh họa" class="img-fluid" style="max-width: 90%;">
         </div>
     </div>
+</div>
+
+@section Scripts {
     <script>
+        (function () {
+            const input = document.getElementById('ngayDiInput');
+            if (!input) return;
+            const today = new Date();
+            input.value = today.toISOString().split('T')[0];
+            input.min = today.toISOString().split('T')[0];
+            const maxDate = new Date();
+            maxDate.setDate(today.getDate() + 60);
+            input.max = maxDate.toISOString().split('T')[0];
+        })();
+
         window.onscroll = function () {
             const scrollBtn = document.getElementById("scrollTopBtn");
             if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
@@ -633,23 +559,19 @@
         document.getElementById("scrollTopBtn").addEventListener("click", function () {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
-    </script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <script>
         $(function () {
             $('#formTimChuyen').on('submit', function (e) {
                 $('#DanhSachChuyenXe').html(`
-                        <div class="loading-spinner">
-                            <svg class="pl" width="110" height="110" viewBox="0 0 128 128">
-                                <circle class="pl__ring2" cx="64" cy="64" r="52.5" fill="none" stroke="hsl(13,90%,55%)" stroke-width="12" transform="rotate(-90,64,64)" stroke-linecap="round" stroke-dasharray="329.9 329.9" stroke-dashoffset="-329.3"></circle>
-                                <circle class="pl__ring4" cx="64" cy="64" r="37.5" fill="none" stroke="hsl(33,90%,55%)" stroke-width="9" transform="rotate(-90,64,64)" stroke-linecap="round" stroke-dasharray="254.5 254.5" stroke-dashoffset="-254"></circle>
-                                <circle class="pl__ring6" cx="64" cy="64" r="22.5" fill="none" stroke="hsl(53,90%,55%)" stroke-width="9" transform="rotate(-90,64,64)" stroke-linecap="round" stroke-dasharray="204.2 204.2" stroke-dashoffset="-203.9"></circle>
-                            </svg>
-                        </div>
-                    `);
+                            <div class="loading-spinner">
+                                <svg class="pl" width="110" height="110" viewBox="0 0 128 128">
+                                    <circle class="pl__ring2" cx="64" cy="64" r="52.5" fill="none" stroke="hsl(13,90%,55%)" stroke-width="12" transform="rotate(-90,64,64)" stroke-linecap="round" stroke-dasharray="329.9 329.9" stroke-dashoffset="-329.3"></circle>
+                                    <circle class="pl__ring4" cx="64" cy="64" r="37.5" fill="none" stroke="hsl(33,90%,55%)" stroke-width="9" transform="rotate(-90,64,64)" stroke-linecap="round" stroke-dasharray="254.5 254.5" stroke-dashoffset="-254"></circle>
+                                    <circle class="pl__ring6" cx="64" cy="64" r="22.5" fill="none" stroke="hsl(53,90%,55%)" stroke-width="9" transform="rotate(-90,64,64)" stroke-linecap="round" stroke-dasharray="204.2 204.2" stroke-dashoffset="-203.9"></circle>
+                                </svg>
+                            </div>
+                        `);
             });
         });
     </script>
-
-</body>
+}

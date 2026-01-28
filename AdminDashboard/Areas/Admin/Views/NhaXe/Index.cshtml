@@ -1,0 +1,70 @@
+﻿@model IEnumerable<AdminDashboard.Models.NhaXe>
+
+@{
+    ViewData["Title"] = "Quản lý Đối tác Nhà xe";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Danh sách Nhà Xe</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin/Home">Dashboard</a></li>
+        <li class="breadcrumb-item active">Nhà Xe</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Danh sách đối tác
+            <a asp-action="Create" class="btn btn-primary btn-sm float-end">
+                <i class="fas fa-plus"></i> Thêm Nhà Xe Mới
+            </a>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Tên Nhà Xe</th>
+                        <th>Hotline</th>
+                        <th>Địa chỉ</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="fw-bold text-primary">@item.TenNhaXe</td>
+                                <td>@item.SoDienThoai</td>
+                                <td>@item.DiaChi</td>
+                                <td>
+                                    @if (item.TrangThai == 1)
+                                    {
+                                        <span class="badge bg-success">Hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">Chờ duyệt / Khóa</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-info text-white">Chi tiết</a>
+                                    <a href="#" class="btn btn-sm btn-danger">Khóa</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Chưa có nhà xe nào. Hãy tạo mới!</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

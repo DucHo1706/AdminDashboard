@@ -1,0 +1,48 @@
+﻿@model AdminDashboard.Models.NguoiDung
+
+@{
+    ViewData["Title"] = "Thêm Tài Xế Mới";
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Tuyển dụng Tài xế</h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Họ và Tên</label>
+                    <input asp-for="HoTen" class="form-control" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Ngày sinh</label>
+                    <input asp-for="NgaySinh" type="date" class="form-control" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Số điện thoại</label>
+                    <input asp-for="SoDienThoai" class="form-control" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Email đăng nhập</label>
+                    <input asp-for="Email" type="email" class="form-control" required />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Mật khẩu cấp lần đầu</label>
+                <input asp-for="MatKhau" type="text" class="form-control" value="123456" required />
+            </div>
+
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-save"></i> Lưu hồ sơ
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+        </form>
+    </div>
+</div>

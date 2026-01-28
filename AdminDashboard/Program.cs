@@ -7,7 +7,6 @@ using CloudinaryDotNet;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ===================== ĐĂNG KÝ DATABASE =====================
 builder.Services.AddDbContext<Db27524Context>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -28,14 +27,15 @@ builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
 builder.Services.AddServerSideBlazor();
 
-// ===================== ĐĂNG KÝ SERVICE =====================
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IVnpayService, VnpayService>();
-builder.Services.AddScoped<IPaginationService, PaginationService>();
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<AdminDashboard.Services.IChuyenXeService, AdminDashboard.Services.ChuyenXeService>();
+builder.Services.AddScoped<AdminDashboard.Services.INhanVienService, AdminDashboard.Services.NhanVienService>();
+builder.Services.AddScoped<AdminDashboard.Services.IBanVeService, AdminDashboard.Services.BanVeService>();
 
-// ===================== CLOUDINARY / LOCAL IMAGE SERVICE =====================
+
 var cloudinaryConfig = builder.Configuration.GetSection("Cloudinary");
 var cloudName = cloudinaryConfig["CloudName"];
 var apiKey = cloudinaryConfig["ApiKey"];
@@ -49,15 +49,14 @@ if (!string.IsNullOrEmpty(cloudName) &&
     var cloudinary = new Cloudinary(account);
     builder.Services.AddSingleton(cloudinary);
     builder.Services.AddScoped<IImageService, CloudinaryImageService>();
-    Console.WriteLine($"✅ Đã đăng ký Cloudinary service: {cloudName}");
+ 
 }
 else
 {
     builder.Services.AddScoped<IImageService, LocalImageService>();
-    Console.WriteLine("⚠️ Đang dùng LocalImageService - chỉ nên dùng cho development");
+    
 }
 
-// ===================== COOKIE AUTHENTICATION =====================
 builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", options =>
     {
@@ -122,10 +121,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home_User}/{action=Home_User}/{id?}"
 );
 
-app.MapControllerRoute(
-    name: "chat_user",
-    pattern: "{controller=ChatUser}/{action=Index}/{id?}"
-);
 
 
 app.Run();

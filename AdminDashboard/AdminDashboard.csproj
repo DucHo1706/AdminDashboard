@@ -22,6 +22,7 @@
     <PackageReference Include="X.PagedList.Mvc.Core" Version="10.5.9" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Areas\NhaXe\Pages\" />
     <Folder Include="Views\KhachHang\" />
     <Folder Include="wwwroot\css\Images\" />
   </ItemGroup>

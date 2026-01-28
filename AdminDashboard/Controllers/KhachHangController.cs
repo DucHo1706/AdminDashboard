@@ -10,7 +10,7 @@ namespace AdminDashboard.Controllers
     public class KhachHangController : Controller
     {
         private readonly Db27524Context _context;
-        private const string KHACH_HANG_ROLE = "KhachHang"; // Định nghĩa hằng số cho tên vai trò
+        private const string KHACH_HANG_ROLE = "KhachHang"; 
 
         public KhachHangController(Db27524Context context)
         {
@@ -27,19 +27,18 @@ namespace AdminDashboard.Controllers
                 .FirstOrDefaultAsync();
 
             if (khachHangRoleId == null)
-            {
-                // Xử lý trường hợp không tìm thấy vai trò "KhachHang" trong DB
+            {             
                 ViewBag.ErrorMessage = "Không tìm thấy vai trò Khách Hàng trong hệ thống.";
-                return View(new List<NguoiDung>()); // Trả về danh sách rỗng
+                return View(new List<NguoiDung>()); 
             }
 
             // Lấy danh sách người dùng có vai trò là "KhachHang"
             var khachHangs = await _context.UserRole
                 .Where(ur => ur.RoleId == khachHangRoleId)
-                .Join(_context.NguoiDung, // Join với bảng NguoiDung
+                .Join(_context.NguoiDung, 
                       userRole => userRole.UserId,
                       nguoiDung => nguoiDung.UserId,
-                      (userRole, nguoiDung) => nguoiDung) // Chỉ lấy thông tin từ NguoiDung
+                      (userRole, nguoiDung) => nguoiDung) 
                 .ToListAsync();
 
             return View(khachHangs);

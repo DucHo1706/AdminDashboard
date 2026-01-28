@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace AdminDashboard.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     public class TramController : Controller
     {
         private readonly Db27524Context _context;
