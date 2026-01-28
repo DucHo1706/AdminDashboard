@@ -77,6 +77,9 @@
                                         <th class="ps-4">Giờ</th>
                                         <th>Lộ Trình</th>
                                         <th>Xe & Ảnh</th>
+
+                                        <th>Tài xế (Phân công)</th>
+
                                         <th>Trạng Thái</th>
                                         <th class="text-end pe-4">Thao tác</th>
                                     </tr>
@@ -108,12 +111,39 @@
                                                     <span class="badge bg-light text-dark border">@item.Xe?.BienSoXe</span>
                                                 </div>
                                             </td>
+
+                                            <td>
+                                                @if (string.IsNullOrEmpty(item.TaiXeId))
+                                                {
+                                                    <a asp-action="PhanCong" asp-route-id="@item.ChuyenId"
+                                                       class="btn btn-sm btn-outline-warning fw-bold text-dark shadow-sm"
+                                                       title="Bấm để chọn tài xế">
+                                                        <i class="bi bi-person-plus-fill me-1"></i> Phân công
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <div class="d-flex flex-column align-items-start">
+                                                        <span class="fw-bold text-primary small">
+                                                            <i class="bi bi-person-badge me-1"></i>@item.TaiXe?.HoTen
+                                                        </span>
+                                                        <small class="text-muted" style="font-size: 0.75em;">
+                                                            <i class="bi bi-telephone me-1"></i>@item.TaiXe?.SoDienThoai
+                                                        </small>
+
+                                                        <a asp-action="PhanCong" asp-route-id="@item.ChuyenId"
+                                                           class="text-secondary small text-decoration-none mt-1" title="Đổi tài xế khác">
+                                                            <i class="bi bi-pencil-square"></i> Đổi tài xế
+                                                        </a>
+                                                    </div>
+                                                }
+                                            </td>
                                             <td>
                                                 <span class="badge @(item.TrangThai == TrangThaiChuyenXe.DaHoanThanh ? "bg-secondary" :
-                                                                   item.TrangThai == TrangThaiChuyenXe.DangMoBanVe ? "bg-success" :
-                                                                   item.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh ? "bg-info text-dark" :
-                                                                   item.TrangThai == TrangThaiChuyenXe.DaHuy ? "bg-danger" :
-                                                                   "bg-warning text-dark")">
+                                                                    item.TrangThai == TrangThaiChuyenXe.DangMoBanVe ? "bg-success" :
+                                                                    item.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh ? "bg-info text-dark" :
+                                                                    item.TrangThai == TrangThaiChuyenXe.DaHuy ? "bg-danger" :
+                                                                    "bg-warning text-dark")">
                                                     @item.TrangThai.GetDisplayName()
                                                 </span>
                                             </td>

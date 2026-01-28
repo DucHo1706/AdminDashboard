@@ -1,0 +1,272 @@
+﻿@model AdminDashboard.Models.ChuyenXe
+@{
+    ViewData["Title"] = "Bán Vé - " + Model.Xe.BienSoXe;
+    var veDaBan = ViewBag.VeDaBan as IEnumerable<dynamic>;
+    int tongSoGhe = ViewBag.TongSoGhe ?? 40;
+}
+
+<style>
+    .seat-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); /* Xe 4 hàng ghế */
+        gap: 12px;
+        max-width: 380px;
+        margin: 0 auto;
+    }
+    .seat {
+        height: 55px;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        cursor: pointer;
+        position: relative;
+        background: white;
+        transition: all 0.2s;
+    }
+    .seat:hover { border-color: #0d6efd; background: #e3f2fd; transform: translateY(-2px); }
+
+    /* Trạng thái ghế */
+    .seat.sold {
+        background-color: #dc3545;
+        color: white;
+        border-color: #dc3545;
+        cursor: not-allowed;
+        pointer-events: none; /* Không cho click */
+    }
+
+    .seat.pending {
+        background-color: #ffc107;
+        color: black;
+        border-color: #ffc107;
+    }
+
+    .seat.selected {
+        background-color: #198754;
+        color: white;
+        border-color: #198754;
+        box-shadow: 0 0 10px rgba(25, 135, 84, 0.5);
+    }
+
+    .seat-label { font-size: 14px; }
+    .seat-customer { font-size: 9px; white-space: nowrap; overflow: hidden; max-width: 100%; }
+</style>
+
+<div class="container-fluid px-4 mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="text-primary fw-bold text-uppercase">
+            <i class="fas fa-ticket-alt me-2"></i> Bán Vé Tại Quầy
+        </h4>
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left"></i> Quay lại tìm kiếm</a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-5 col-md-6 mb-4">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h6 class="mb-0 fw-bold">Sơ đồ ghế: <span class="text-primary">@Model.Xe.BienSoXe</span></h6>
+                </div>
+                <div class="card-body bg-light">
+                    <div class="d-flex justify-content-center gap-3 mb-4 text-small">
+                        <div class="d-flex align-items-center"><div class="seat me-2" style="width:20px; height:20px;"></div> Trống</div>
+                        <div class="d-flex align-items-center"><div class="seat sold me-2" style="width:20px; height:20px;"></div> Đã bán</div>
+                        <div class="d-flex align-items-center"><div class="seat selected me-2" style="width:20px; height:20px; background:#198754;"></div> Đang chọn</div>
+                    </div>
+
+                    <div class="seat-grid">
+                        @for (int i = 1; i <= tongSoGhe; i++)
+                        {
+                            // --- SỬA LẠI: Bỏ chữ "A", chỉ giữ số 2 chữ số (01, 02...) ---
+                            string soGhe = i.ToString("D2");
+                            // -----------------------------------------------------------
+
+                            // Logic cũ giữ nguyên, giờ nó sẽ so khớp đúng với ghế "01" trong DB của bạn
+                            var ve = veDaBan?.FirstOrDefault(v => v.SoGhe == soGhe);
+
+                            string statusClass = "";
+                            string tenKhach = "";
+
+                            if (ve != null)
+                            {
+                                statusClass = "sold";
+                                tenKhach = ve.TenKhach;
+                            }
+
+                            <div class="seat @statusClass" onclick="selectSeat(this, '@soGhe')" id="seat-@soGhe">
+                                <span class="seat-label">@soGhe</span>
+                                @if (!string.IsNullOrEmpty(tenKhach))
+                                {
+                                    <span class="seat-customer">@tenKhach</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7 col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-user-edit me-2"></i> Thông Tin Vé</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info d-flex align-items-center shadow-sm">
+                        <i class="fas fa-bus fa-2x me-3"></i>
+                        <div>
+                            <div class="fw-bold">@Model.LoTrinh.TramDiNavigation.TenTram <i class="fas fa-arrow-right mx-1"></i> @Model.LoTrinh.TramToiNavigation.TenTram</div>
+                            <div class="small">Xuất bến: <strong>@Model.GioDi</strong> - Ngày: <strong>@Model.NgayDi.ToString("dd/MM/yyyy")</strong></div>
+                        </div>
+                    </div>
+
+                    <form id="formBanVe">
+                        <input type="hidden" id="ChuyenId" value="@Model.ChuyenId" />
+
+                        <div class="mb-4 text-center">
+                            <label class="text-muted small text-uppercase fw-bold">Ghế Đang Chọn</label>
+                            <input type="text" id="SoGhe" class="form-control form-control-lg fw-bold fs-2 text-center text-success border-0 bg-transparent" readonly placeholder="---" />
+                            <div id="msg-error" class="text-danger small fw-bold"></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Họ tên khách hàng <span class="text-danger">*</span></label>
+                                <input type="text" id="HoTen" class="form-control" placeholder="Nhập tên khách..." />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Số điện thoại</label>
+                                <input type="text" id="SoDienThoai" class="form-control" placeholder="09xxxx..." />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ghi chú</label>
+                            <input type="text" id="GhiChu" class="form-control" placeholder="VD: Đón ngã tư, khách quen..." />
+                        </div>
+
+                        <hr />
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <label class="fw-bold">Giá vé niêm yết:</label>
+                            <div class="input-group" style="width: 200px;">
+                                <input type="number" id="GiaVe" class="form-control text-end fw-bold" value="@(Model.LoTrinh.GiaVeCoDinh ?? 200000)" />
+                                <span class="input-group-text">VND</span>
+                            </div>
+                        </div>
+
+                        <div class="form-check form-switch mb-4 p-3 bg-light rounded border">
+                            <input class="form-check-input" type="checkbox" id="DaThanhToan" checked style="width: 50px; height: 25px;">
+                            <label class="form-check-label fw-bold ms-3 pt-1" for="DaThanhToan">
+                                KHÁCH ĐÃ THANH TOÁN TIỀN MẶT
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="button" onclick="submitBanVe()" class="btn btn-success btn-lg fw-bold text-uppercase shadow-sm">
+                                <i class="fas fa-print me-2"></i> Xác Nhận & Xuất Vé
+                            </button>
+
+                            <button type="button" onclick="cancelTicket()" id="btnHuyVe" class="btn btn-danger d-none">
+                                <i class="fas fa-trash me-2"></i> Hủy Vé Này
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Hàm chọn ghế
+        function selectSeat(element, soGhe) {
+            // Nếu ghế đã bán (có class sold), ta có thể hiện popup hỏi muốn hủy không (tùy nghiệp vụ)
+            if (element.classList.contains('sold')) {
+                // Logic mở rộng: Cho phép hủy vé
+                if(confirm("Ghế " + soGhe + " đã bán. Bạn có muốn HỦY vé này không?")) {
+                    huyVe(soGhe);
+                }
+                return;
+            }
+
+            // Xóa class 'selected' ở các ghế khác (chỉ cho chọn 1 ghế 1 lần để tránh rối)
+            document.querySelectorAll('.seat.selected').forEach(el => el.classList.remove('selected'));
+
+            // Thêm class 'selected' cho ghế vừa bấm
+            element.classList.add('selected');
+
+            // Cập nhật vào ô input
+            document.getElementById('SoGhe').value = soGhe;
+            document.getElementById('msg-error').innerText = "";
+        }
+
+        // Hàm gọi API Bán vé
+        function submitBanVe() {
+            var soGhe = document.getElementById('SoGhe').value;
+            if (!soGhe || soGhe === "---") {
+                alert("Vui lòng chọn một ghế trống trên sơ đồ!");
+                return;
+            }
+
+            var hoTen = document.getElementById('HoTen').value;
+            if (!hoTen) {
+                alert("Vui lòng nhập tên khách hàng!");
+                document.getElementById('HoTen').focus();
+                return;
+            }
+
+            // Chuẩn bị dữ liệu gửi đi
+            var data = {
+                ChuyenId: document.getElementById('ChuyenId').value,
+                SoGhe: soGhe,
+                HoTen: hoTen,
+                SoDienThoai: document.getElementById('SoDienThoai').value,
+                GhiChu: document.getElementById('GhiChu').value,
+                GiaVe: parseFloat(document.getElementById('GiaVe').value),
+                DaThanhToan: document.getElementById('DaThanhToan').checked
+            };
+
+            // Gửi Ajax
+            fetch('/NhaXe/BanVe/XacNhanBanVe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    alert(res.message);
+                    location.reload(); // Tải lại trang để cập nhật màu ghế đỏ
+                } else {
+                    alert("LỖI: " + res.message);
+                }
+            })
+            .catch(err => {
+                alert("Lỗi kết nối máy chủ!");
+                console.error(err);
+            });
+        }
+
+        // Hàm hủy vé
+        function huyVe(soGhe) {
+            var chuyenId = document.getElementById('ChuyenId').value;
+
+            fetch('/NhaXe/BanVe/HuyVe?chuyenId=' + chuyenId + '&soGhe=' + soGhe, {
+                method: 'POST'
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    alert("Đã hủy vé ghế " + soGhe);
+                    location.reload();
+                } else {
+                    alert("Không thể hủy: " + res.message);
+                }
+            });
+        }
+    </script>
+}

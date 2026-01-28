@@ -7,7 +7,6 @@ using CloudinaryDotNet;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ===================== ĐĂNG KÝ DATABASE =====================
 builder.Services.AddDbContext<Db27524Context>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -28,15 +27,15 @@ builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
 builder.Services.AddServerSideBlazor();
 
-// ===================== ĐĂNG KÝ SERVICE =====================
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IVnpayService, VnpayService>();
-builder.Services.AddScoped<IPaginationService, PaginationService>();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<AdminDashboard.Services.IChuyenXeService, AdminDashboard.Services.ChuyenXeService>();
 builder.Services.AddScoped<AdminDashboard.Services.INhanVienService, AdminDashboard.Services.NhanVienService>();
-// ===================== CLOUDINARY / LOCAL IMAGE SERVICE =====================
+builder.Services.AddScoped<AdminDashboard.Services.IBanVeService, AdminDashboard.Services.BanVeService>();
+
+
 var cloudinaryConfig = builder.Configuration.GetSection("Cloudinary");
 var cloudName = cloudinaryConfig["CloudName"];
 var apiKey = cloudinaryConfig["ApiKey"];
@@ -58,7 +57,6 @@ else
     
 }
 
-// ===================== COOKIE AUTHENTICATION =====================
 builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", options =>
     {

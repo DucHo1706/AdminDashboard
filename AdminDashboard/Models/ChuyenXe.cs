@@ -1,6 +1,6 @@
 ﻿using AdminDashboard.Models.TrangThai;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema; // Cần thư viện này
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AdminDashboard.Models
 {
@@ -10,41 +10,42 @@ namespace AdminDashboard.Models
         [StringLength(255)]
         public string ChuyenId { get; set; }
 
-        // ... (Các trường LoTrinhId, XeId giữ nguyên) ...
         [Required, StringLength(255)]
         public string LoTrinhId { get; set; }
 
         [Required, StringLength(255)]
         public string XeId { get; set; }
 
+        // --- CỘT TÀI XẾ ---
         [StringLength(255)]
-        public string? TaiXeId { get; set; }
-
-        // --- SỬA ĐOẠN NÀY ---
-        [Required]
-        public DateTime NgayDi { get; set; } // Ngày riêng
+        public string? TaiXeId { get; set; } // Vẫn giữ là string? (cho phép null)
 
         [Required]
-        [Column(TypeName = "time")] // 
+        public DateTime NgayDi { get; set; }
+
+        [Required]
+        [Column(TypeName = "time")]
         public TimeSpan GioDi { get; set; }
 
         [Required]
-        [Column(TypeName = "time")] // <--- THÊM DÒNG NÀY
+        [Column(TypeName = "time")]
         public TimeSpan GioDenDuKien { get; set; }
-        // --------------------
 
         [Required]
         public TrangThaiChuyenXe TrangThai { get; set; }
 
-        // ... (Các Navigation properties giữ nguyên) ...
+        // --- NAVIGATION PROPERTIES ---
         [ForeignKey(nameof(LoTrinhId))]
         public virtual LoTrinh LoTrinh { get; set; }
 
         [ForeignKey(nameof(XeId))]
         public virtual Xe Xe { get; set; }
 
+        // --- SỬA ĐOẠN NÀY ---
+        // Đổi từ NguoiDung -> NhanVien
         [ForeignKey(nameof(TaiXeId))]
-        public virtual NguoiDung TaiXe { get; set; }
+        public virtual NhanVien? TaiXe { get; set; }
+        // --------------------
 
         public virtual ICollection<ChuyenXeImage> Images { get; set; } = new List<ChuyenXeImage>();
     }

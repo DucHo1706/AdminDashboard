@@ -107,7 +107,7 @@
                     </h5>
                     <div class="seat-map-container">
                         <div class="bus-layout">
-                            @foreach (var ghe in (Model.Xe?.DanhSachGhe ?? Enumerable.Empty<AdminDashboard.Models.Ghe>()).OrderBy(g => int.Parse(g.SoGhe)))
+                            @foreach (var ghe in (Model.Xe?.DanhSachGhe ?? Enumerable.Empty<AdminDashboard.Models.Ghe>()).OrderBy(g => g.SoGhe))
                             {
                                 bool daDat = danhSachGheDaDat.Contains(ghe.GheID);
                                 if (daDat)

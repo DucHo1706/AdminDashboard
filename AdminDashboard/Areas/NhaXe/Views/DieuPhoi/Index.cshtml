@@ -1,0 +1,227 @@
+﻿@model AdminDashboard.Models.ViewModels.LichLamViecViewModel
+
+@{
+    ViewData["Title"] = "Bảng Điều Phối & Lịch Tài Xế";
+}
+
+<style>
+    .sticky-col {
+        position: sticky;
+        left: 0;
+        background-color: #f8f9fa;
+        z-index: 10;
+        border-right: 2px solid #dee2e6;
+        width: 250px;
+        min-width: 250px;
+    }
+
+    .trip-card {
+        background-color: #e3f2fd; 
+        border-left: 4px solid #0d6efd;
+        padding: 5px 8px;
+        margin-bottom: 5px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+        .trip-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            background-color: #bbdefb;
+        }
+
+    .trip-time {
+        font-weight: 700;
+        color: #0d6efd;
+        display: block;
+    }
+
+    .trip-route {
+        font-weight: 600;
+        color: #333;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .trip-plate {
+        font-size: 0.75rem;
+        color: #666;
+    }
+
+    .table-schedule th, .table-schedule td {
+        vertical-align: top;
+        min-width: 140px;
+    }
+
+    .today-column {
+        background-color: #fff3cd !important;
+    }
+
+    .waiting-trip-card {
+        background-color: #fff;
+        border: 1px solid #ffc107;
+        border-left: 4px solid #dc3545;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: all 0.2s;
+        min-width: 280px;
+        max-width: 320px;
+    }
+
+        .waiting-trip-card:hover {
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+</style>
+
+<div class="container-fluid px-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 mb-3">
+        <h3 class="fw-bold text-primary text-uppercase mb-2 mb-md-0">
+            <i class="fas fa-th me-2"></i> Bảng Lịch Chạy
+        </h3>
+
+        <div class="bg-white p-2 rounded shadow-sm border d-flex align-items-center">
+            <a href="?date=@Model.StartDate.AddDays(-7).ToString("yyyy-MM-dd")" class="btn btn-outline-secondary btn-sm me-3">
+                <i class="fas fa-chevron-left"></i> Tuần trước
+            </a>
+
+            <span class="fw-bold fs-5 text-dark">
+                @Model.StartDate.ToString("dd/MM") <span class="text-muted mx-1">-</span> @Model.EndDate.ToString("dd/MM/yyyy")
+            </span>
+
+            <a href="?date=@Model.StartDate.AddDays(7).ToString("yyyy-MM-dd")" class="btn btn-outline-secondary btn-sm ms-3">
+                Tuần sau <i class="fas fa-chevron-right"></i>
+            </a>
+
+            <a href="?date=@DateTime.Today.ToString("yyyy-MM-dd")" class="btn btn-primary btn-sm ms-3 fw-bold">
+                Hôm nay
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-4 border-warning border-2 shadow-sm bg-warning bg-opacity-10">
+        <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center py-2">
+            <span class="text-dark fw-bold text-uppercase">
+                <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                Danh sách chưa có tài xế (@(Model.UnassignedTrips?.Count ?? 0))
+            </span>
+        </div>
+        <div class="card-body p-2 pt-0">
+            @if (Model.UnassignedTrips != null && Model.UnassignedTrips.Any())
+            {
+                <div class="d-flex flex-wrap gap-2">
+                    @foreach (var trip in Model.UnassignedTrips)
+                    {
+                        <div class="waiting-trip-card rounded p-2 d-flex align-items-center justify-content-between">
+                            <div class="me-3">
+                                <div class="fw-bold text-danger"><i class="far fa-clock"></i> @trip.GioDi</div>
+                                <div class="small fw-bold text-dark">@trip.Tuyen</div>
+                                <div class="small text-muted"><i class="fas fa-bus me-1"></i> @trip.BienSoXe</div>
+                            </div>
+
+                            <a href="/NhaXe/DieuPhoi/PhanCong/@trip.ChuyenId" class="btn btn-sm btn-primary fw-bold shadow-sm text-nowrap">
+                                <i class="fas fa-user-plus"></i> Chọn TX
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-success mb-0 py-2 border-0 bg-white bg-opacity-75">
+                    <i class="fas fa-check-circle me-2"></i> Tuyệt vời! Tất cả chuyến xe trong tuần này đã được phân công.
+                </div>
+            }
+        </div>
+    </div>
+    <div class="card shadow border-0 mb-5">
+        <div class="card-body p-0">
+            <div class="table-responsive" style="max-height: 75vh;">
+                <table class="table table-bordered table-schedule mb-0">
+                    <thead class="bg-primary text-white text-center sticky-top" style="z-index: 20;">
+                        <tr>
+                            <th class="sticky-col py-3">TÀI XẾ / NGÀY</th>
+                            @for (var d = Model.StartDate; d <= Model.EndDate; d = d.AddDays(1))
+                            {
+                                var isToday = d.Date == DateTime.Today;
+                                <th class="@(isToday ? "bg-warning text-dark" : "")">
+                                    <div class="text-uppercase small">@d.ToString("dddd")</div>
+                                    <div class="fs-5">@d.ToString("dd/MM")</div>
+                                </th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.TaiXes != null && Model.TaiXes.Any())
+                        {
+                            foreach (var tx in Model.TaiXes)
+                            {
+                                <tr>
+                                    <td class="sticky-col align-middle">
+                                        <div class="d-flex align-items-center p-2">
+                                            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm"
+                                                 style="width: 45px; height: 45px; font-size: 18px; font-weight: bold;">
+                                                @tx.HoTen.Substring(0, 1)
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold text-dark">@tx.HoTen</div>
+                                                <div class="small text-muted"><i class="fas fa-phone-alt me-1"></i> @tx.SoDienThoai</div>
+                                                <div class="mt-1 badge bg-success bg-opacity-10 text-success border border-success">Đang làm việc</div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    @for (var d = Model.StartDate; d <= Model.EndDate; d = d.AddDays(1))
+                                    {
+                                        var dateKey = d.ToString("yyyy-MM-dd");
+                                        var isToday = d.Date == DateTime.Today;
+
+                                        var trips = tx.LichTrinh.ContainsKey(dateKey) ? tx.LichTrinh[dateKey] : null;
+
+                                        <td class="@(isToday ? "today-column" : "") p-2">
+                                            @if (trips != null && trips.Any())
+                                            {
+                                                foreach (var t in trips)
+                                                {
+                                                    <div class="trip-card" title="Click để đổi tài xế"
+                                                         onclick="window.location.href='/NhaXe/DieuPhoi/PhanCong/@t.ChuyenId'">
+                                                        <span class="trip-time">
+                                                            <i class="far fa-clock"></i> @t.GioDi
+                                                        </span>
+                                                        <span class="trip-route">@t.Tuyen</span>
+                                                        <div class="trip-plate">
+                                                            <i class="fas fa-bus me-1"></i> @t.BienSoXe
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <div class="text-center text-muted small py-4 opacity-25">
+                                                    - Trống -
+                                                </div>
+                                            }
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    <i class="fas fa-users-slash fa-2x mb-3"></i>
+                                    <p>Không tìm thấy tài xế nào đang làm việc.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

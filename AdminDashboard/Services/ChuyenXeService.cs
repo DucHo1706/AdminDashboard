@@ -23,11 +23,9 @@ namespace AdminDashboard.Services
         }
 
         // 1. TẠO LỊCH TỰ ĐỘNG
+        // 1. TẠO LỊCH TỰ ĐỘNG (ĐÃ FIX LỖI CHỈ TẠO 1 CHUYẾN/NGÀY)
         public async Task<KetQuaTaoLich> TaoLichTuDongAsync(TaoLichChayRequest req, string nhaXeId)
         {
-            // ... (Giữ nguyên code phần Tạo lịch như bạn đã có ở trên) ...
-            // Code Tạo lịch của bạn đang đúng, tôi copy lại vắn tắt để bạn không bị mất code cũ
-
             var isMyCar = await _context.Xe.AnyAsync(x => x.XeId == req.XeId && x.NhaXeId == nhaXeId);
             if (!isMyCar) return new KetQuaTaoLich { Success = 0, Skipped = 0, Message = "Xe không hợp lệ." };
 
@@ -37,43 +35,48 @@ namespace AdminDashboard.Services
                 using var transaction = await _context.Database.BeginTransactionAsync();
                 try
                 {
+                    // 1. Upload ảnh (nếu có)
                     List<string> uploadedUrls = new List<string>();
                     if (req.Images?.Count > 0) uploadedUrls = await _imageService.UploadImagesAsync(req.Images);
 
                     int countSuccess = 0;
                     int countSkipped = 0;
 
+                    // 2. Lấy tất cả chuyến xe đã có trong khoảng thời gian này để check trùng
                     var existingTrips = await _context.ChuyenXe
                         .Where(c => c.XeId == req.XeId && c.TrangThai != TrangThaiChuyenXe.DaHuy && c.NgayDi >= req.TuNgay && c.NgayDi <= req.DenNgay)
-                        .Select(c => new { c.NgayDi, c.GioDi, c.GioDenDuKien, c.LoTrinhId }).ToListAsync();
+                        .Select(c => new { c.NgayDi, c.GioDi, c.GioDenDuKien }).ToListAsync(); // Bỏ check LoTrinhId để xe không bị trùng giờ chạy dù khác tuyến
 
+                    // Danh sách các khe thời gian bận
                     var busySlots = existingTrips.Select(x => new
                     {
                         Start = x.NgayDi.Date.Add(x.GioDi),
-                        End = x.NgayDi.Date.Add(x.GioDenDuKien).AddDays(x.GioDenDuKien < x.GioDi ? 1 : 0),
-                        LoTrinhId = x.LoTrinhId,
-                        Ngay = x.NgayDi.Date
+                        End = x.NgayDi.Date.Add(x.GioDenDuKien).AddDays(x.GioDenDuKien < x.GioDi ? 1 : 0)
                     }).ToList();
 
                     var currentDate = req.TuNgay;
+
+                    // --- VÒNG LẶP NGÀY ---
                     while (currentDate <= req.DenNgay)
                     {
-                        bool daChayTuyenNayHomNay = busySlots.Any(x => x.Ngay == currentDate && x.LoTrinhId == req.LoTrinhId);
-                        if (daChayTuyenNayHomNay) { currentDate = currentDate.AddDays(1); countSkipped++; continue; }
+                        // BỎ đoạn check "daChayTuyenNayHomNay" để cho phép 1 ngày chạy nhiều chuyến
 
                         var currentTime = req.KhungGioTu;
-                        bool createdTripForToday = false;
 
+                        // --- VÒNG LẶP GIỜ (TẠO NHIỀU CHUYẾN TRONG NGÀY) ---
                         while (currentTime <= req.KhungGioDen)
                         {
-                            if (createdTripForToday) break;
+                            // Tính thời gian bắt đầu và kết thúc của chuyến dự kiến
                             DateTime newTripStart = currentDate.Date.Add(currentTime);
                             DateTime newTripEnd = newTripStart.Add(req.ThoiGianDiChuyen);
                             TimeSpan gioDenDB = newTripEnd.TimeOfDay;
+
+                            // Kiểm tra xem khung giờ này xe có đang bận chạy chuyến khác không
                             bool isConflict = busySlots.Any(slot => newTripStart < slot.End && newTripEnd > slot.Start);
 
                             if (!isConflict)
                             {
+                                // Tạo chuyến mới
                                 var chuyenXe = new ChuyenXe
                                 {
                                     ChuyenId = Guid.NewGuid().ToString("N")[..8],
@@ -85,21 +88,38 @@ namespace AdminDashboard.Services
                                     TrangThai = TrangThaiChuyenXe.ChoDuyet
                                 };
                                 _context.ChuyenXe.Add(chuyenXe);
-                                foreach (var url in uploadedUrls) _context.ChuyenXeImage.Add(new ChuyenXeImage { ChuyenId = chuyenXe.ChuyenId, ImageUrl = url });
 
-                                busySlots.Add(new { Start = newTripStart, End = newTripEnd, LoTrinhId = req.LoTrinhId, Ngay = currentDate });
+                                // Gán ảnh
+                                foreach (var url in uploadedUrls)
+                                    _context.ChuyenXeImage.Add(new ChuyenXeImage { ChuyenId = chuyenXe.ChuyenId, ImageUrl = url });
+
+                                // Cập nhật lại danh sách bận để chuyến sau trong ngày không bị trùng chuyến vừa tạo
+                                busySlots.Add(new { Start = newTripStart, End = newTripEnd });
                                 countSuccess++;
-                                createdTripForToday = true;
                             }
-                            else { currentTime = currentTime.Add(TimeSpan.FromMinutes(req.GianCachPhut)); }
+                            else
+                            {
+                                countSkipped++;
+                            }
+
+                            // QUAN TRỌNG: Luôn tăng thời gian để qua chuyến tiếp theo (VD: 7h -> 9h -> 11h...)
+                            currentTime = currentTime.Add(TimeSpan.FromMinutes(req.GianCachPhut));
                         }
+
                         currentDate = currentDate.AddDays(1);
                     }
+
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
+
                     return new KetQuaTaoLich { Success = countSuccess, Skipped = countSkipped, Message = "Success" };
                 }
-                catch (Exception ex) { await transaction.RollbackAsync(); throw ex; }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    // Log lỗi ra để biết chi tiết nếu cần
+                    throw new Exception("Lỗi tạo lịch: " + ex.Message);
+                }
             });
         }
 
@@ -223,6 +243,71 @@ namespace AdminDashboard.Services
 
             await _context.SaveChangesAsync();
             return chuyenXes.Count; // Trả về số lượng đã duyệt thành công
+        }
+        // --- 5. PHÂN CÔNG TÀI XẾ (Code đã sửa lỗi & thêm check trạng thái) ---
+        public async Task<string> PhanCongTaiXeAsync(string chuyenId, string taiXeId, string nhaXeId)
+        {
+            var cx = await _context.ChuyenXe
+                .Include(c => c.Xe)
+                .FirstOrDefaultAsync(c => c.ChuyenId == chuyenId);
+
+            if (cx == null) return "Không tìm thấy chuyến xe.";
+            if (cx.Xe.NhaXeId != nhaXeId) return "Bạn không có quyền thao tác.";
+
+            // --- SỬA 1: CHECK TRẠNG THÁI CHUYẾN XE ---
+            // Chỉ chặn khi chuyến xe đã "chốt sổ" (Đang chạy, Đã xong, Đã hủy)
+            // Các trạng thái còn lại (Chờ duyệt, Đã lên lịch, Đang bán vé...) đều cho phép đổi tài xế thoải mái.
+            if (cx.TrangThai == TrangThaiChuyenXe.DangDiChuyen ||
+                cx.TrangThai == TrangThaiChuyenXe.DaHoanThanh ||
+                cx.TrangThai == TrangThaiChuyenXe.DaHuy)
+            {
+                return $"Không thể thay đổi tài xế khi chuyến xe đang ở trạng thái '{cx.TrangThai}'.";
+            }
+
+            // Nếu người dùng chọn "Chưa phân công" (Gỡ tài xế) -> Cho phép luôn
+            if (string.IsNullOrEmpty(taiXeId))
+            {
+                cx.TaiXeId = null;
+                await _context.SaveChangesAsync();
+                return "Success";
+            }
+
+            // --- SỬA 2: FIX LỖI LINQ (InvalidOperationException) ---
+            // Nguyên nhân lỗi cũ: EF Core không dịch được đoạn code (NgayDi + GioDi).AddHours() sang SQL.
+            // Giải pháp: Tải dữ liệu thô về RAM rồi mới tính toán.
+
+            // B1: Tính thời gian của chuyến xe HIỆN TẠI (Đang muốn gán)
+            double thoiGianChay = 5; // Giả sử 5 tiếng (Bạn nên lấy từ DB nếu có cột ThoiGianDiChuyen)
+            DateTime startNew = cx.NgayDi.Date.Add(cx.GioDi);
+            DateTime endNew = startNew.AddHours(thoiGianChay);
+
+            // B2: Lọc sơ bộ từ DB (Chỉ lấy các chuyến của tài xế này trong khoảng +/- 1 ngày)
+            // Bước này giúp giảm tải bộ nhớ, chỉ lấy vài dòng cần thiết về
+            var potentialTrips = await _context.ChuyenXe
+                .Where(c => c.TaiXeId == taiXeId
+                         && c.ChuyenId != chuyenId // Không so với chính nó
+                         && c.TrangThai != TrangThaiChuyenXe.DaHuy // Không tính chuyến hủy
+                         && c.NgayDi >= startNew.Date.AddDays(-1)
+                         && c.NgayDi <= startNew.Date.AddDays(1))
+                .ToListAsync(); // <--- QUAN TRỌNG: Tải về RAM tại đây
+
+            // B3: Tính toán check trùng trong RAM (C# xử lý được TimeSpan/AddHours thoải mái)
+            bool isBusy = potentialTrips.Any(c =>
+            {
+                var startOld = c.NgayDi.Date.Add(c.GioDi);
+                var endOld = startOld.AddHours(thoiGianChay);
+
+                // Công thức kiểm tra 2 khoảng thời gian có giao nhau không:
+                // (StartA < EndB) && (EndA > StartB)
+                return startNew < endOld && endNew > startOld;
+            });
+
+            if (isBusy) return "Tài xế này bị trùng lịch chạy với chuyến khác. Vui lòng chọn người khác.";
+
+            // Nếu mọi thứ ổn -> Lưu vào DB
+            cx.TaiXeId = taiXeId;
+            await _context.SaveChangesAsync();
+            return "Success";
         }
     }
 }

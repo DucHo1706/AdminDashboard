@@ -23,11 +23,8 @@ namespace AdminDashboard.Services
 
         public async Task<string> TaoNhanVienAsync(TaoNhanVienRequest req, string nhaXeId)
         {
-            // 1. Kiểm tra Email (Làm ngoài transaction cho nhẹ)
             var existingUser = await _context.NguoiDung.FirstOrDefaultAsync(u => u.Email == req.Email);
             if (existingUser != null) return "Email này đã được sử dụng.";
-
-            // 2. Upload ảnh
             string avatarUrl = null;
             if (req.Avatar != null)
             {
@@ -35,8 +32,6 @@ namespace AdminDashboard.Services
                 var urls = await _imageService.UploadImagesAsync(files);
                 if (urls != null && urls.Any()) avatarUrl = urls[0];
             }
-
-            // --- KHẮC PHỤC LỖI EXECUTION STRATEGY TẠI ĐÂY ---
             var strategy = _context.Database.CreateExecutionStrategy();
 
             return await strategy.ExecuteAsync(async () =>
@@ -44,7 +39,6 @@ namespace AdminDashboard.Services
                 using var transaction = await _context.Database.BeginTransactionAsync();
                 try
                 {
-                    // 3. TẠO TÀI KHOẢN (Bảng NguoiDung)
                     var newUserId = Guid.NewGuid().ToString();
                     var newUser = new NguoiDung
                     {
@@ -53,13 +47,12 @@ namespace AdminDashboard.Services
                         Email = req.Email,
                         SoDienThoai = req.SoDienThoai,
                         MatKhau = req.MatKhau,
-                        TrangThai = TrangThaiNguoiDung.HoatDong, // Đã fix namespace
+                        TrangThai = TrangThaiNguoiDung.HoatDong, 
                         NhaXeId = nhaXeId,
                         NgaySinh = DateTime.Now
                     };
                     _context.NguoiDung.Add(newUser);
 
-                    // 4. GÁN QUYỀN (Bảng UserRole)
                     string roleName = req.VaiTro == VaiTroNhanVien.TaiXe ? "TaiXe" : "NhanVienBanVe";
 
                     var role = await _context.VaiTro.FirstOrDefaultAsync(r => r.TenVaiTro == roleName);
@@ -72,7 +65,6 @@ namespace AdminDashboard.Services
 
                     _context.UserRole.Add(new UserRole { UserId = newUserId, RoleId = role.RoleId });
 
-                    // 5. TẠO HỒ SƠ NHÂN VIÊN (Bảng NhanVien)
                     var nv = new NhanVien
                     {
                         NhanVienId = Guid.NewGuid().ToString(),

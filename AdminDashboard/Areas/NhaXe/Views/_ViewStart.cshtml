@@ -1,3 +1,20 @@
 ﻿@{
-    Layout = "~/Views/Shared/_LayoutNhaXe.cshtml";
+    // Logic chọn Layout thông minh
+    if (User.IsInRole("ChuNhaXe"))
+    {
+        Layout = "_LayoutNhaXe"; // Ông chủ thấy menu full
+    }
+    else if (User.IsInRole("NhanVienBanVe"))
+    {
+        Layout = "_LayoutNhanVien"; // Nhân viên thấy menu rút gọn
+    }
+    else if (User.IsInRole("TaiXe"))
+    {
+        Layout = "_LayoutTaiXe"; // (Chuẩn bị cho tương lai)
+    }
+    else
+    {
+        // Mặc định hoặc Admin cấp cao
+        Layout = "_LayoutNhaXe";
+    }
 }

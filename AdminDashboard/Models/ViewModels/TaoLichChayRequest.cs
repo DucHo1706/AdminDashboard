@@ -13,7 +13,7 @@ namespace AdminDashboard.Models.ViewModels
         public TimeSpan KhungGioDen { get; set; }
         public int GianCachPhut { get; set; }
         public TimeSpan ThoiGianDiChuyen { get; set; }
-        public IFormFileCollection Images { get; set; } // Nhận file ảnh từ form
+        public IFormFileCollection? Images { get; set; } // Nhận file ảnh từ form
     }
 
     // Class trả về kết quả để Controller biết đường thông báo

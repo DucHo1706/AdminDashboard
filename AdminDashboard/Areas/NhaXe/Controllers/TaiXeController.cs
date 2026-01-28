@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace AdminDashboard.Areas.NhaXe.Controllers
 {
     [Area("NhaXe")]
-    // [Authorize(Roles = "ChuNhaXe")] // Bật lại sau khi test xong
+    [Authorize(Roles = "ChuNhaXe")]
     public class TaiXeController : Controller
     {
         private readonly Db27524Context _context;

@@ -90,18 +90,18 @@ namespace AdminDashboard.Services
 
                 if (result.Result == "ok")
                 {
-                    _logger.LogInformation($"✅ Đã xóa ảnh: {publicId}");
+                    _logger.LogInformation($" Đã xóa ảnh: {publicId}");
                     return true;
                 }
                 else
                 {
-                    _logger.LogWarning($"⚠️ Không thể xóa ảnh: {result.Result}");
+                    _logger.LogWarning($" Không thể xóa ảnh: {result.Result}");
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"❌ Lỗi khi xóa ảnh: {imageUrl}");
+                _logger.LogError(ex, $" Lỗi khi xóa ảnh: {imageUrl}");
                 return false;
             }
         }

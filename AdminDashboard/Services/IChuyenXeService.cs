@@ -1,6 +1,7 @@
 ﻿using AdminDashboard.Models;
 using AdminDashboard.Models.ViewModels;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace AdminDashboard.Services
 {
@@ -15,5 +16,8 @@ namespace AdminDashboard.Services
       
         Task<string> DeleteChuyenXeAsync(string id, string nhaXeId);
         Task<int> DuyetNhieuChuyenAsync(List<string> ids, string adminId);
+
+
+        Task<string> PhanCongTaiXeAsync(string chuyenId, string taiXeId, string nhaXeId);
     }
 }

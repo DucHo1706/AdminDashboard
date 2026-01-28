@@ -112,6 +112,10 @@ namespace AdminDashboard.Controllers
             {
                 return RedirectToAction("LichLamViec", "TaiXe", new { area = "TaiXe" });
             }
+            else if (roleName == "NhanVienBanVe")
+            {
+                return RedirectToAction("Index", "BanVe", new { area = "NhaXe" });
+            }
             else
             {
                 // Khách hàng thường

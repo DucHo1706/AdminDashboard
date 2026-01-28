@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AdminDashboard.Areas.NhaXe.Controllers
 {
     [Area("NhaXe")]
-    // [Authorize(Roles = "ChuNhaXe")] // Bạn bỏ comment dòng này sau khi đã chạy code tạo Role
+    [Authorize(Roles = "ChuNhaXe")]
     public class NhanVienController : Controller
     {
         private readonly Db27524Context _context;

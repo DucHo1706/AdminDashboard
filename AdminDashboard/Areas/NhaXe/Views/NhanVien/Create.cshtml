@@ -122,7 +122,6 @@
             var divTaiXe = document.getElementById("divTaiXe");
 
             function toggleFields() {
-                // Value = 1 là Tài xế (theo Enum)
                 if (ddl.value == "1") {
                     divTaiXe.style.display = "block";
                     setTimeout(() => divTaiXe.classList.add("show"), 10);
@@ -132,7 +131,6 @@
                 }
             }
 
-            // Gọi lần đầu và khi thay đổi
             toggleFields();
             ddl.addEventListener("change", toggleFields);
         });

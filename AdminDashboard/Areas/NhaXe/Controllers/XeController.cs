@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AdminDashboard.Areas.NhaXe.Controllers
 {
     [Area("NhaXe")]
-    // [Authorize(Roles = "ChuNhaXe")
+    [Authorize(Roles = "ChuNhaXe")]
     public class XeController : Controller
     {
         private readonly Db27524Context _context;

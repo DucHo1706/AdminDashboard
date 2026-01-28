@@ -31,30 +31,56 @@ namespace AdminDashboard.Controllers
         [Authorize(Roles = "KhachHang")]
         public async Task<IActionResult> ChonGhe(string chuyenId)
         {
-            if (string.IsNullOrEmpty(chuyenId))
-            {
-                return BadRequest("Khong co thong tin chuyen xe.");
-            }
+            if (string.IsNullOrEmpty(chuyenId)) return BadRequest("Khong co thong tin chuyen xe.");
 
+            // 1. Lấy thông tin chuyến và xe
             var chuyenXe = await _context.ChuyenXe
-                .Include(c => c.Xe)
-                    .ThenInclude(x => x.DanhSachGhe)
-                .Include(c => c.LoTrinh)
-                    .ThenInclude(lt => lt.TramDiNavigation)
-                .Include(c => c.LoTrinh)
-                    .ThenInclude(lt => lt.TramToiNavigation)
+                .Include(c => c.Xe).ThenInclude(x => x.DanhSachGhe) // Lấy danh sách ghế hiện có
+                .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramDiNavigation)
+                .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramToiNavigation)
                 .Include(c => c.Images)
                 .FirstOrDefaultAsync(c => c.ChuyenId == chuyenId);
 
-            if (chuyenXe == null)
+            if (chuyenXe == null) return NotFound("Chuyen xe khong ton tai.");
+
+   
+            var xe = chuyenXe.Xe;
+            int tongSoGhe = xe.SoLuongGhe > 0 ? xe.SoLuongGhe : 40; // Mặc định 40 nếu chưa set
+
+            // Nếu số ghế trong DB ít hơn thực tế -> Tạo bổ sung ngay lập tức
+            if (xe.DanhSachGhe == null || xe.DanhSachGhe.Count < tongSoGhe)
             {
-                return NotFound("Chuyen xe khong ton tai.");
+                if (xe.DanhSachGhe == null) xe.DanhSachGhe = new List<Ghe>();
+
+                for (int i = 1; i <= tongSoGhe; i++)
+                {
+                    string tenGhe = "A" + i.ToString("D2"); // A01, A02...
+
+                    // Kiểm tra ghế này đã có trong DB chưa
+                    if (!xe.DanhSachGhe.Any(g => g.SoGhe == tenGhe))
+                    {
+                        var newGhe = new Ghe
+                        {
+                            GheID = Guid.NewGuid().ToString(),
+                            XeId = xe.XeId,
+                            SoGhe = tenGhe,
+                            TrangThai = "Trong"
+                        };
+                        _context.Ghe.Add(newGhe);
+                    }
+                }
+                await _context.SaveChangesAsync(); // Lưu ngay để khách hàng nhìn thấy
+
+                // Reload lại danh sách ghế sau khi tạo
+                await _context.Entry(xe).Collection(x => x.DanhSachGhe).LoadAsync();
             }
+            // ==================================================================
 
             List<string> danhSachGheDaDat = new List<string>();
 
             try
             {
+                // 2. Xử lý đơn hàng hết hạn (Giữ nguyên code cũ của bạn)
                 var expiredOrders = await _context.DonHang
                     .Where(d => d.ChuyenId == chuyenId && d.TrangThaiThanhToan == "DangChoThanhToan" && d.ThoiGianHetHan < DateTime.Now)
                     .ToListAsync();
@@ -65,32 +91,29 @@ namespace AdminDashboard.Controllers
                     {
                         var vesExpired = await _context.Ve.Where(v => v.DonHangId == dh.DonHangId).ToListAsync();
                         _context.Ve.RemoveRange(vesExpired);
-                        dh.TrangThaiThanhToan = "Da huy"; // Sửa: Tiếng Việt không dấu
+                        dh.TrangThaiThanhToan = "Da huy";
                     }
                     await _context.SaveChangesAsync();
                 }
 
+                // 3. Lấy danh sách ghế đã bán (Logic đồng bộ với Nhân viên)
+                // Nhân viên coi "DangChoThanhToan" là đã bán (để giữ chỗ)
                 danhSachGheDaDat = await _context.Ve
                     .Where(v => v.DonHang.ChuyenId == chuyenId &&
-                                 (v.DonHang.TrangThaiThanhToan == "Da thanh toan" || // Sửa: Tiếng Việt không dấu
+                                 (v.DonHang.TrangThaiThanhToan == "Da thanh toan" ||
+                                  v.DonHang.TrangThaiThanhToan == "Da thanh toan tien mat" || // Thêm trường hợp tiền mặt
                                   (v.DonHang.TrangThaiThanhToan == "DangChoThanhToan" && v.DonHang.ThoiGianHetHan >= DateTime.Now)))
                     .Select(v => v.GheID)
                     .ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Loi khi don dep hoac lay danh sach ghe da dat cho ChuyenId: {ChuyenId}", chuyenId);
-
-                danhSachGheDaDat = await _context.Ve
-                    .Where(v => v.DonHang.ChuyenId == chuyenId && v.DonHang.TrangThaiThanhToan == "Da thanh toan") // Sửa: Tiếng Việt không dấu
-                    .Select(v => v.GheID)
-                    .ToListAsync();
+                _logger.LogError(ex, "Loi khi lay danh sach ghe");
             }
 
             ViewBag.DanhSachGheDaDat = danhSachGheDaDat;
             return View(chuyenXe);
         }
-
         [HttpPost]
         [Authorize]
         [Authorize(Roles = "KhachHang")]

@@ -4,6 +4,7 @@ using AdminDashboard.TransportDBContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AdminDashboard.Migrations
 {
     [DbContext(typeof(Db27524Context))]
-    partial class Db27524ContextModelSnapshot : ModelSnapshot
+    [Migration("20260127084525_UpdateDonHang_ChoKhachLe")]
+    partial class UpdateDonHang_ChoKhachLe
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

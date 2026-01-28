@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AdminDashboard.Areas.NhaXe.Controllers
 {
     [Area("NhaXe")]
-    // [Authorize(Roles = "ChuNhaXe")]
+     [Authorize(Roles = "ChuNhaXe")]
     public class ChuyenXeController : Controller
     {
         private readonly Db27524Context _context;
@@ -183,5 +183,7 @@ namespace AdminDashboard.Areas.NhaXe.Controllers
             ViewBag.CurrentTrangThai = trangThai;
             return PartialView("_BangChuyenXe", data);
         }
+
+     
     }
 }
