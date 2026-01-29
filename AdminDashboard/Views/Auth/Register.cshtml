@@ -1,221 +1,362 @@
 ﻿@model AdminDashboard.Models.Login.DangKy
 @{
-    Layout = "~/Views/Shared/_Layout_User.cshtml";
+    Layout = null;
     ViewData["Title"] = "Đăng ký tài khoản";
 }
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
     <style>
+        /* CSS giữ nguyên như phiên bản trước */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
+            font-family: 'Poppins', sans-serif;
             background: url('https://images.pexels.com/photos/209652/pexels-photo-209652.jpeg?cs=srgb&dl=pexels-samtingwong-209652.jpg&fm=jpg') no-repeat center center fixed;
             background-size: cover;
             height: 100vh;
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-        }
-
-        .register-container {
-            max-width: 600px;
-            margin: auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.3);
-        }
-
-        .header {
-            background-color: #ff6200;
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            text-align: center;
-        }
-
-        .form {
+            width: 100vw;
             display: flex;
-            flex-direction: column;
-            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
         }
 
-            .form label {
-                position: relative;
-                width: 100%;
-            }
-
-            .form .input {
-                background-color: white;
-                color: black;
-                width: 100%;
-                padding: 15px 10px 5px 10px;
-                outline: 0;
-                border: 1px solid rgba(105, 105, 105, 0.397);
-                border-radius: 10px;
-                font-size: 15px;
-            }
-
-            .form label span {
+            body::before {
+                content: '';
                 position: absolute;
-                left: 12px;
-                top: 12px;
-                font-size: 14px;
-                color: #666;
-                transition: all 0.3s ease;
-                pointer-events: none;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.35);
+                z-index: 1;
             }
 
-            .form .input:focus + span,
-            .form .input.filled + span {
-                color: #d30073;
-                top: -6px;
-                font-size: 12px;
-                font-weight: 600;
-                background: #fff;
-                padding: 0 5px;
-                border-radius: 5px;
-            }
-
-        .submit {
-            border: none;
-            outline: none;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 16px;
-            background-color: #FF6600;
-            color: #fff;
-            cursor: pointer;
-        }
-
-            .submit:hover {
-                background-color: #FF3333;
-            }
-
-        .signin {
+        .register-card {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 500px;
+            padding: 30px 35px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
             text-align: center;
-            font-size: 14px;
+            color: #fff;
+            margin: 20px;
+            max-height: 95vh;
+            overflow-y: auto;
         }
 
-            .signin a {
-                color: #d30073;
-                text-decoration: none;
+            .register-card::-webkit-scrollbar {
+                width: 0;
+                background: transparent;
             }
 
-                .signin a:hover {
-                    text-decoration: underline;
-                }
+        .header h2 {
+            font-weight: 600;
+            font-size: 24px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 25px;
+        }
+
+        .input-group-custom {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .form-control-custom {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 20px;
+            border-radius: 30px;
+            color: #fff !important;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+            .form-control-custom::placeholder {
+                color: rgba(255, 255, 255, 0.7);
+            }
+
+            .form-control-custom:focus {
+                background: rgba(255, 255, 255, 0.35);
+                border-color: #ffcba4;
+                box-shadow: 0 0 20px rgba(255, 203, 164, 0.5);
+                transform: scale(1.02);
+            }
+
+        .flatpickr-calendar {
+            background: #fff !important;
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 12px;
+            border-radius: 30px;
+            background: #ffcba4;
+            border: none;
+            color: #5e3023;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-top: 15px;
+        }
+
+            .btn-register:hover {
+                background: #ffbca4;
+                transform: translateY(-2px);
+            }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.8);
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .form-control-custom:focus ~ .toggle-password {
+            color: #ffcba4;
+            text-shadow: 0 0 10px rgba(255, 203, 164, 0.8);
+        }
 
         .text-danger {
-            font-size: 13px;
-            color: red;
+            color: #ffadad !important;
+            font-size: 11px;
+            text-align: left;
+            display: block;
+            margin-top: 3px;
+            margin-left: 15px;
         }
 
-            /* Ẩn span text-danger khi rỗng */
             .text-danger:empty {
                 display: none;
             }
 
-        .flex {
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #ffcba4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @@keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .row-custom {
             display: flex;
-            gap: 10px;
+            gap: 15px;
+        }
+
+        .col-custom {
+            flex: 1;
+        }
+
+        @@media (max-width: 576px) {
+            .row-custom {
+                flex-direction: column;
+                gap: 0;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="register-container">
+    <div id="loading-overlay"><div class="spinner"></div></div>
+
+    <div class="register-card">
         <div class="header">
             <h2>Đăng Ký Tài Khoản</h2>
+            <p>Nhập thông tin chi tiết của bạn</p>
         </div>
-        <form class="form" asp-action="Register" method="post">
-            <div class="flex">
-                <label>
-                    <input asp-for="HoTen" type="text" class="input" />
-                    <span>Họ và tên</span>
-                </label>
-            </div>
-            <span asp-validation-for="HoTen" class="text-danger"></span>
-            <div class="flex">
-                <label>
-                    <input asp-for="Email" type="email" class="input" />
-                    <span>Email</span>
-                </label>
-                <label>
-                    <input asp-for="NgaySinh"
-                           type="text"
-                           class="input"
-                           id="NgaySinh"
-                           placeholder="Ngày sinh" />
-                </label>
-            </div>
-            <span asp-validation-for="Email" class="text-danger"></span>
-            <span asp-validation-for="NgaySinh" class="text-danger"></span>
 
-            <label>
-                <input asp-for="MatKhau" type="password" class="input"
+        <form asp-action="Register" method="post" id="register-form">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger bg-transparent border-0 text-white p-0 mb-2 small"></div>
+
+            <div class="input-group-custom">
+                <input asp-for="HoTen" class="form-control-custom" type="text" placeholder="Họ và Tên" autocomplete="off" />
+                <span asp-validation-for="HoTen" class="text-danger"></span>
+            </div>
+
+            <div class="row-custom">
+                <div class="col-custom input-group-custom">
+                    <input asp-for="Email" class="form-control-custom" type="email" placeholder="Email" autocomplete="off" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="col-custom input-group-custom">
+                    <input asp-for="NgaySinh" class="form-control-custom" type="text" id="NgaySinh" placeholder="Ngày sinh" />
+                    <span asp-validation-for="NgaySinh" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="input-group-custom">
+                <input asp-for="SoDienThoai" class="form-control-custom" type="tel"
+                       id="SoDienThoai"
+                       maxlength="10"
+                       pattern="[0-9]{10}"
+                       required
+                       placeholder="Số điện thoại"
+                       oninvalid="this.setCustomValidity(this.validity.valueMissing ? 'Vui lòng nhập số điện thoại' : (this.validity.patternMismatch ? 'Số điện thoại phải gồm 10 chữ số' : ''))"
+                       oninput="this.setCustomValidity('')" />
+                <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+            </div>
+
+            <div class="input-group-custom">
+                <input asp-for="MatKhau" class="form-control-custom" type="password" id="pass-1"
+                       placeholder="Mật khẩu"
                        pattern="^(?=\S*[^\w\s])\S{8,20}$"
                        title="Mật khẩu phải dài 8-20 ký tự, chứa ít nhất 1 ký tự đặc biệt và không có khoảng trắng" />
-                <span>Mật khẩu</span>
-            </label>
-            <span asp-validation-for="MatKhau" class="text-danger"></span>
+                <i class="fa-regular fa-eye toggle-password" onclick="togglePass('pass-1', this)"></i>
+                <span asp-validation-for="MatKhau" class="text-danger"></span>
+            </div>
 
-            <label>
-                <input asp-for="XacNhanMatKhau" type="password" class="input"
+            <div class="input-group-custom">
+                <input asp-for="XacNhanMatKhau" class="form-control-custom" type="password" id="pass-2"
+                       placeholder="Xác nhận mật khẩu"
                        pattern="^(?=\S*[^\w\s])\S{8,20}$"
                        title="Xác nhận mật khẩu phải dài 8-20 ký tự, chứa ít nhất 1 ký tự đặc biệt và không có khoảng trắng" />
-                <span>Xác nhận mật khẩu</span>
-            </label>
-            <span asp-validation-for="XacNhanMatKhau" class="text-danger"></span>
-            <label>
-                <input asp-for="SoDienThoai" type="tel" maxlength="10" pattern="[0-9]{10}" class="input" />
-                <span>Số điện thoại</span>
-            </label>
-            <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+                <i class="fa-regular fa-eye toggle-password" onclick="togglePass('pass-2', this)"></i>
+                <span asp-validation-for="XacNhanMatKhau" class="text-danger"></span>
+            </div>
 
-            <button type="submit" class="submit">Đăng ký</button>
-            <p class="signin">Bạn đã có tài khoản? <a href="/Auth/Login">Đăng nhập</a></p>
+            <button type="submit" class="btn-register">ĐĂNG KÝ</button>
+
+            <div style="margin-top: 25px; font-size: 13px;">
+                Bạn đã có tài khoản? <a href="/Auth/Login" style="color: #ffcba4; font-weight:bold; text-decoration:none;">Đăng nhập</a>
+            </div>
         </form>
     </div>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
+
     <script>
+        // Cấu hình Flatpickr
         flatpickr("#NgaySinh", {
             dateFormat: "Y-m-d",
             altInput: true,
             altFormat: "d/m/Y",
             maxDate: "today",
-            onChange: function (selectedDates, dateStr, instance) {
-                const input = document.getElementById("NgaySinh");
-                input.classList.toggle("filled", !!dateStr);
-            }
+            disableMobile: "true"
         });
 
-        document.querySelectorAll('.input').forEach(input => {
-            input.addEventListener('input', function () {
-                this.classList.toggle('filled', this.value !== '');
-            });
-            if (input.value) {
-                input.classList.add('filled');
+        // Toggle Password
+        function togglePass(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
             }
-        });
+        }
 
+        // --- XỬ LÝ VALIDATION TÙY CHỈNH ---
+
+        // 1. Xử lý Mật khẩu (Password)
         document.querySelectorAll('input[type="password"]').forEach(input => {
             input.addEventListener('invalid', function (event) {
-                event.target.setCustomValidity('Mật khẩu phải dài 8-20 ký tự, chứa ít nhất 1 ký tự đặc biệt và không có khoảng trắng');
+                if (event.target.validity.patternMismatch) {
+                    event.target.setCustomValidity('Mật khẩu phải dài 8-20 ký tự, chứa ít nhất 1 ký tự đặc biệt và không có khoảng trắng');
+                } else {
+                    event.target.setCustomValidity(''); // Reset nếu lỗi khác
+                }
             });
             input.addEventListener('input', function (event) {
                 event.target.setCustomValidity('');
             });
         });
 
-        // Xóa thông báo lỗi khi focus vào input
-        document.querySelectorAll('.form .input').forEach(input => {
-            input.addEventListener('focus', function () {
-                document.querySelectorAll('.text-danger').forEach(errorSpan => {
-                    errorSpan.innerHTML = '';
-                });
+        // 2. Xử lý Số điện thoại (Phone) - Bắt buộc nhập & Đúng định dạng
+        const phoneInput = document.getElementById('SoDienThoai');
+        if (phoneInput) {
+            phoneInput.addEventListener('invalid', function (event) {
+                if (event.target.validity.valueMissing) {
+                    // Lỗi chưa nhập
+                    event.target.setCustomValidity('Vui lòng nhập số điện thoại');
+                } else if (event.target.validity.patternMismatch) {
+                    // Lỗi nhập sai 10 số
+                    event.target.setCustomValidity('Số điện thoại phải gồm 10 chữ số');
+                }
+            });
+
+            phoneInput.addEventListener('input', function (event) {
+                event.target.setCustomValidity('');
+            });
+        }
+
+        $(document).ready(function () {
+            // Xóa lỗi validation server-side
+            $('.form-control-custom').on('input', function () {
+                $(this).siblings('.text-danger').text('');
+                $('.alert-danger').text('');
+            });
+
+            // Loading overlay
+            $('#register-form').on('submit', function () {
+                if ($(this).valid()) {
+                    $('#loading-overlay').css('display', 'flex');
+                }
             });
         });
     </script>

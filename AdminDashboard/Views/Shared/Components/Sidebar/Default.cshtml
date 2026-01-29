@@ -1,0 +1,80 @@
+﻿@{
+    var activeMenu = ViewBag.ActiveMenu as string;
+}
+<style>
+    /* Sidebar Style - Original Orange Theme */
+    .sidebar {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+        position: sticky;
+        top: 100px;
+        transition: 0.3s ease;
+    }
+
+        .sidebar h5 {
+            font-weight: 700;
+            color: #ff6600; /* Màu cam gốc */
+            margin-bottom: 25px;
+        }
+
+    .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 15px;
+        color: #333;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+        .menu-item:hover {
+            background-color: #fff3e0; /* Nền cam nhạt khi hover */
+            color: #ff6600;
+            transform: translateX(4px);
+        }
+
+        .menu-item.active {
+            background-color: #ff6600; /* Nền cam đậm khi active */
+            color: white;
+        }
+
+            /* Khi active thì icon bên trong cũng đổi màu trắng theo */
+            .menu-item.active i {
+                color: white !important;
+            }
+
+        .menu-item i {
+            font-size: 18px;
+        }
+
+</style>
+
+<div class="sidebar">
+    <h5 class="text-center">TÀI KHOẢN CÁ NHÂN</h5>
+    <h6 class="text-muted mb-4 text-center">@User.Identity.Name!</h6>
+
+    <a asp-controller="Auth" asp-action="Account"
+       class="menu-item @(activeMenu == "Account" ? "active" : "")">
+        <i class="bi bi-person-circle text-warning"></i>Thông tin tài khoản
+    </a>
+
+    <a asp-controller="Auth" asp-action="History"
+       class="menu-item @(activeMenu == "History" ? "active" : "")">
+        <i class="bi bi-clock-history text-info"></i>Lịch sử mua vé
+    </a>
+
+    <a asp-controller="Auth" asp-action="ResetPassword"
+       class="menu-item @(activeMenu == "ResetPassword" ? "active" : "")">
+        <i class="bi bi-key-fill text-warning"></i>Đặt lại mật khẩu
+    </a>
+
+    <a asp-controller="Auth" asp-action="Logout" class="menu-item">
+        <i class="bi bi-box-arrow-right text-danger"></i>Đăng xuất
+    </a>
+</div>
