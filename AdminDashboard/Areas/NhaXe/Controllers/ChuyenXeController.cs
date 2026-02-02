@@ -183,7 +183,23 @@ namespace AdminDashboard.Areas.NhaXe.Controllers
             ViewBag.CurrentTrangThai = trangThai;
             return PartialView("_BangChuyenXe", data);
         }
+        [HttpGet]
+        public async Task<IActionResult> GetDetailsPartial(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return BadRequest();
 
-     
+            var cx = await _context.ChuyenXe
+                .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramDiNavigation)
+                .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramToiNavigation)
+                .Include(c => c.Xe).Include(c => c.Xe) // Include thêm loại xe nếu cần
+                .Include(c => c.TaiXe)
+                .Include(c => c.Images)
+                .FirstOrDefaultAsync(c => c.ChuyenId == id);
+
+            if (cx == null) return NotFound();
+
+            return PartialView("_ChuyenXeDetailsModal", cx);
+        }
+
     }
 }

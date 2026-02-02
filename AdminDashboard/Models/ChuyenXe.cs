@@ -16,9 +16,8 @@ namespace AdminDashboard.Models
         [Required, StringLength(255)]
         public string XeId { get; set; }
 
-        // --- CỘT TÀI XẾ ---
         [StringLength(255)]
-        public string? TaiXeId { get; set; } // Vẫn giữ là string? (cho phép null)
+        public string? TaiXeId { get; set; }
 
         [Required]
         public DateTime NgayDi { get; set; }
@@ -34,19 +33,14 @@ namespace AdminDashboard.Models
         [Required]
         public TrangThaiChuyenXe TrangThai { get; set; }
 
-        // --- NAVIGATION PROPERTIES ---
         [ForeignKey(nameof(LoTrinhId))]
         public virtual LoTrinh LoTrinh { get; set; }
 
         [ForeignKey(nameof(XeId))]
         public virtual Xe Xe { get; set; }
 
-        // --- SỬA ĐOẠN NÀY ---
-        // Đổi từ NguoiDung -> NhanVien
         [ForeignKey(nameof(TaiXeId))]
         public virtual NhanVien? TaiXe { get; set; }
-        // --------------------
-
         public virtual ICollection<ChuyenXeImage> Images { get; set; } = new List<ChuyenXeImage>();
     }
 }

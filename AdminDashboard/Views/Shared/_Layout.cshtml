@@ -220,7 +220,7 @@
     <div class="wrapper">
         <nav id="sidebar" class="sidebar">
             <div class="logo">
-                <a asp-area="" asp-controller="Home" asp-action="Index">
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Thongke">
                     <img src="~/css/images/logo_web.png" alt="Logo" />
                 </a>
                 <div class="small text-center mt-2 fw-bold">ADMIN QUẢN TRỊ</div>
@@ -228,7 +228,7 @@
 
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link" href="/Admin/Statistics">
+                    <a class="nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Thongke">
                         <i class="bi bi-bar-chart-line-fill"></i><span>Thống kê Sàn</span>
                     </a>
                 </li>

@@ -16,7 +16,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
     <style>
-        /* CSS giữ nguyên như phiên bản trước */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -310,16 +309,13 @@
                 icon.classList.add("fa-eye");
             }
         }
-
-        // --- XỬ LÝ VALIDATION TÙY CHỈNH ---
-
         // 1. Xử lý Mật khẩu (Password)
         document.querySelectorAll('input[type="password"]').forEach(input => {
             input.addEventListener('invalid', function (event) {
                 if (event.target.validity.patternMismatch) {
                     event.target.setCustomValidity('Mật khẩu phải dài 8-20 ký tự, chứa ít nhất 1 ký tự đặc biệt và không có khoảng trắng');
                 } else {
-                    event.target.setCustomValidity(''); // Reset nếu lỗi khác
+                    event.target.setCustomValidity('');
                 }
             });
             input.addEventListener('input', function (event) {

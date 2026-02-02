@@ -2,33 +2,216 @@
 
 @{
     ViewData["Title"] = "Quản lý Đối tác Nhà xe";
-    Layout = "_Layout";
 }
 
-<div class="container-fluid px-4">
-    <h1 class="mt-4">Danh sách Nhà Xe</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="/Admin/Home">Dashboard</a></li>
-        <li class="breadcrumb-item active">Nhà Xe</li>
-    </ol>
+<style>
+    .btn-action {
+        border: 1px solid #dc3545;
+        background: transparent;
+        cursor: pointer;
+        color: #dc3545;
+    }
 
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-table me-1"></i>
-            Danh sách đối tác
-            <a asp-action="Create" class="btn btn-primary btn-sm float-end">
-                <i class="fas fa-plus"></i> Thêm Nhà Xe Mới
-            </a>
-        </div>
-        <div class="card-body">
-            <table class="table table-bordered table-striped">
-                <thead class="table-dark">
+        .btn-action:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+
+    body {
+        background-color: #f4f6f9;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .vehicle-type-page {
+        padding: 30px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .page-title {
+        font-weight: 700;
+        font-size: 28px;
+        color: #3f4c6b;
+    }
+
+        .page-title i {
+            color: #ff9800;
+            margin-right: 12px;
+        }
+
+    .btn-add-new {
+        background-color: #ff9800;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-weight: 600;
+        font-size: 15px;
+        text-decoration: none;
+        box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+        transition: all 0.3s ease;
+    }
+
+        .btn-add-new:hover {
+            background-color: #f57c00;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 152, 0, 0.5);
+            color: #fff;
+        }
+
+    .content-panel {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        padding: 20px;
+    }
+
+    .vehicle-type-table {
+        border-collapse: collapse;
+        width: 100%;
+        vertical-align: middle;
+    }
+
+        .vehicle-type-table thead th {
+            border: none;
+            padding: 15px 20px;
+            color: #8c96a5;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            text-align: left;
+            border-bottom: 2px solid #eef0f4;
+        }
+
+        .vehicle-type-table tbody tr {
+            border-bottom: 1px solid #eef0f4;
+            transition: background-color 0.2s ease;
+        }
+
+            .vehicle-type-table tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            .vehicle-type-table tbody tr:hover {
+                background-color: #f8f9fa;
+            }
+
+        .vehicle-type-table tbody td {
+            border: none;
+            padding: 18px 20px;
+            vertical-align: middle;
+            color: #5b6a82;
+        }
+
+    .vehicle-name {
+        font-weight: 600;
+        font-size: 15px;
+        color: #374151;
+    }
+
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        background-color: #e3f2fd;
+        color: #0d6efd;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .status-active {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .status-inactive {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .btn-action {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        background: transparent;
+        transition: all 0.3s ease;
+    }
+
+        .btn-action i {
+            font-size: 15px;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            color: white;
+        }
+
+    .btn-edit {
+        border: 1px solid #28a745;
+        color: #28a745;
+    }
+
+        .btn-edit:hover {
+            background-color: #28a745;
+        }
+
+    .btn-details {
+        border: 1px solid #17a2b8;
+        color: #17a2b8;
+    }
+
+        .btn-details:hover {
+            background-color: #17a2b8;
+        }
+</style>
+<div class="vehicle-type-page">
+
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-building"></i> @ViewData["Title"]
+        </h1>
+        <a asp-action="Create" class="btn btn-add-new">
+            <i class="fas fa-plus-circle"></i> Thêm Nhà Xe Mới
+        </a>
+    </div>
+
+    <div class="content-panel">
+        <div class="table-responsive">
+            <table class="table vehicle-type-table">
+                <thead>
                     <tr>
                         <th>Tên Nhà Xe</th>
                         <th>Hotline</th>
-                        <th>Địa chỉ</th>
-                        <th>Trạng thái</th>
-                        <th>Thao tác</th>
+                        <th>Địa Chỉ</th>
+                        <th class="text-center">Trạng Thái</th>
+                        <th class="text-center" style="width: 180px;">Hành Động</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -37,22 +220,48 @@
                         foreach (var item in Model)
                         {
                             <tr>
-                                <td class="fw-bold text-primary">@item.TenNhaXe</td>
-                                <td>@item.SoDienThoai</td>
-                                <td>@item.DiaChi</td>
                                 <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle me-3">@item.TenNhaXe.Substring(0, 1).ToUpper()</div>
+                                        <span class="vehicle-name">@item.TenNhaXe</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-muted"><i class="bi bi-telephone me-1"></i>@item.SoDienThoai</span>
+                                </td>
+                                <td>
+                                    <span class="text-muted" style="font-size: 13px;">
+                                        <i class="bi bi-geo-alt me-1"></i>@item.DiaChi
+                                    </span>
+                                </td>
+                                <td class="text-center">
                                     @if (item.TrangThai == 1)
                                     {
-                                        <span class="badge bg-success">Hoạt động</span>
+                                        <span class="status-badge status-active">Hoạt động</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-warning text-dark">Chờ duyệt / Khóa</span>
+                                        <span class="status-badge status-inactive">Đã khóa</span>
                                     }
                                 </td>
-                                <td>
-                                    <a href="#" class="btn btn-sm btn-info text-white">Chi tiết</a>
-                                    <a href="#" class="btn btn-sm btn-danger">Khóa</a>
+                                <td class="action-buttons">
+                                    <a asp-area="Admin" asp-controller="NhaXe" asp-action="Details" asp-route-id="@item.NhaXeId" class="btn-action btn-details" title="Chi tiết">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+
+                                    <a asp-area="Admin" asp-controller="NhaXe" asp-action="Edit" asp-route-id="@item.NhaXeId" class="btn-action btn-edit" title="Sửa">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+
+                                    <button type="button"
+                                            class="btn-action btn-delete"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteModal"
+                                            data-id="@item.NhaXeId"
+                                            data-name="@item.TenNhaXe"
+                                            title="Khóa/Xóa">
+                                        <i class="bi bi-lock"></i>
+                                    </button>
                                 </td>
                             </tr>
                         }
@@ -60,7 +269,12 @@
                     else
                     {
                         <tr>
-                            <td colspan="5" class="text-center text-muted">Chưa có nhà xe nào. Hãy tạo mới!</td>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                    Chưa có đối tác nhà xe nào. Hãy tạo mới!
+                                </div>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -68,3 +282,53 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận hành động
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn <strong>Khóa/Xóa</strong> nhà xe này không?</p>
+                <p class="text-danger fw-bold fs-5 text-center" id="modalNhaXeName"></p>
+                <p class="text-muted small text-center mb-0">Hành động này sẽ chuyển trạng thái nhà xe sang "Ngừng hoạt động".</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" name="id" id="idToDelete" />
+                    <button type="submit" class="btn btn-danger">Đồng ý Khóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Đảm bảo DOM đã load xong
+    document.addEventListener("DOMContentLoaded", function () {
+        var deleteModal = document.getElementById('deleteModal');
+
+        // Lắng nghe sự kiện khi Modal chuẩn bị hiện lên
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            // Button nào đã kích hoạt modal?
+            var button = event.relatedTarget;
+
+            // Lấy dữ liệu từ data-id và data-name của button đó
+            var id = button.getAttribute('data-id');
+            var name = button.getAttribute('data-name');
+
+            // Gán dữ liệu vào Form trong Modal
+            var inputId = deleteModal.querySelector('#idToDelete');
+            var textName = deleteModal.querySelector('#modalNhaXeName');
+
+            inputId.value = id;
+            textName.textContent = name;
+        });
+    });
+</script>
