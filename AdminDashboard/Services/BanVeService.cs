@@ -1,6 +1,7 @@
 ﻿using AdminDashboard.Models;
 using AdminDashboard.Models.TrangThai;
 using AdminDashboard.Models.ViewModels;
+using AdminDashboard.Patterns;
 using AdminDashboard.TransportDBContext;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -21,16 +22,18 @@ namespace AdminDashboard.Services
 
         public async Task<List<ChuyenXe>> GetChuyenXeBanVeAsync(string nhaXeId, DateTime ngayDi)
         {
-            return await _context.ChuyenXe
-                .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramDiNavigation)
-                .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramToiNavigation)
-                .Include(c => c.Xe)
-                .Where(c => c.Xe.NhaXeId == nhaXeId
-                         && c.NgayDi.Date == ngayDi.Date
-                         && c.TrangThai != TrangThaiChuyenXe.DaHuy
-                         && c.TrangThai != TrangThaiChuyenXe.ChoDuyet)
-                .OrderBy(c => c.GioDi)
-                .ToListAsync();
+            var query = _context.ChuyenXe
+            .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramDiNavigation)
+            .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramToiNavigation)
+            .Include(c => c.Xe)
+            .AsQueryable();
+
+            var builder = new ChuyenXeQueryBuilder(query)
+                .FilterByNhaXe(nhaXeId)
+                .FilterByDate(ngayDi)
+                .SortByTime();
+
+            return await builder.Build().ToListAsync();
         }
 
         public async Task<SoDoGheDTO> GetSoDoGheAsync(string chuyenId, string nhaXeId)
@@ -97,26 +100,18 @@ namespace AdminDashboard.Services
 
             try
             {
-                var donHang = new DonHang
-                {
-                    DonHangId = Guid.NewGuid().ToString("N"),
-                    ChuyenId = req.ChuyenId,
-                    IDKhachHang = null,
-                    NgayDat = DateTime.Now,
-                    TongTien = req.GiaVe,
-                    TrangThaiThanhToan = req.DaThanhToan ? "Da thanh toan" : "Cho thanh toan",
-                    HoTenNguoiDat = req.HoTen,
-                    SdtNguoiDat = req.SoDienThoai,
-                    GhiChu = req.GhiChu ?? $"Bán tại quầy bởi {tenNhanVien}"
-                };
+                // Sử dụng Factory Pattern để tạo đối tượng
+                var donHang = TicketFactory.CreateDonHang(
+                    req.ChuyenId,
+                    req.GiaVe,
+                    req.HoTen,
+                    req.SoDienThoai,
+                    req.GhiChu,
+                    req.DaThanhToan,
+                    tenNhanVien
+                );
 
-                var ve = new Ve
-                {
-                    VeId = Guid.NewGuid().ToString(),
-                    DonHangId = donHang.DonHangId,
-                    GheID = gheDb.GheID,
-                    Gia = req.GiaVe
-                };
+                var ve = TicketFactory.CreateVe(donHang.DonHangId, gheDb.GheID, req.GiaVe);
 
                 _context.DonHang.Add(donHang);
                 _context.Ve.Add(ve);

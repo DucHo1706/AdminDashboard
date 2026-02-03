@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 namespace AdminDashboard.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    // [Authorize(Roles = "Admin")] // Bật cái này sau khi làm xong đăng nhập
     public class NhaXeController : Controller
     {
         private readonly Db27524Context _context;
@@ -17,61 +16,61 @@ namespace AdminDashboard.Areas.Admin.Controllers
         {
             _context = context;
         }
-
-        // 1. Danh sách nhà xe
         public async Task<IActionResult> Index()
         {
             var listNhaXe = await _context.NhaXe.ToListAsync();
             return View(listNhaXe);
         }
+        public async Task<IActionResult> Details(string id)
+        {
+            if (id == null) return NotFound();
 
-        // 2. Form tạo mới (GET)
+            var nhaXe = await _context.NhaXe.FirstOrDefaultAsync(m => m.NhaXeId == id);
+            if (nhaXe == null) return NotFound();
+
+            return View(nhaXe);
+        }
         public IActionResult Create()
         {
             return View();
         }
 
-        // 3. Xử lý tạo mới (POST)
+        // POST: Xử lý dữ liệu tạo mới
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateNhaXeViewModel model)
         {
             if (ModelState.IsValid)
             {
-                // A. Kiểm tra trùng Email
                 if (await _context.NguoiDung.AnyAsync(u => u.Email == model.EmailChuXe))
                 {
-                    ModelState.AddModelError("EmailChuXe", "Email này đã có người dùng.");
+                    ModelState.AddModelError("EmailChuXe", "Email này đã có người dùng sử dụng.");
                     return View(model);
                 }
 
-                // B. Tạo Nhà Xe
                 var nhaXe = new AdminDashboard.Models.NhaXe
                 {
-                    NhaXeId = Guid.NewGuid().ToString("N"),
+                    NhaXeId = Guid.NewGuid().ToString("N"), 
                     TenNhaXe = model.TenNhaXe,
                     SoDienThoai = model.SoDienThoaiNhaXe,
                     DiaChi = model.DiaChi,
-                    TrangThai = 1 // 1: Hoạt động luôn (vì do Admin tạo mà)
-                }; 
+                    TrangThai = 1 
+                };
 
                 _context.NhaXe.Add(nhaXe);
-                await _context.SaveChangesAsync(); // Lưu để có NhaXeId
+                await _context.SaveChangesAsync();
 
-                // C. Tạo Tài khoản Chủ xe
                 var chuXe = new NguoiDung
                 {
-                    UserId = Guid.NewGuid().ToString(), // ID User luôn là Guid
+                    UserId = Guid.NewGuid().ToString(),
                     HoTen = model.HoTenChuXe,
                     Email = model.EmailChuXe,
-                    MatKhau = model.MatKhauMacDinh, // Nhớ mã hóa nếu cần
+                    MatKhau = model.MatKhauMacDinh, 
                     TrangThai = TrangThaiNguoiDung.HoatDong,
-                    NhaXeId = nhaXe.NhaXeId // <--- LIÊN KẾT QUAN TRỌNG NHẤT
+                    NhaXeId = nhaXe.NhaXeId 
                 };
                 _context.NguoiDung.Add(chuXe);
 
-                // D. Gán quyền "ChuNhaXe"
-                // Tìm ID của Role "ChuNhaXe" trong DB
                 var roleChuXe = await _context.VaiTro.FirstOrDefaultAsync(r => r.TenVaiTro == "ChuNhaXe");
                 if (roleChuXe != null)
                 {
@@ -85,7 +84,89 @@ namespace AdminDashboard.Areas.Admin.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             return View(model);
+        }
+        public async Task<IActionResult> Edit(string id)
+        {
+            if (id == null) return NotFound();
+
+            var nhaXe = await _context.NhaXe.FindAsync(id);
+            if (nhaXe == null) return NotFound();
+
+            return View(nhaXe);
+        }
+
+        // POST: Xử lý lưu thay đổi
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(string id, AdminDashboard.Models.NhaXe nhaXeInput)
+        {
+            if (id != nhaXeInput.NhaXeId)
+            {
+                return NotFound();
+            }
+            var nhaXeGoc = await _context.NhaXe.FindAsync(id);
+
+            if (nhaXeGoc == null)
+            {
+                return NotFound();
+            }
+            nhaXeGoc.TenNhaXe = nhaXeInput.TenNhaXe;
+            nhaXeGoc.SoDienThoai = nhaXeInput.SoDienThoai;
+            nhaXeGoc.DiaChi = nhaXeInput.DiaChi;
+            nhaXeGoc.TrangThai = nhaXeInput.TrangThai;
+            try
+            {
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!NhaXeExists(nhaXeInput.NhaXeId))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Lỗi khi lưu: " + ex.Message);
+            }
+            return View(nhaXeInput);
+        }
+        // GET: Xác nhận xóa
+        public async Task<IActionResult> Delete(string id)
+        {
+            if (id == null) return NotFound();
+
+            var nhaXe = await _context.NhaXe.FirstOrDefaultAsync(m => m.NhaXeId == id);
+            if (nhaXe == null) return NotFound();
+
+            return View(nhaXe);
+        }
+
+        // POST: Thực hiện xóa
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(string id)
+        {
+            var nhaXe = await _context.NhaXe.FindAsync(id);
+            if (nhaXe != null)
+            {
+                nhaXe.TrangThai = 0; 
+                _context.Update(nhaXe);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+        private bool NhaXeExists(string id)
+        {
+            return (_context.NhaXe?.Any(e => e.NhaXeId == id)).GetValueOrDefault();
         }
     }
 }

@@ -1,0 +1,514 @@
+﻿@model AdminDashboard.Areas.Admin.Models.ThongKeViewModel
+
+@{
+    ViewData["Title"] = "Dashboard Overview";
+}
+
+@section Styles {
+    <style>
+
+        .card-dashboard {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+
+            .card-dashboard:hover {
+                transform: translateY(-3px);
+            }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #212529;
+            margin-bottom: 0;
+        }
+
+            .stat-value h3 {
+                font-size: 1.75rem;
+                font-weight: 700;
+                margin-bottom: 0;
+            }
+
+        .avatar-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+
+        .progress-custom {
+            height: 6px;
+            border-radius: 4px;
+            background-color: #e9ecef;
+        }
+
+        .stat-card {
+            border-radius: 20px;
+            padding: 22px;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.35s ease;
+            cursor: pointer;
+        }
+        /* Doanh thu */
+        .revenue-card {
+            background: linear-gradient(135deg, #6a11cb, #5a2fd4);
+            box-shadow: 0 15px 35px rgba(106, 17, 203, 0.35);
+        }
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(106, 17, 203, 0.45);
+        }
+
+        .stat-card-body {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-labels {
+            font-size: 15px;
+            opacity: 0.85;
+            color: #fff;
+        }
+
+        .stat-values {
+            font-size: 28px;
+            font-weight: 700;
+            margin-top: 6px;
+            color: #fff;
+        }
+
+            .stat-values span {
+                font-size: 15px;
+                opacity: 0.8;
+                color: #fff;
+            }
+
+        .stat-icon {
+            font-size: 60px;
+            opacity: 0.18;
+            transition: transform 0.4s ease;
+        }
+
+        .stat-card:hover .stat-icon {
+            transform: rotate(-10deg) scale(1.1);
+        }
+
+        .stat-card::after {
+            content: "";
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            top: -40px;
+            right: -40px;
+        }
+
+        /* Vé */
+        .sticket-card {
+            border-radius: 20px;
+            padding: 22px;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.35s ease;
+            cursor: pointer;
+        }
+        .stickets-card {
+            background: RGB(13, 110, 253);
+            box-shadow: 0 15px 35px RGB(44, 171, 236, 0.35);
+        }
+
+        .sticket-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px RGB(165, 216, 255, 0.45);
+        }
+        .sticket-card::after {
+            content: "";
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            background: RGB(243, 234, 40, 0.08);
+            border-radius: 50%;
+            top: -40px;
+            right: -40px;
+        }
+
+        /* Khách hàng */
+        .customer-card {
+            border-radius: 20px;
+            padding: 22px;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.35s ease;
+            cursor: pointer;
+        }
+
+        .customers-card {
+            background: RGB(255, 140, 0);
+            box-shadow: 0 15px 35px RGB(252, 196, 25, 0.35);
+        }
+
+        .customer-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px RGB(255, 212, 59, 0.45);
+        }
+
+        .customer-card::after {
+            content: "";
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            background: RGB(255, 192, 120, 0.08);
+            border-radius: 50%;
+            top: -40px;
+            right: -40px;
+        }
+    </style>
+}
+
+<div class="container-fluid py-5 text-center">
+
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card revenue-card h-100">
+                <div class="stat-card-body">
+                    <div class="stat-left">
+                        <div class="stat-labels">Tổng Doanh Thu</div>
+                        <div class="stat-values">
+                            @Model.TongDoanhThu.ToString("N0")
+                            <span>đ</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-icon">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="sticket-card stickets-card h-100">
+                <div class="stat-card-body">
+                    <div class="stat-left">
+                        <div class="stat-labels">Tổng Vé Đã Bán</div>
+                        <div class="stat-values mt-2">
+                            <h3>@Model.TongDonHang</h3>
+                        </div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="bi bi-ticket-perforated-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-dashboard h-100 p-3" style="background-color:antiquewhite">
+                <div class="row align-items-center">
+                    <div class="col-6 text-start">
+                        <div class="stat-label">Chuyến Hôm Nay</div>
+                        <div class="stat-value mt-2">@Model.SoChuyenXeHomNay</div>
+                        <div class="mt-1"><small class="text-muted" style="font-size: 0.75rem">Đang vận hành</small></div>
+                    </div>
+                    <div class="col-6 text-center">
+                        <canvas id="statusChart" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="customer-card customers-card h-100">
+                <div class="stat-card-body">
+                    <div class="stat-left">
+                        <div class="stat-label">Tổng Khách Hàng</div>
+                        <div class="stat-value mt-2">@Model.TongSoNguoiDung</div>
+                    </div>
+                    <div class="text-end">
+                        <i class="bi bi-people-fill fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <a class="card card-dashboard h-100 p-3 text-decoration-none"
+               asp-area="Admin" asp-controller="NhaXe" asp-action="Index">
+                <div class="d-flex justify-content-between">
+                    <div class="text-start">
+                        <div class="stat-label">Đối tác Nhà xe</div>
+                        <div class="stat-value mt-2">
+                            <h3 class="text-dark">@Model.TongNhaXe</h3>
+                        </div>
+                    </div>
+                    <div class="text-primary">
+                        <i class="bi bi-car-front fs-1 opacity-25"></i>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <a class="card card-dashboard h-100 p-3 text-decoration-none"
+               asp-area="Admin" asp-controller="Tram" asp-action="Index">
+                <div class="d-flex justify-content-between">
+                    <div class="text-start">
+                        <div class="stat-label">Trạm</div>
+                        <div class="stat-value mt-2">
+                            <h3 class="text-dark">@Model.TongTram</h3>
+                        </div>
+                    </div>
+                    <div class="text-primary">
+                        <i class="bi bi-playstation fs-1 opacity-25"></i>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-5 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold">Lịch Trình Sắp Chạy</h6>
+                    <span class="badge bg-light text-dark fw-normal border">Hôm nay & Ngày mai</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <tbody>
+                                @if (Model.CacChuyenXeSapChay != null && Model.CacChuyenXeSapChay.Any())
+                                {
+                                    @foreach (var item in Model.CacChuyenXeSapChay)
+                                    {
+                                        <tr>
+                                            <td style="width: 50px;" class="ps-3">
+                                                <div class="avatar-circle text-primary bg-primary-subtle"
+                                                     title="@(item.TenTaiXe ?? "Chưa phân công")">
+                                                    @(string.IsNullOrEmpty(item.TenTaiXe) ? "?" : item.TenTaiXe.Substring(0, 1))
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column text-start">
+                                                    <span class="fw-bold text-dark mb-1" style="font-size: 0.9rem;">
+                                                        @if (item.TenLoTrinh.Contains("➝"))
+                                                        {
+                                                            var trams = item.TenLoTrinh.Split("➝");
+                                                            <span class="text-secondary">@trams[0]</span>
+                                                            <i class="bi bi-arrow-right-short text-primary mx-1 fw-bold"></i>
+                                                            <span class="text-dark">@trams[1]</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            @item.TenLoTrinh
+                                                        }
+                                                    </span>
+                                                    <small class="text-muted" style="font-size: 0.75rem;">
+                                                        <i class="bi bi-person-badge"></i> @(item.TenTaiXe ?? "Đang xếp tài")
+                                                        <span class="mx-2">|</span>
+                                                        <i class="bi bi-calendar-event"></i> @item.NgayDi.ToString("dd/MM")
+                                                    </small>
+                                                </div>
+                                            </td>
+                                            <td class="text-end pe-3" style="min-width: 140px;">
+                                                <div class="d-flex justify-content-between mb-1 align-items-center">
+                                                    <span class="badge bg-white text-dark border shadow-sm">
+                                                        <i class="bi bi-clock"></i> @item.GioDi.ToString(@"hh\:mm")
+                                                    </span>
+                                                    <small class="text-muted fw-bold" style="font-size: 0.75rem;">@item.PhanTramLapDay%</small>
+                                                </div>
+                                                <div class="progress progress-custom">
+                                                    <div class="progress-bar bg-primary" role="progressbar" style="width: @item.PhanTramLapDay%"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="3" class="text-center py-5">
+                                            <div class="text-muted fst-italic">Chưa có chuyến xe nào sắp khởi hành.</div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold">Biểu Đồ Doanh Thu (7 Ngày)</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueChart" style="height: 300px; width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-dashboard">
+                <div class="card-header bg-white border-0 py-3 d-flex justify-content-between">
+                    <h6 class="mb-0 fw-bold">Tuyến Đường Phổ Biến Nhất</h6>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead class="text-muted small text-uppercase bg-light">
+                                <tr>
+                                    <th class="ps-3 border-0">Tên Tuyến</th>
+                                    <th class="border-0">Doanh Thu</th>
+                                    <th class="border-0">Số Vé Bán</th>
+                                    <th class="text-end pe-3 border-0">Tỷ lệ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.TopLoTrinh != null && Model.TopLoTrinh.Any())
+                                {
+                                    @foreach (var route in Model.TopLoTrinh)
+                                    {
+                                        <tr>
+                                            <td class="fw-bold text-start ps-3">
+                                                @if (route.TenLoTrinh.Contains("➝"))
+                                                {
+                                                    var trams = route.TenLoTrinh.Split("➝");
+                                                    <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                                                    <span class="text-secondary">@trams[0]</span>
+                                                    <i class="bi bi-arrow-right-short text-primary mx-1"></i>
+                                                    <span class="text-dark">@trams[1]</span>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-geo-alt-fill text-danger me-2"></i> @route.TenLoTrinh
+                                                }
+                                            </td>
+                                            <td class="fw-bold text-success">@route.DoanhThu.ToString("N0") đ</td>
+                                            <td>@route.SoVeBan vé</td>
+                                            <td class="text-end pe-3">
+                                                <div class="d-flex align-items-center justify-content-end">
+                                                    <div class="progress progress-custom w-50">
+                                                        <div class="progress-bar bg-success" style="width: 85%"></div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // --- 1. BIỂU ĐỒ ĐƯỜNG (Line Chart) - DOANH THU ---
+            const ctxRevenue = document.getElementById('revenueChart');
+            if (ctxRevenue) {
+                // Kiểm tra dữ liệu an toàn trước khi parse JSON
+                const labelsRevenue = @Html.Raw(Json.Serialize(Model.LabelsBieuDo));
+                const dataRevenue = @Html.Raw(Json.Serialize(Model.DataBieuDo));
+
+                const ctxRev2d = ctxRevenue.getContext('2d');
+                let gradient = ctxRev2d.createLinearGradient(0, 0, 0, 400);
+                gradient.addColorStop(0, 'rgba(13, 110, 253, 0.2)');
+                gradient.addColorStop(1, 'rgba(13, 110, 253, 0)');
+
+                new Chart(ctxRev2d, {
+                    type: 'line',
+                    data: {
+                        labels: labelsRevenue,
+                        datasets: [{
+                            label: 'Doanh thu',
+                            data: dataRevenue,
+                            borderColor: '#0d6efd',
+                            backgroundColor: gradient,
+                            borderWidth: 2,
+                            pointBackgroundColor: '#fff',
+                            pointBorderColor: '#0d6efd',
+                            pointRadius: 4,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { borderDash: [2, 4] } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            // --- 2. BIỂU ĐỒ TRÒN (Doughnut) - TRẠNG THÁI ---
+            const ctxStatus = document.getElementById('statusChart');
+            if (ctxStatus) {
+                const statusData = @Html.Raw(Json.Serialize(Model.StatusData));
+                const statusLabels = @Html.Raw(Json.Serialize(Model.StatusLabels));
+
+                new Chart(ctxStatus.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: statusLabels,
+                        datasets: [{
+                            data: statusData,
+                            backgroundColor: ['#0d6efd', '#ffc107', '#198754', '#dc3545'],
+                            borderWidth: 0,
+                            cutout: '75%'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                enabled: true,
+                                callbacks: {
+                                    label: function (context) {
+                                        return ' ' + context.label + ': ' + context.raw + ' chuyến';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}

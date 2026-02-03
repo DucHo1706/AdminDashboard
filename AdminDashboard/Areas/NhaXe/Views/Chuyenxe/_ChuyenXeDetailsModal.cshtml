@@ -1,0 +1,96 @@
+﻿@using AdminDashboard.Models.TrangThai
+@using AdminDashboard.Helpers
+@model AdminDashboard.Models.ChuyenXe
+
+<div class="modal-header bg-primary text-white">
+    <h5 class="modal-title">
+        <i class="bi bi-bus-front-fill me-2"></i>Chi tiết chuyến xe
+    </h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal-body p-0">
+    <div class="table-responsive">
+        <table class="table table-bordered mb-0 align-middle">
+            <thead class="bg-light text-secondary small">
+                <tr>
+                    <th class="ps-3">Giờ</th>
+                    <th>Lộ Trình</th>
+                    <th>Xe & Ảnh</th>
+                    <th>Tài xế</th>
+                    <th>Trạng Thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="ps-3 fw-bold text-primary">
+                        @Model.GioDi.ToString(@"hh\:mm")
+                        <div class="small text-muted fw-normal">@Model.NgayDi.ToString("dd/MM")</div>
+                    </td>
+
+                    <td>
+                        <div class="fw-bold text-dark">
+                            @(Model.LoTrinh?.TramDiNavigation?.TenTram)
+                            <i class="bi bi-arrow-right small text-muted mx-1"></i>
+                            @(Model.LoTrinh?.TramToiNavigation?.TenTram)
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="d-flex align-items-center">
+                            @if (Model.Images != null && Model.Images.Any())
+                            {
+                                <img src="@Model.Images.First().ImageUrl" class="rounded border me-2" style="width:50px; height:35px; object-fit:cover;" />
+                            }
+                            else
+                            {
+                                <div class="rounded border me-2 d-flex align-items-center justify-content-center bg-light text-muted small" style="width:50px; height:35px;">No IMG</div>
+                            }
+                            <div>
+                                <span class="badge bg-light text-dark border d-block">@Model.Xe?.BienSoXe</span>
+                                <small class="text-muted" style="font-size: 10px;">@Model.Xe?.LoaiXe?.TenLoaiXe</small>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        @if (string.IsNullOrEmpty(Model.TaiXeId))
+                        {
+                            <span class="text-danger small fst-italic">Chưa phân công</span>
+                        }
+                        else
+                        {
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold text-primary small">
+                                    <i class="bi bi-person-badge me-1"></i>@Model.TaiXe?.HoTen
+                                </span>
+                                <small class="text-muted" style="font-size: 0.75em;">
+                                    <i class="bi bi-telephone me-1"></i>@Model.TaiXe?.SoDienThoai
+                                </small>
+                            </div>
+                        }
+                    </td>
+
+                    <td>
+                        <span class="badge @(Model.TrangThai == TrangThaiChuyenXe.DangMoBanVe ? "bg-success" :
+                                            Model.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh ? "bg-warning text-dark" :
+                                            Model.TrangThai == TrangThaiChuyenXe.DaHuy ? "bg-danger" : "bg-secondary")">
+                            @Model.TrangThai.GetDisplayName()
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal-footer bg-light">
+    <a href="@Url.Action("Edit", "Chuyenxe", new { area = "NhaXe", id = Model.ChuyenId })" class="btn btn-sm btn-outline-success">
+        <i class="bi bi-pencil"></i> Chỉnh sửa
+    </a>
+
+    <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete('@Model.ChuyenId')">
+        <i class="bi bi-trash"></i> Xóa
+    </button>
+
+</div>

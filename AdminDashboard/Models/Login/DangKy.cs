@@ -5,6 +5,8 @@ namespace AdminDashboard.Models.Login
     public class DangKy
     {  
         [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
+        [Required(ErrorMessage = "Vui lòng nhập số điện thoại")]
+        [RegularExpression(@"^[0-9]{10}$", ErrorMessage = "Số điện thoại phải gồm 10 chữ số")]
         public string? SoDienThoai { get; set; }
 
         [Required(ErrorMessage = "Email bắt buộc")]

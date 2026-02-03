@@ -4,6 +4,7 @@ using AdminDashboard.Hubs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using CloudinaryDotNet;
+using AdminDashboard.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,8 +35,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<AdminDashboard.Services.IChuyenXeService, AdminDashboard.Services.ChuyenXeService>();
 builder.Services.AddScoped<AdminDashboard.Services.INhanVienService, AdminDashboard.Services.NhanVienService>();
 builder.Services.AddScoped<AdminDashboard.Services.IBanVeService, AdminDashboard.Services.BanVeService>();
-
-
+builder.Services.AddScoped<IVeRepository, VeRepository>();
 var cloudinaryConfig = builder.Configuration.GetSection("Cloudinary");
 var cloudName = cloudinaryConfig["CloudName"];
 var apiKey = cloudinaryConfig["ApiKey"];
@@ -92,6 +92,7 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+AdminDashboard.Patterns.VnPayConfiguration.Instance.Initialize(app.Configuration);
 
 app.MapHub<ChatHub>("/chathub"); 
 
