@@ -1,70 +1,26 @@
 Website Quản lý đặt vé xe sử dụng asp.net sql sever 
 Công nghệ sử dụng: Asp.net ngôn ngữ c#, database SqlSever , Host SQL SERVER Monsterasp.net
 Tài liệu Đồ án 
-Link DBcontext 
-Fluent API 
-https://learn.microsoft.com/en-us/ef/ef6/modeling/code-first/fluent/types-and-properties
 
 Thư viện cần tải 
 <img width="2877" height="1689" alt="image" src="https://github.com/user-attachments/assets/c824e419-a4cb-4486-bb3b-43e7d0d4d62a" />
 <img width="1320" height="296" alt="image" src="https://github.com/user-attachments/assets/25f3c395-c65f-4c9c-a76a-e165b2d74211" />
-"Chức Năng Cần làm "
-Ban quản trị:
-Đăng nhập
 
-Thêm xóa sửa
 
-Đăng xuất
+Tài khoản admin : admin@gmail.com 
 
-Quản lý vé
+Mật khẩu : 123456789@duc
 
-Quản lý bài viết
+Tài khoản nhà xe : trang@gmail.com 
 
-Quản lý tài khoản khách hàng
+Mật khẩu : 123456789@phuongtrang	 
 
-Quản lý menu
+Tài khoản khách hàng có thể tự tạo 
 
-Quản lý đơn hàng
+Tài khoản tài xế : nhanvienpt2@gmail.com
 
-Quản lý lịch trình chuyến đi
+Mật khẩu : 123456789@duc 
 
-Quản lý thông tin cá nhân
+Tài khoản Nhân viên bán vé xe : 	nhanvienpt@gmail.com
 
-Thành viên:
-Đăng nhập
-
-Đăng xuất
-
-Tìm kiếm
-
-Đặt vé
-
-Hủy Vé
-
-Thanh toán
-
-Lịch sử đặt vé
-
-Xem chi tiết vé và chuyến đi
-
-Xem danh sách chuyến đi trong ngày
-
-Xem danh sách tất cả chuyến đi
-
-Quản lý thông tin cá nhân
-
-Khách:
-Xem vé (xem chuyến đi)
-
-Tạo tài khoản
-
-Tìm kiếm
-
-Xem bài viết
-
-=====================================================
-
-"Chức Năng Đã có "
-Đăng nhập
-Đăng ký 
-Đăng xuất 
+Mật khẩu : 123456789@duc 
