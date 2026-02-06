@@ -1,4 +1,5 @@
-﻿using AdminDashboard.Models;
+﻿using AdminDashboard.Facades;
+using AdminDashboard.Models;
 using AdminDashboard.Models.TrangThai;
 using AdminDashboard.Models.ViewModels;
 using AdminDashboard.TransportDBContext;
@@ -12,86 +13,25 @@ namespace AdminDashboard.Controllers
     public class Home_UserController : Controller
     {
         private readonly Db27524Context _context;
+        private readonly IHomeFacade _homeFacade; 
 
-        public Home_UserController(Db27524Context context)
+        public Home_UserController(Db27524Context context, IHomeFacade homeFacade)
         {
             _context = context;
+            _homeFacade = homeFacade;
         }
 
         public IActionResult Home_User()
         {
-            // 1. Dropdown trạm (Giữ nguyên)
             var danhSachTram = _context.Tram.ToList();
             ViewBag.DanhSachTram = new SelectList(danhSachTram, "IdTram", "TenTram");
 
-            var today = DateTime.Today; // Lấy ngày hôm nay (00:00:00)
+            // 2. Sử dụng Facade để lấy dữ liệu phức tạp
+            ViewBag.RoutesByDeparture = _homeFacade.LayTuyenXeNoiBat();
 
-            // ---------------------------------------------------------------------
-            // PHẦN 1: LẤY DỮ LIỆU ĐỂ TẠO "TUYẾN XE NỔI BẬT" (ViewBag)
-            // (Vẫn lấy các chuyến >= hôm nay để gom nhóm hiển thị cho đẹp)
-            // ---------------------------------------------------------------------
-            var allUpcomingTrips = _context.ChuyenXe
-                .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramDiNavigation)
-                .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramToiNavigation)
-                .Include(c => c.Images)
-                .Where(c => c.NgayDi.Date >= today &&
-                            c.TrangThai == TrangThaiChuyenXe.DangMoBanVe)
-                .ToList();
+            // 3. Lấy chuyến xe hôm nay qua Facade
+            var tripsToday = _homeFacade.LayChuyenXeHomNay();
 
-            // Logic gom nhóm Tuyến xe (Giữ nguyên logic của bạn)
-            var routesByDeparture = allUpcomingTrips
-                .Where(c => c.LoTrinh?.TramDiNavigation != null)
-                .GroupBy(c => new {
-                    TenTram = c.LoTrinh.TramDiNavigation.TenTram,
-                    Tinh = c.LoTrinh.TramDiNavigation.Tinh ?? "",
-                    ImageUrl = c.Images?.FirstOrDefault()?.ImageUrl ?? "/images/slider/hcm.png"
-                })
-                .Select(g => new TuyenXeViewModel
-                {
-                    Tinh = g.Key.Tinh,
-                    TenTram = g.Key.TenTram,
-                    ImageUrl = g.Key.ImageUrl,
-                    TuyenXe = g.Where(c => c.LoTrinh?.TramToiNavigation != null)
-                        .GroupBy(c => c.LoTrinh.TramToiNavigation.TenTram)
-                        .Select(group => group.OrderBy(c => c.NgayDi).ThenBy(c => c.GioDi).First())
-                        .Select(c => new TuyenXeItemViewModel
-                        {
-                            ChuyenId = c.ChuyenId,
-                            DiemDen = c.LoTrinh.TramToiNavigation.TenTram,
-                            NgayDi = c.NgayDi,
-                            GioDi = c.GioDi,
-                            GioDenDuKien = c.GioDenDuKien,
-                            ThoiGian = (c.GioDenDuKien - c.GioDi).TotalHours >= 1
-                                ? $"{(int)(c.GioDenDuKien - c.GioDi).TotalHours} giờ"
-                                : $"{(int)((c.GioDenDuKien - c.GioDi).TotalMinutes)} phút",
-                            GiaVe = c.LoTrinh.GiaVeCoDinh ?? 0,
-                            ImageUrl = c.Images?.FirstOrDefault()?.ImageUrl ?? g.Key.ImageUrl
-                        })
-                        .OrderBy(t => t.DiemDen)
-                        .Take(3)
-                        .ToList()
-                })
-                .Where(r => r.TuyenXe != null && r.TuyenXe.Any())
-                .Take(3)
-                .ToList();
-
-            ViewBag.RoutesByDeparture = routesByDeparture;
-
-            // ---------------------------------------------------------------------
-            // PHẦN 2: LẤY DỮ LIỆU "CHUYẾN XE HÔM NAY" (Model chính trả về View)
-            // (Chỉ lấy chính xác ngày hôm nay để hiển thị list bên dưới)
-            // ---------------------------------------------------------------------
-            var tripsToday = _context.ChuyenXe
-                .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramDiNavigation)
-                .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramToiNavigation)
-                .Include(c => c.Xe).ThenInclude(x => x.LoaiXe) // Include loại xe để hiển thị
-                .Include(c => c.Images)
-                .Where(c => c.NgayDi.Date == today && // <--- QUAN TRỌNG: Chỉ lấy ngày hôm nay
-                            c.TrangThai == TrangThaiChuyenXe.DangMoBanVe)
-                .OrderBy(c => c.GioDi) // Sắp xếp theo giờ chạy
-                .ToList();
-
-            // Trả về danh sách chuyến hôm nay cho Model
             return View(tripsToday);
         }
 
@@ -175,7 +115,7 @@ namespace AdminDashboard.Controllers
             }
         }
 
-        public async Task<IActionResult> PurchaseHistory()
+        public IActionResult PurchaseHistory()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
@@ -183,14 +123,9 @@ namespace AdminDashboard.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            var donHangs = await _context.DonHang
-                .Where(d => d.IDKhachHang == userId)
-                .Include(d => d.ChuyenXe).ThenInclude(cx => cx.LoTrinh).ThenInclude(lt => lt.TramDiNavigation)
-                .Include(d => d.ChuyenXe).ThenInclude(cx => cx.LoTrinh).ThenInclude(lt => lt.TramToiNavigation)
-                .OrderByDescending(d => d.NgayDat)
-                .ToListAsync();
+            var viewModel = _homeFacade.LayLichSuDonHang(userId);
 
-            return View(donHangs);
+            return View(viewModel);
         }
 
         public IActionResult ChuyenXe_User()

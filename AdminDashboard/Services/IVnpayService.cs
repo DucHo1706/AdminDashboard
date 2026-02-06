@@ -1,5 +1,6 @@
 ﻿using AdminDashboard.Helpers;
 using AdminDashboard.Models;
+using AdminDashboard.Patterns;
 
 namespace AdminDashboard.Services
 {
@@ -21,17 +22,15 @@ namespace AdminDashboard.Services
             var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
 
-            // Lấy các thông số từ appsettings.json
             var pay = new VnpayLibrary();
-            var urlCallBack = _config["Vnpay:ReturnUrl"];
-            var tmnCode = _config["Vnpay:TmnCode"];
-            var hashSecret = _config["Vnpay:HashSecret"];
+            var urlCallBack = VnPayConfiguration.Instance.ReturnUrl;
+            var tmnCode = VnPayConfiguration.Instance.TmnCode;
+            var hashSecret = VnPayConfiguration.Instance.HashSecret;
 
-            // Thêm các tham số cần thiết vào VnpayLibrary
             pay.AddRequestData("vnp_Version", "2.1.0");
             pay.AddRequestData("vnp_Command", "pay");
             pay.AddRequestData("vnp_TmnCode", tmnCode);
-            pay.AddRequestData("vnp_Amount", ((long)donHang.TongTien * 100).ToString()); // Số tiền * 100 vì VNPay yêu cầu đơn vị là đồng
+            pay.AddRequestData("vnp_Amount", ((long)donHang.TongTien * 100).ToString()); 
             pay.AddRequestData("vnp_CreateDate", timeNow.ToString("yyyyMMddHHmmss"));
             pay.AddRequestData("vnp_CurrCode", "VND");
             pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(context));
@@ -39,10 +38,10 @@ namespace AdminDashboard.Services
             pay.AddRequestData("vnp_OrderInfo", $"Thanh toan don hang {donHang.DonHangId}");
             pay.AddRequestData("vnp_OrderType", "other");
             pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
-            pay.AddRequestData("vnp_TxnRef", donHang.DonHangId.ToString()); // Mã tham chiếu của giao dịch. Chính là Mã đơn hàng
+            pay.AddRequestData("vnp_TxnRef", donHang.DonHangId.ToString()); 
 
             // Tạo URL thanh toán
-            var paymentUrl = pay.CreateRequestUrl(_config["Vnpay:BaseUrl"], hashSecret);
+            var paymentUrl = pay.CreateRequestUrl(VnPayConfiguration.Instance.BaseUrl, hashSecret);
 
             return paymentUrl;
         }
