@@ -6,7 +6,6 @@
 
 @section Styles {
     <style>
-        /* CSS riêng cho trang chủ */
         .banner {
             padding: 30px 0;
         }
@@ -451,7 +450,7 @@
         </div>
     }
 
-    <div id="DanhSachChuyenXe" class="mt-5" style="@(ViewBag.RoutesByDeparture != null && ((List<AdminDashboard.Models.ViewModels.TuyenXeViewModel>)ViewBag.RoutesByDeparture).Any() ? "display: none;" : "")">
+    @* <div id="DanhSachChuyenXe" class="mt-5" style="@(ViewBag.RoutesByDeparture != null && ((List<AdminDashboard.Models.ViewModels.TuyenXeViewModel>)ViewBag.RoutesByDeparture).Any() ? "display: none;" : "")">
         @if (Model != null && Model.Any())
         {
             <div class="row">
@@ -491,8 +490,245 @@
         {
             <div class="alert alert-info text-center mt-4">Không tìm thấy chuyến xe nào phù hợp.</div>
         }
-    </div>
+    </div> *@
 </div>
+
+
+<div class="container mt-5 background">
+    <div class="text-center mb-5">
+        <h2 style="color: #3f4c6b; font-weight: bold;">CHUYẾN XE HÔM NAY</h2>
+        <p class="text-muted fs-5">
+            <i class="bi bi-calendar-event me-2"></i>
+            @DateTime.Now.ToString("dd/MM/yyyy")
+        </p>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var cx in Model)
+            {
+                <div class="col">
+                    <div class="trip-result-card h-100">
+                        <div class="card-body-trip">
+                            <div class="trip-route-section">
+                                <div class="route-info">
+                                    <div class="route-start">
+                                        <div class="time-badge">@cx.GioDi.ToString(@"hh\:mm")</div>
+                                        <div class="station-name text-truncate" title="@cx.LoTrinh?.TramDiNavigation?.TenTram">
+                                            @cx.LoTrinh?.TramDiNavigation?.TenTram
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="route-arrow">
+                                        <div class="route-duration">
+                                            @((cx.GioDenDuKien - cx.GioDi).ToString(@"hh\:mm"))
+                                        </div>
+                                        <div class="arrow-line">
+                                            <i class="bi bi-arrow-right"></i>
+                                        </div>
+                                        <div class="bus-type text-truncate">
+                                            @cx.Xe?.LoaiXe?.TenLoaiXe
+                                        </div>
+                                    </div>
+
+                                    <div class="route-end">
+                                        <div class="time-badge">@cx.GioDenDuKien.ToString(@"hh\:mm")</div>
+                                        <div class="station-name text-truncate" title="@cx.LoTrinh?.TramToiNavigation?.TenTram">
+                                            @cx.LoTrinh?.TramToiNavigation?.TenTram
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="trip-details-section">
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="detail-item">
+                                        <i class="bi bi-calendar3"></i>
+                                        <span>@cx.NgayDi.ToString("dd/MM/yyyy")</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="bi bi-car-front"></i>
+                                        <span>@cx.Xe?.BienSoXe</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="price-section mt-2">
+                                    <span class="price-label">Giá vé:</span>
+                                    <span class="price-value">@String.Format("{0:N0} đ", cx.LoTrinh?.GiaVeCoDinh)</span>
+                                </div>
+                            </div>
+
+                            <div class="trip-action-section">
+                                <a asp-page="/Booking/ChonGhe" 
+                                   asp-route-chuyenId="@cx.ChuyenId" 
+                                   class="btn-select-trip w-100 justify-content-center">
+                                    <i class="bi bi-ticket-perforated me-2"></i>
+                                    Đặt vé ngay
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <img src="https://cdn-icons-png.flaticon.com/512/7486/7486747.png" alt="No Bus" style="width: 100px; opacity: 0.5">
+            <h5 class="text-muted mt-3">Hôm nay không có chuyến xe nào khởi hành.</h5>
+            <p>Vui lòng chọn ngày khác hoặc quay lại sau.</p>
+        </div>
+    }
+</div>
+
+<style>
+    .trip-result-card {
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        border: 1px solid #f0f0f0;
+    }
+
+    .trip-result-card:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        transform: translateY(-5px);
+    }
+
+    .card-body-trip {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .trip-route-section {
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+    }
+
+    .route-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 5px;
+    }
+
+    .route-start, .route-end {
+        flex: 1;
+        text-align: center;
+        min-width: 0;
+    }
+
+    .time-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: inline-block;
+    }
+
+    .station-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .route-arrow {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        width: 60px;
+    }
+
+    .route-duration {
+        font-size: 12px;
+        color: #666;
+    }
+
+    .arrow-line {
+        font-size: 20px;
+        color: #FF6600;
+    }
+
+    .bus-type {
+        font-size: 11px;
+        color: #888;
+        background: #f8f9fa;
+        padding: 2px 8px;
+        border-radius: 10px;
+        max-width: 100%;
+    }
+
+    .trip-details-section {
+        margin-bottom: 15px;
+        flex-grow: 1;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #666;
+        font-size: 14px;
+    }
+
+    .detail-item i {
+        color: #FF6600;
+    }
+
+    .price-section {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #fff5f0;
+        padding: 8px 12px;
+        border-radius: 8px;
+    }
+
+    .price-label {
+        font-size: 13px;
+        color: #666;
+    }
+
+    .price-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: #FF6600;
+    }
+
+    .trip-action-section {
+        margin-top: auto;
+    }
+
+    .btn-select-trip {
+        background: linear-gradient(135deg, #FF6600 0%, #FF9933 100%);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(255, 102, 0, 0.3);
+    }
+
+    .btn-select-trip:hover {
+        background: linear-gradient(135deg, #FF9933 0%, #FF6600 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(255, 102, 0, 0.4);
+        color: white;
+    }
+</style>
 
 <div class="container mt-5 background">
     <h2 class="text-center mb-4">ĐIỂM NỔI BẬT</h2>

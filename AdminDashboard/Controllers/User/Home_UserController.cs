@@ -20,32 +20,28 @@ namespace AdminDashboard.Controllers
 
         public IActionResult Home_User()
         {
-            // Lấy tất cả các trạm để hiển thị trong dropdown
+            // 1. Dropdown trạm (Giữ nguyên)
             var danhSachTram = _context.Tram.ToList();
-
-            // Dùng ViewBag hoặc ViewModel để truyền danh sách này ra View
             ViewBag.DanhSachTram = new SelectList(danhSachTram, "IdTram", "TenTram");
 
-            // Tải các chuyến xe sắp tới để hiển thị trên trang Home User
-            var today = DateTime.Today;
-            var upcomingTrips = _context.ChuyenXe
-                .Include(c => c.LoTrinh)
-                    .ThenInclude(lt => lt.TramDiNavigation)
-                .Include(c => c.LoTrinh)
-                    .ThenInclude(lt => lt.TramToiNavigation)
-                .Include(c => c.Xe)
-                    .ThenInclude(x => x.LoaiXe)
+            var today = DateTime.Today; // Lấy ngày hôm nay (00:00:00)
+
+            // ---------------------------------------------------------------------
+            // PHẦN 1: LẤY DỮ LIỆU ĐỂ TẠO "TUYẾN XE NỔI BẬT" (ViewBag)
+            // (Vẫn lấy các chuyến >= hôm nay để gom nhóm hiển thị cho đẹp)
+            // ---------------------------------------------------------------------
+            var allUpcomingTrips = _context.ChuyenXe
+                .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramDiNavigation)
+                .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramToiNavigation)
                 .Include(c => c.Images)
                 .Where(c => c.NgayDi.Date >= today &&
-                            c.TrangThai == TrangThaiChuyenXe.DangMoBanVe) 
-                .OrderBy(c => c.NgayDi)
-                .ThenBy(c => c.GioDi)
+                            c.TrangThai == TrangThaiChuyenXe.DangMoBanVe)
                 .ToList();
 
-            // Nhóm chuyến xe theo điểm đi (Tên trạm)
-            var routesByDeparture = upcomingTrips
+            // Logic gom nhóm Tuyến xe (Giữ nguyên logic của bạn)
+            var routesByDeparture = allUpcomingTrips
                 .Where(c => c.LoTrinh?.TramDiNavigation != null)
-                .GroupBy(c => new { 
+                .GroupBy(c => new {
                     TenTram = c.LoTrinh.TramDiNavigation.TenTram,
                     Tinh = c.LoTrinh.TramDiNavigation.Tinh ?? "",
                     ImageUrl = c.Images?.FirstOrDefault()?.ImageUrl ?? "/images/slider/hcm.png"
@@ -55,8 +51,7 @@ namespace AdminDashboard.Controllers
                     Tinh = g.Key.Tinh,
                     TenTram = g.Key.TenTram,
                     ImageUrl = g.Key.ImageUrl,
-                    TuyenXe = g
-                        .Where(c => c.LoTrinh?.TramToiNavigation != null)
+                    TuyenXe = g.Where(c => c.LoTrinh?.TramToiNavigation != null)
                         .GroupBy(c => c.LoTrinh.TramToiNavigation.TenTram)
                         .Select(group => group.OrderBy(c => c.NgayDi).ThenBy(c => c.GioDi).First())
                         .Select(c => new TuyenXeItemViewModel
@@ -66,23 +61,38 @@ namespace AdminDashboard.Controllers
                             NgayDi = c.NgayDi,
                             GioDi = c.GioDi,
                             GioDenDuKien = c.GioDenDuKien,
-                            ThoiGian = (c.GioDenDuKien - c.GioDi).TotalHours >= 1 
-                                ? $"{(int)(c.GioDenDuKien - c.GioDi).TotalHours} giờ" 
+                            ThoiGian = (c.GioDenDuKien - c.GioDi).TotalHours >= 1
+                                ? $"{(int)(c.GioDenDuKien - c.GioDi).TotalHours} giờ"
                                 : $"{(int)((c.GioDenDuKien - c.GioDi).TotalMinutes)} phút",
                             GiaVe = c.LoTrinh.GiaVeCoDinh ?? 0,
                             ImageUrl = c.Images?.FirstOrDefault()?.ImageUrl ?? g.Key.ImageUrl
                         })
                         .OrderBy(t => t.DiemDen)
-                        .Take(3) // Lấy tối đa 3 tuyến đầu tiên
+                        .Take(3)
                         .ToList()
                 })
-                .Where(r => r.TuyenXe != null && r.TuyenXe.Any()) // Chỉ lấy những nhóm có tuyến
-                .Take(3) // Lấy tối đa 3 điểm đi
+                .Where(r => r.TuyenXe != null && r.TuyenXe.Any())
+                .Take(3)
                 .ToList();
 
             ViewBag.RoutesByDeparture = routesByDeparture;
 
-            return View(upcomingTrips);
+            // ---------------------------------------------------------------------
+            // PHẦN 2: LẤY DỮ LIỆU "CHUYẾN XE HÔM NAY" (Model chính trả về View)
+            // (Chỉ lấy chính xác ngày hôm nay để hiển thị list bên dưới)
+            // ---------------------------------------------------------------------
+            var tripsToday = _context.ChuyenXe
+                .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramDiNavigation)
+                .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramToiNavigation)
+                .Include(c => c.Xe).ThenInclude(x => x.LoaiXe) // Include loại xe để hiển thị
+                .Include(c => c.Images)
+                .Where(c => c.NgayDi.Date == today && // <--- QUAN TRỌNG: Chỉ lấy ngày hôm nay
+                            c.TrangThai == TrangThaiChuyenXe.DangMoBanVe)
+                .OrderBy(c => c.GioDi) // Sắp xếp theo giờ chạy
+                .ToList();
+
+            // Trả về danh sách chuyến hôm nay cho Model
+            return View(tripsToday);
         }
 
         public async Task<IActionResult> Account()
@@ -153,15 +163,6 @@ namespace AdminDashboard.Controllers
             user.SoDienThoai = model.SoDienThoai;
             user.NgaySinh = model.NgaySinh;
 
-            var khachHang = await _context.NguoiDung.FirstOrDefaultAsync(kh => kh.UserId == userId);
-            if (khachHang != null)
-            {
-                khachHang.HoTen = model.HoTen;
-                khachHang.Email = model.Email;
-                khachHang.SoDienThoai = model.SoDienThoai;
-                khachHang.NgaySinh = model.NgaySinh;
-            }
-
             try
             {
                 await _context.SaveChangesAsync();
@@ -174,8 +175,6 @@ namespace AdminDashboard.Controllers
             }
         }
 
-
-
         public async Task<IActionResult> PurchaseHistory()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -183,9 +182,6 @@ namespace AdminDashboard.Controllers
             {
                 return RedirectToAction("Login", "Auth");
             }
-
-            // Giữ nguyên các đơn hết hạn ở trạng thái Chờ thanh toán để hiển thị bên "Hiện tại".
-            // Không auto-cancel và không giải phóng ghế tại đây; việc hủy sẽ do người dùng hoặc tác vụ khác xử lý.
 
             var donHangs = await _context.DonHang
                 .Where(d => d.IDKhachHang == userId)
@@ -196,7 +192,7 @@ namespace AdminDashboard.Controllers
 
             return View(donHangs);
         }
-        // GET: ChuyenXe/DanhSach
+
         public IActionResult ChuyenXe_User()
         {
             ViewBag.DanhSachTram = new SelectList(_context.Tram, "IdTram", "TenTram");
@@ -224,7 +220,6 @@ namespace AdminDashboard.Controllers
                          || c.TrangThai == TrangThaiChuyenXe.DaLenLich)
                 .AsQueryable();
 
-            // So sánh theo ID Trạm vì dropdown chọn IdTram
             if (!string.IsNullOrEmpty(diemDi))
                 query = query.Where(c => c.LoTrinh.TramDi == diemDi);
 
@@ -241,6 +236,7 @@ namespace AdminDashboard.Controllers
 
             return PartialView("_DanhSachChuyenXe", ketQua);
         }
+
         public IActionResult About()
         {
             return View();
