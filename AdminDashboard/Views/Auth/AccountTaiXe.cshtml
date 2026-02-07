@@ -253,14 +253,6 @@
                                 </div>
                             </div>
 
-                            @if(User.IsInRole("TaiXe") || User.IsInRole("Admin"))
-                            {
-                                <div class="info-group">
-                                    <h6 class="text-uppercase text-muted mb-3" style="font-size: 0.75rem; letter-spacing: 1px; font-weight: 700;">Thông tin nghiệp vụ</h6>
-                                    @await Component.InvokeAsync("TaiXeInfo", new { userId = Model.UserId })
-                                </div>
-                            }
-
                             <div class="text-center">
                                 <button id="btnShowForm" class="btn btn-main"><i class="bi bi-pencil-square me-2"></i>Cập nhật hồ sơ</button>
                             </div>
