@@ -1,11 +1,15 @@
 ﻿using AdminDashboard.Models;
 
-public class SortByDateStrategy : ISortStrategy
+namespace AdminDashboard.Patterns.Strategy
 {
-    public List<ChuyenXe> Sort(List<ChuyenXe> data)
+    public class SortByDateStrategy : ISortStrategy
     {
-        return data.OrderBy(c => c.NgayDi)
-                   .ThenBy(c => c.GioDi)
-                   .ToList();
+        public List<ChuyenXe> Sort(List<ChuyenXe> data)
+        {
+            return data.OrderBy(c => c.NgayDi)
+                       .ThenBy(c => c.GioDi)
+                       .ToList();
+        }
     }
 }
+
