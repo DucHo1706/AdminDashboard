@@ -3,6 +3,9 @@ using AdminDashboard.Models;
 using AdminDashboard.Models.TrangThai;
 using AdminDashboard.Models.ViewModels;
 using AdminDashboard.TransportDBContext;
+using AdminDashboard.Patterns.Command;
+using AdminDashboard.Patterns.Strategy;
+using AdminDashboard.Patterns.Observer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +16,7 @@ namespace AdminDashboard.Controllers
     public class Home_UserController : Controller
     {
         private readonly Db27524Context _context;
-        private readonly IHomeFacade _homeFacade; 
+        private readonly IHomeFacade _homeFacade;
 
         public Home_UserController(Db27524Context context, IHomeFacade homeFacade)
         {
@@ -26,10 +29,7 @@ namespace AdminDashboard.Controllers
             var danhSachTram = _context.Tram.ToList();
             ViewBag.DanhSachTram = new SelectList(danhSachTram, "IdTram", "TenTram");
 
-            // 2. Sử dụng Facade để lấy dữ liệu phức tạp
             ViewBag.RoutesByDeparture = _homeFacade.LayTuyenXeNoiBat();
-
-            // 3. Lấy chuyến xe hôm nay qua Facade
             var tripsToday = _homeFacade.LayChuyenXeHomNay();
 
             return View(tripsToday);
@@ -39,17 +39,13 @@ namespace AdminDashboard.Controllers
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
-            {
                 return RedirectToAction("Login", "Auth");
-            }
 
             var user = await _context.NguoiDung
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (user == null)
-            {
                 return NotFound("Không tìm thấy thông tin người dùng.");
-            }
 
             var role = await (from ur in _context.UserRole
                               join r in _context.VaiTro on ur.RoleId equals r.RoleId
@@ -65,15 +61,11 @@ namespace AdminDashboard.Controllers
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
-            {
                 return RedirectToAction("Login", "Auth");
-            }
 
             var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null)
-            {
                 return NotFound("Không tìm thấy thông tin người dùng.");
-            }
 
             return View(user);
         }
@@ -82,30 +74,26 @@ namespace AdminDashboard.Controllers
         public async Task<IActionResult> EditAccount(NguoiDung model)
         {
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
-            {
                 return RedirectToAction("Login", "Auth");
-            }
 
             var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null)
-            {
                 return NotFound("Không tìm thấy thông tin người dùng.");
-            }
-
-            user.HoTen = model.HoTen;
-            user.Email = model.Email;
-            user.SoDienThoai = model.SoDienThoai;
-            user.NgaySinh = model.NgaySinh;
 
             try
             {
-                await _context.SaveChangesAsync();
+                // ✅ COMMAND
+                ICommand cmd = new UpdateUserCommand(_context, user, model);
+                cmd.Execute();
+
+                // ✅ OBSERVER
+                DashboardService service = new DashboardService();
+                service.Notify("User updated");
+
                 return RedirectToAction("Account");
             }
             catch (Exception ex)
@@ -119,18 +107,16 @@ namespace AdminDashboard.Controllers
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
-            {
                 return RedirectToAction("Login", "Auth");
-            }
 
             var viewModel = _homeFacade.LayLichSuDonHang(userId);
-
             return View(viewModel);
         }
 
         public IActionResult ChuyenXe_User()
         {
             ViewBag.DanhSachTram = new SelectList(_context.Tram, "IdTram", "TenTram");
+
             var danhSach = _context.ChuyenXe
                 .Include(c => c.LoTrinh).ThenInclude(l => l.TramDiNavigation)
                 .Include(c => c.LoTrinh).ThenInclude(l => l.TramToiNavigation)
@@ -164,10 +150,9 @@ namespace AdminDashboard.Controllers
             if (!string.IsNullOrEmpty(ngayDi) && DateTime.TryParse(ngayDi, out DateTime parsedNgay))
                 query = query.Where(c => c.NgayDi.Date == parsedNgay.Date);
 
-            var ketQua = query
-                .OrderBy(c => c.NgayDi)
-                .ThenBy(c => c.GioDi)
-                .ToList();
+            // ✅ STRATEGY
+            ISortStrategy strategy = new SortByDateStrategy();
+            var ketQua = strategy.Sort(query.ToList());
 
             return PartialView("_DanhSachChuyenXe", ketQua);
         }
