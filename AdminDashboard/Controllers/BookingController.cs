@@ -1,11 +1,13 @@
 ﻿using AdminDashboard.Helpers;
 using AdminDashboard.Models;
+using AdminDashboard.Patterns.State;
 using AdminDashboard.Services;
 using AdminDashboard.TransportDBContext;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using AdminDashboard.Patterns.State;
 
 namespace AdminDashboard.Controllers
 {
@@ -89,9 +91,14 @@ namespace AdminDashboard.Controllers
                 {
                     foreach (var dh in expiredOrders)
                     {
-                        var vesExpired = await _context.Ve.Where(v => v.DonHangId == dh.DonHangId).ToListAsync();
+                        var vesExpired = await _context.Ve
+                            .Where(v => v.DonHangId == dh.DonHangId)
+                            .ToListAsync();
+
                         _context.Ve.RemoveRange(vesExpired);
-                        dh.TrangThaiThanhToan = "Da huy";
+
+                        var donHangContext = new DonHangContext(dh);
+                        donHangContext.HuyDon(); //Áp dụng State 
                     }
                     await _context.SaveChangesAsync();
                 }
@@ -208,11 +215,17 @@ namespace AdminDashboard.Controllers
             if (isSignatureValid && vnp_ResponseCode == "00")
             {
                 var donHang = _context.DonHang.Find(vnp_TxnRef);
-                if (donHang != null && donHang.TrangThaiThanhToan == "DangChoThanhToan" && DateTime.Now <= donHang.ThoiGianHetHan)
+
+                if (donHang != null
+                    && donHang.TrangThaiThanhToan == "DangChoThanhToan"
+                    && DateTime.Now <= donHang.ThoiGianHetHan)
                 {
-                    donHang.TrangThaiThanhToan = "Da thanh toan"; // Sửa: Tiếng Việt không dấu
+                    var donHangContext = new DonHangContext(donHang);
+                    donHangContext.ThanhToan(); //Áp dụng State 
+
                     _context.SaveChanges();
                 }
+
                 return RedirectToAction("BookingSuccess", new { id = vnp_TxnRef });
             }
 
@@ -260,10 +273,17 @@ namespace AdminDashboard.Controllers
 
             if (DateTime.Now > donHang.ThoiGianHetHan)
             {
-                var ves = await _context.Ve.Where(v => v.DonHangId == donHang.DonHangId).ToListAsync();
+                var ves = await _context.Ve
+                    .Where(v => v.DonHangId == donHang.DonHangId)
+                    .ToListAsync();
+
                 _context.Ve.RemoveRange(ves);
-                donHang.TrangThaiThanhToan = "Da huy"; // Sửa
+
+                var donHangContext = new DonHangContext(donHang);
+                donHangContext.HuyDon(); // Áp dụng State
+
                 await _context.SaveChangesAsync();
+
                 TempData["ErrorMessage"] = "Don hang da het thoi gian thanh toan.";
                 return RedirectToAction("BookingSuccess", new { id });
             }
@@ -283,18 +303,25 @@ namespace AdminDashboard.Controllers
             if (string.IsNullOrEmpty(id)) return BadRequest();
 
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var donHang = await _context.DonHang.FirstOrDefaultAsync(d => d.DonHangId == id && d.IDKhachHang == userId);
+            var donHang = await _context.DonHang
+                .FirstOrDefaultAsync(d => d.DonHangId == id && d.IDKhachHang == userId);
+
             if (donHang == null) return NotFound();
 
-            if (donHang.TrangThaiThanhToan == "Da thanh toan") // Sửa
+            if (donHang.TrangThaiThanhToan == "Da thanh toan")
             {
                 TempData["ErrorMessage"] = "Don hang da thanh toan khong the huy.";
                 return RedirectToAction("BookingSuccess", new { id });
             }
 
-            var ves = await _context.Ve.Where(v => v.DonHangId == donHang.DonHangId).ToListAsync();
+            var ves = await _context.Ve
+                .Where(v => v.DonHangId == donHang.DonHangId)
+                .ToListAsync();
             _context.Ve.RemoveRange(ves);
-            donHang.TrangThaiThanhToan = "Da huy"; // Sửa
+
+            var donHangContext = new DonHangContext(donHang);
+            donHangContext.HuyDon(); //Áp dụng State
+
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Da huy don hang va giai phong ghe.";
@@ -342,10 +369,17 @@ namespace AdminDashboard.Controllers
 
             if (DateTime.Now > donHang.ThoiGianHetHan)
             {
-                var ves = await _context.Ve.Where(v => v.DonHangId == donHang.DonHangId).ToListAsync();
+                var ves = await _context.Ve
+                    .Where(v => v.DonHangId == donHang.DonHangId)
+                    .ToListAsync();
+
                 _context.Ve.RemoveRange(ves);
-                donHang.TrangThaiThanhToan = "Da huy"; // Sửa
+
+                var donHangContext = new DonHangContext(donHang);
+                donHangContext.HuyDon(); //Áp dụng State
+
                 await _context.SaveChangesAsync();
+
                 response = new { RspCode = "98", Message = "Order expired" };
                 return Json(response);
             }
