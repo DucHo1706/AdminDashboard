@@ -28,6 +28,9 @@ builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
 builder.Services.AddServerSideBlazor();
 
+builder.Services.AddScoped<ThongKeService>();
+builder.Services.AddScoped<IThongKeService, ThongKeProxy>();
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IVnpayService, VnpayService>();
