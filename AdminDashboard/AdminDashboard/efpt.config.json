@@ -1,0 +1,105 @@
+﻿{
+   "CodeGenerationMode": 4,
+   "ContextClassName": "db27524.public.databaseasp.netContext",
+   "ContextNamespace": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": false,
+   "IrregularWords": null,
+   "MinimumProductVersion": "2.6.1248",
+   "ModelNamespace": null,
+   "OutputContextPath": null,
+   "OutputPath": "Models",
+   "PluralRules": null,
+   "PreserveCasingWithRegex": true,
+   "ProjectRootNamespace": "AdminDashboard",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 2,
+   "SelectedToBeGenerated": 0,
+   "SingularRules": null,
+   "T4TemplatePath": null,
+   "Tables": [
+      {
+         "Name": "[dbo].[BaiViet]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ChuyenXe]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ChuyenXeImage]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DonHang]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Ghe]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[LoaiXe]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[LoTrinh]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[NguoiDung]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TaiXe]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Tram]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UserRole]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[VaiTro]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Ve]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Xe]",
+         "ObjectType": 0
+      }
+   ],
+   "UiHint": null,
+   "UncountableWords": null,
+   "UseAsyncStoredProcedureCalls": true,
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": false,
+   "UseDatabaseNamesForRoutines": true,
+   "UseDateOnlyTimeOnly": true,
+   "UseDbContextSplitting": false,
+   "UseDecimalDataAnnotationForSprocResult": true,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseHierarchyId": false,
+   "UseInflector": true,
+   "UseInternalAccessModifiersForSprocsAndFunctions": false,
+   "UseLegacyPluralizer": false,
+   "UseManyToManyEntity": false,
+   "UseNoDefaultConstructor": false,
+   "UseNoNavigations": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UsePrefixNavigationNaming": false,
+   "UseSchemaFolders": false,
+   "UseSchemaNamespaces": false,
+   "UseSpatial": false,
+   "UseT4": false,
+   "UseT4Split": false
+}

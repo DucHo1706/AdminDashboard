@@ -1,0 +1,91 @@
+﻿@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+@{
+    ViewData["Title"] = "Chọn Chuyến Để Bán Vé";
+    var ngayDi = ViewBag.NgayDi as DateTime? ?? DateTime.Today;
+
+    // Nhận cục dữ liệu đếm vé từ Controller
+    var soldCounts = ViewBag.SoldCounts as Dictionary<string, int>;
+}
+
+<div class="container-fluid px-4 mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="text-primary fw-bold text-uppercase m-0">
+            <i class="fas fa-search me-2"></i> Chọn Chuyến Xe
+        </h3>
+        <form method="get" class="d-flex align-items-center bg-white p-2 rounded shadow-sm border">
+            <label class="fw-bold text-muted small text-nowrap me-2">Ngày khởi hành:</label>
+            <input type="date" name="ngayDi" value="@ngayDi.ToString("yyyy-MM-dd")"
+                   class="form-control form-control-sm border-secondary fw-bold text-primary"
+                   onchange="this.form.submit()" />
+        </form>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row">
+            @foreach (var item in Model)
+            {
+                // --- ĐOẠN NÀY ĐÃ ĐƯỢC SỬA CHO KHỚP VỚI BẠN ---
+
+                // 1. Dùng tên biến cũ của bạn: SoLuongGhe
+                int tongGhe = item.Xe.SoLuongGhe;
+
+                // 2. Lấy số vé đã bán từ ViewBag (Nếu không có thì bằng 0)
+                int daBan = (soldCounts != null && soldCounts.ContainsKey(item.ChuyenId)) ? soldCounts[item.ChuyenId] : 0;
+
+                // 3. Tính ghế trống
+                int gheTrong = tongGhe - daBan;
+                if (gheTrong < 0) gheTrong = 0; // Đề phòng âm
+                                                // ---------------------------------------------
+
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0 hover-effect">
+                        <div class="card-header bg-white border-bottom-0 pt-3 pb-0 d-flex justify-content-between align-items-start">
+                            <span class="badge bg-primary fs-6"><i class="far fa-clock me-1"></i> @item.GioDi</span>
+                            <span class="badge bg-light text-dark border">@item.Xe.BienSoXe</span>
+                        </div>
+
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-dark mb-2 mt-2 text-center">
+                                @item.LoTrinh.TramDiNavigation.TenTram
+                                <i class="fas fa-long-arrow-alt-right text-muted mx-2"></i>
+                                @item.LoTrinh.TramToiNavigation.TenTram
+                            </h5>
+                            <hr class="my-2 opacity-25">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="text-muted small">
+                                    Ghế trống: <strong class="text-success fs-6">@gheTrong</strong> / @tongGhe
+                                </div>
+                                <div class="fw-bold text-primary">
+                                    @(item.LoTrinh.GiaVeCoDinh?.ToString("#,##0") ?? "0") đ
+                                </div>
+                            </div>
+
+                            <a href="/NhaXe/BanVe/BanVe/@item.ChuyenId" class="btn btn-outline-primary w-100 fw-bold stretched-link">
+                                <i class="fas fa-ticket-alt me-2"></i> VÀO BÁN VÉ
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5 bg-white rounded shadow-sm">
+            <h5 class="text-muted">Không tìm thấy chuyến xe nào trong ngày @ngayDi.ToString("dd/MM/yyyy")</h5>
+        </div>
+    }
+</div>
+
+<style>
+    .hover-effect {
+        transition: transform 0.2s;
+    }
+
+        .hover-effect:hover {
+            transform: translateY(-5px);
+            border-color: #0d6efd !important;
+        }
+</style>

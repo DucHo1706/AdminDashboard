@@ -1,0 +1,335 @@
+﻿@using AdminDashboard.Models.TrangThai
+@using AdminDashboard.Helpers
+@using System.Globalization
+@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+
+@{
+    var today = DateTime.Today;
+    var startDate = Model != null && Model.Any() ? Model.Min(x => x.NgayDi.Date) : today;
+    if (startDate < today.AddDays(-7)) startDate = today;
+    var endDate = startDate.AddDays(6);
+    var dateRange = Enumerable.Range(0, 7).Select(offset => startDate.AddDays(offset)).ToList();
+    int startHour = 5;
+    int endHour = 22;
+    var cultureVi = new CultureInfo("vi-VN");
+}
+
+<style>
+    :root {
+        --header-bg: #f5f5f5; 
+        --header-text: #333; 
+        --border-color: #dee2e6; 
+        --cell-height: 60px; 
+        --accent-blue: #007bff; 
+    }
+
+    .timetable-compact-container {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        max-height: 85vh;
+        overflow-y: auto;
+        font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    .table-compact {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+        .table-compact thead th {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: #003366;
+            color: white;
+            text-align: center;
+            padding: 10px 5px;
+            border: 1px solid #ddd;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+    .col-hour-compact {
+        background-color: #eef2f5;
+        color: #333;
+        font-weight: 700;
+        text-align: center;
+        vertical-align: middle;
+        border: 1px solid var(--border-color);
+        width: 60px;
+        font-size: 12px;
+    }
+
+    .table-compact tbody td {
+        border: 1px solid var(--border-color);
+        padding: 4px;
+        vertical-align: top;
+        height: var(--cell-height);
+        background: #fff;
+        font-size: 11px;
+    }
+
+        .table-compact tbody td:hover {
+            background-color: #fafafa;
+        }
+
+    .trip-box {
+        display: block;
+        background-color: #fffbf0; 
+        border: 1px solid #f0e0c0;
+        border-radius: 2px;
+        padding: 4px;
+        margin-bottom: 2px;
+        cursor: pointer;
+        text-decoration: none !important;
+        color: #333;
+        transition: all 0.1s;
+    }
+
+        .trip-box:hover {
+            border-color: #ff9900;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+
+    .trip-code {
+        color: #003366; /* Xanh đậm */
+        font-weight: 700;
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    .trip-route {
+        color: #cc0000; /* Đỏ nâu */
+        font-weight: 600;
+        display: block;
+        line-height: 1.2;
+        margin-bottom: 2px;
+    }
+
+    .trip-info {
+        color: #007bff; /* Xanh dương */
+        display: block;
+        font-size: 10px;
+    }
+
+    .th-today {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
+    /* Chip Content Styles */
+    .chip-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2px;
+    }
+
+    .chip-time {
+        font-size: 10px;
+        font-weight: 800;
+        color: var(--primary-dark);
+        background: #edf2f7;
+        padding: 1px 4px;
+        border-radius: 3px;
+    }
+
+    .chip-plate {
+        font-size: 10px;
+        font-weight: 700;
+        color: #4a5568;
+    }
+
+    .chip-route {
+        display: block;
+        font-size: 9px;
+        color: #718096;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* MÀU TRẠNG THÁI */
+    /* Đang bán*/
+    .style-success {
+        background-color: #f0fff4;
+        border: 1px solid #c6f6d5;
+    }
+
+        .style-success::before {
+            background-color: #38a169;
+        }
+
+        .style-success:hover {
+            border-color: #38a169;
+        }
+
+    /* Chờ chạy*/
+    .style-warning {
+        background-color: #fffaf0;
+        border: 1px solid #feebc8;
+    }
+
+        .style-warning::before {
+            background-color: #dd6b20;
+        }
+
+        .style-warning:hover {
+            border-color: #dd6b20;
+        }
+
+    /* Đã hủy */
+    .style-danger {
+        background-color: #fff5f5;
+        border: 1px solid #fed7d7;
+    }
+
+        .style-danger::before {
+            background-color: #e53e3e;
+        }
+
+        .style-danger:hover {
+            border-color: #e53e3e;
+        }
+
+    .header-bar {
+        background: white;
+        padding: 10px 15px;
+        border-radius: 8px 8px 0 0;
+        border: 1px solid #e2e8f0;
+        border-bottom: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .status-legend span {
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-weight: 600;
+        margin-left: 5px;
+    }
+
+    .trip-box {
+        cursor: pointer;
+    }
+</style>
+
+<div class="container-fluid p-0">
+    <div class="header-bar">
+        <div>
+            <h6 class="fw-bold m-0" style="color: #2d3748; font-size: 14px;">
+                <i class="bi bi-grid-3x3 me-2" style="color: #FF6600;"></i>
+                LỊCH ĐIỀU PHỐI XE
+            </h6>
+            <small class="text-muted" style="font-size: 10px;">Tuần: @startDate.ToString("dd/MM") - @endDate.ToString("dd/MM")</small>
+        </div>
+
+        <div class="status-legend">
+            <span style="background: #c6f6d5; color: #22543d;">Đang bán</span>
+            <span style="background: #feebc8; color: #744210;">Chờ chạy</span>
+            <span style="background: #fed7d7; color: #822727;">Đã hủy</span>
+        </div>
+    </div>
+
+    <div class="timetable-compact-container">
+        <table class="table-compact">
+            <thead>
+                <tr>
+                    <th style="width: 60px; background: #002855;">Giờ</th>
+                    @foreach (var date in dateRange)
+                    {
+                        var isToday = date == DateTime.Today;
+                        <th class="@(isToday ? "th-today" : "")">
+                            @date.ToString("dddd", cultureVi)<br />
+                            <span style="font-weight: normal; font-size: 11px;">@date.ToString("dd/MM")</span>
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @for (int hour = startHour; hour <= endHour; hour++)
+                {
+                    <tr>
+                        <td class="col-hour-compact">@hour<span>h</span></td>
+                        @foreach (var date in dateRange)
+                        {
+                            var trips = Model.Where(x => x.NgayDi.Date == date && x.GioDi.Hours == hour).OrderBy(x => x.GioDi).ToList();
+                            <td>
+                                @if (trips.Any())
+                                {
+                                    @foreach (var item in trips)
+                                    {
+                                        string styleClass = "border-secondary";
+                                        if (item.TrangThai == TrangThaiChuyenXe.DangMoBanVe) { styleClass = "border-success"; }
+                                        else if (item.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh) { styleClass = "border-warning"; }
+                                        else if (item.TrangThai == TrangThaiChuyenXe.DaHuy) { styleClass = "border-danger"; }
+
+                                        <div class="trip-box @styleClass"
+                                             style="border-left: 3px solid #ccc;"
+                                             onclick="openDetailModal('@item.ChuyenId')">
+
+                                            <span class="trip-code">@item.GioDi.ToString("mm")' - @item.Xe?.BienSoXe</span>
+                                            <span class="trip-route">@item.LoTrinh?.TramDiNavigation?.TenTram &rarr;</span>
+                                            <span class="trip-info">TX: @(string.IsNullOrEmpty(item.TaiXeId) ? "--" : item.TaiXe?.HoTen)</span>
+                                        </div>
+                                    }
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" id="detailModalContent">
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2">Đang tải thông tin...</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Hàm gọi Modal
+    function openDetailModal(id) {
+        // 1. Hiện Modal trước với icon loading
+        var myModal = new bootstrap.Modal(document.getElementById('detailModal'));
+        myModal.show();
+
+        // 2. Gọi AJAX lấy nội dung chi tiết
+        $.ajax({
+            url: '@Url.Action("GetDetailsPartial", "Chuyenxe", new { area = "NhaXe" })',
+            type: 'GET',
+            data: { id: id },
+            success: function (res) {
+                // 3. Đổ dữ liệu vào modal
+                $('#detailModalContent').html(res);
+            },
+            error: function () {
+                $('#detailModalContent').html('<div class="p-4 text-danger text-center">Lỗi tải dữ liệu.</div>');
+            }
+        });
+    }
+
+    // Hàm hỗ trợ xóa từ trong modal chi tiết
+    function confirmDelete(id) {
+        // Ẩn modal chi tiết đi
+        var detailModal = bootstrap.Modal.getInstance(document.getElementById('detailModal'));
+        detailModal.hide();
+
+        // Hiện modal xóa chính thức (đã có sẵn ở trang Index)
+        var deleteModalEl = document.getElementById('deleteModal');
+        var deleteModal = new bootstrap.Modal(deleteModalEl);
+
+        // Gán ID vào input hidden của form xóa
+        document.getElementById('deleteChuyenId').value = id;
+        deleteModal.show();
+    }
+</script>

@@ -1,0 +1,314 @@
+﻿@model AdminDashboard.Models.Login.DangNhap
+@{
+    Layout = null; 
+    ViewData["Title"] = "Đăng nhập";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url('https://images.pexels.com/photos/209652/pexels-photo-209652.jpeg?cs=srgb&dl=pexels-samtingwong-209652.jpg&fm=jpg') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center; 
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.35); 
+            z-index: 1;
+        }
+
+        .login-card {
+            position: relative;
+            z-index: 2; 
+            width: 100%;
+            max-width: 420px;
+            padding: 40px 35px;
+            background: rgba(255, 255, 255, 0.15); 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            color: #fff;
+            margin: 20px; 
+        }
+
+        .login-header h2 {
+            font-weight: 600;
+            font-size: 24px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .login-header p {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+
+        .input-group-custom {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .form-control-custom {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 20px;
+            border-radius: 30px;
+            color: #fff !important;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-control-custom::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+            .form-control-custom:focus {
+                background: rgba(255, 255, 255, 0.35);
+                border-color: #ffcba4; 
+                box-shadow: 0 0 20px rgba(255, 203, 164, 0.5);
+                transform: scale(1.02);
+                color: #fff;
+            }
+                .form-control-custom:focus ~ .toggle-password {
+                    color: #ffcba4;
+                    text-shadow: 0 0 10px rgba(255, 203, 164, 0.8);
+                    transform: translateY(-50%) scale(1.1); 
+                }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.8);
+            z-index: 10;
+        }
+        
+        .toggle-password:hover {
+            color: #fff;
+        }
+
+        .options-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            margin-bottom: 25px;
+            padding: 0 5px;
+        }
+
+        .form-check-input {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+        }
+        
+        .form-check-input:checked {
+            background-color: #ff9f43;
+            border-color: #ff9f43;
+        }
+
+        .forgot-link {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+            color: #ffdfc4;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            border-radius: 30px;
+            background: #ffcba4; 
+            border: none;
+            color: #5e3023;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-login:hover {
+            background: #ffbca4;
+            transform: translateY(-2px);
+        }
+
+        .divider {
+            margin: 25px 0 20px;
+            position: relative;
+            text-align: center;
+        }
+
+        .divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: rgba(255,255,255,0.3);
+        }
+
+        .divider span {
+            position: relative;
+            background: transparent; 
+            padding: 0 10px;
+            color: rgba(255,255,255,0.8);
+            font-size: 12px;
+            background-color: rgba(100, 100, 100, 0.5); 
+            border-radius: 10px;
+        }
+
+        .text-validate {
+            color: #ffadad;
+            font-size: 12px;
+            text-align: left;
+            display: block;
+            margin-top: 5px;
+            margin-left: 10px;
+        }
+
+        #loading-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #ffcba4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="login-card">
+        <div class="login-header">
+            <h2>ĐĂNG NHẬP</h2>
+            <p>Chào mừng bạn quay trở lại!</p>
+        </div>
+
+        <form asp-action="Login" method="post" novalidate id="login-form">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger bg-transparent border-0 text-white p-0 mb-3 small"></div>
+
+            <div class="input-group-custom">
+                <input asp-for="EmailOrPhone" class="form-control-custom" type="text" placeholder="Username hoặc Email" autocomplete="off" />
+                <span asp-validation-for="EmailOrPhone" class="text-validate"></span>
+            </div>
+
+            <div class="input-group-custom">
+                <input asp-for="MatKhau" class="form-control-custom" type="password" id="password-input" placeholder="Mật khẩu" />
+                <i class="fa-regular fa-eye toggle-password" onclick="togglePassword()" id="eye-icon"></i>
+                <span asp-validation-for="MatKhau" class="text-validate"></span>
+            </div>
+
+            <div class="options-row">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="rememberMe">
+                    <label class="form-check-label text-white" for="rememberMe">Remember Me</label>
+                </div>
+                <a href="/Auth/ForgotPass" class="forgot-link">Quên mật khẩu?</a>
+            </div>
+
+            <button type="submit" class="btn-login">ĐĂNG NHẬP</button>
+
+            <div class="divider p-2">
+            </div>
+
+        </form>
+        
+        <div style="margin-top: 20px; font-size: 13px;">
+            Chưa có tài khoản? <a href="/Auth/Register" style="color: #ffcba4; font-weight:bold; text-decoration:none;">Đăng ký ngay</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById("password-input");
+            const eyeIcon = document.getElementById("eye-icon");
+
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                eyeIcon.classList.remove("fa-eye");
+                eyeIcon.classList.add("fa-eye-slash");
+            } else {
+                passwordInput.type = "password";
+                eyeIcon.classList.remove("fa-eye-slash");
+                eyeIcon.classList.add("fa-eye");
+            }
+        }
+
+        $(document).ready(function () {
+            // Xóa thông báo lỗi khi người dùng bắt đầu gõ lại
+            $('.form-control-custom').on('input', function() {
+                $(this).siblings('.text-validate').text('');
+                $('.alert-danger').text('');
+            });
+
+            // Hiệu ứng loading khi submit
+            $('#login-form').on('submit', function () {
+                if ($(this).valid()) {
+                    $('#loading-overlay').css('display', 'flex');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,370 @@
+@using AdminDashboard.Models.TrangThai
+@model AdminDashboard.Models.ChuyenXe
+
+@{
+    ViewData["Title"] = "Chỉnh sửa Chuyến xe";
+}
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f0f4f8;
+            background-size: cover;
+            background-position: center;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 38px;
+            font-weight: 700;
+            color: #111827;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+
+        .form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Bỏ height 85vh */
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 50px 60px;
+            border-radius: 16px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+            width: 95%;
+            max-width: 700px;
+        }
+
+        .form-group-custom {
+            margin-bottom: 22px;
+        }
+
+        .control-label {
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .control-label i {
+                color: #ff9800;
+            }
+
+        .form-control,
+        .form-select {
+            height: 45px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            padding: 0 14px;
+            font-size: 15px;
+            transition: 0.2s ease;
+        }
+        
+        input[type="file"].form-control {
+            padding: 10px 14px;
+        }
+
+            .form-control:focus,
+            .form-select:focus {
+                border-color: #ff9800;
+                box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.2);
+                outline: none;
+            }
+        
+        button {
+            position: relative;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 1px solid #FF6633;
+            font-size: 15px;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
+            background: transparent;
+            color: black;
+            overflow: hidden;
+            transition: all 0.25s ease;
+        }
+
+            button:hover {
+                background: #FF6633;
+                box-shadow: 0 0 20px 5px #FF9933;
+                color: white;
+            }
+
+        a.text-decoration-none {
+            color: #ff6633;
+            transition: transform 0.2s ease;
+        }
+
+            a.text-decoration-none:hover {
+                transform: scale(1.2);
+            }
+
+        hr {
+            border: none;
+            height: 1px;
+            background-color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+
+            .logo-wrapper img {
+                width: 130px;
+                height: 38px;
+            }
+
+        .custom-hr {
+            max-width: 900px;
+            height: 3px;
+            background-color: orange;
+            border: none;
+            border-radius: 3px;
+            margin: 0 auto 30px;
+        }
+        /* CSS cho hiển thị ảnh */
+        .image-preview-list .card {
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .image-preview-list .card-img-top {
+             height: 120px; 
+             object-fit: cover;
+             border-top-left-radius: 8px;
+             border-top-right-radius: 8px;
+        }
+        .image-preview-list .card-body {
+            padding: 0.75rem;
+            background-color: #f8f9fa;
+        }
+        .image-preview-list .form-check-label {
+            font-size: 0.85rem;
+            color: #dc3545;
+            font-weight: 500;
+        }
+
+        /* (Giữ nguyên CSS Toast) */
+        .toast-message{position:fixed;top:20px;right:20px;background-color:#00c21a;color:white;display:flex;align-items:center;border-radius:8px;padding:14px 18px;box-shadow:0 4px 20px rgba(0,0,0,0.2);z-index:1050;min-width:250px;font-size:15px;font-weight:500;animation:slideIn .4s ease}.toast-icon{font-size:20px;margin-right:10px}.toast-close{background:none;border:none;color:white;font-size:18px;font-weight:bold;margin-left:auto;cursor:pointer}.toast-progress{position:absolute;bottom:0;left:0;height:4px;background:rgba(255,255,255,0.7);width:100%;animation:progress 3s linear forwards;border-radius:0 0 8px 8px}@@keyframes slideIn{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:translateX(0)}}@@keyframes slideOut{to{opacity:0;transform:translateX(100%)}}@@keyframes progress{from{width:100%}to{width:0%}}@@keyframes sh02{from{opacity:0;left:0%}50%{opacity:1}to{opacity:0;left:100%}}
+    </style>
+</head>
+
+<body>
+    <h2 style="color:orangered">@ViewData["Title"]</h2>
+    <hr class="custom-hr" />
+    <div class="form">
+        <div class="form-container">
+            
+         <form id="editForm" asp-action="Edit" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="ChuyenId" />
+
+                <div class="header-bar mb-3">
+                    <a asp-action="Index" class="text-decoration-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-box-arrow-left" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0z" /><path fill-rule="evenodd" d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708z" /></svg>
+                    </a>
+                    <div style="width:18px;"></div>
+                </div>
+                <div class="logo-wrapper">
+                    <img src="~/css/Images/logo_web.png" alt="Logo" />
+                </div>
+                <hr class="bg-black" />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label asp-for="LoTrinhId" class="control-label"><i class="fas fa-route"></i> Lộ trình</label>
+                            <select asp-for="LoTrinhId" class="form-select" asp-items="ViewBag.LoTrinhId"><option value="">-- Chọn Lộ Trình --</option></select>
+                            <span asp-validation-for="LoTrinhId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label asp-for="XeId" class="control-label"><i class="fas fa-bus"></i> Xe</label>
+                            <select asp-for="XeId" class="form-select" asp-items="ViewBag.XeId"><option value="">-- Chọn Xe --</option></select>
+                            <span asp-validation-for="XeId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label asp-for="NgayDi" class="control-label"><i class="fas fa-calendar-alt"></i> Ngày đi</label>
+                            <input asp-for="NgayDi" class="form-control" type="date" />
+                            <span asp-validation-for="NgayDi" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label asp-for="GioDi" class="control-label"><i class="fas fa-clock"></i> Giờ đi</label>
+                            <input asp-for="GioDi" class="form-control" type="time" />
+                            <span asp-validation-for="GioDi" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label asp-for="GioDenDuKien" class="control-label"><i class="fas fa-hourglass-half"></i> Giờ đến dự kiến</label>
+                            <input asp-for="GioDenDuKien" class="form-control" type="time" />
+                            <span asp-validation-for="GioDenDuKien" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label class="control-label"><i class="fas fa-info-circle"></i> Trạng thái hiện tại</label>
+
+                            <div class="form-control bg-light d-flex align-items-center">
+                                @if (Model.TrangThai == TrangThaiChuyenXe.ChoDuyet)
+                                {
+                                    <span class="badge bg-warning text-dark me-2">●</span> <span>Chờ Admin Duyệt</span>
+                                }
+                                else if (Model.TrangThai == TrangThaiChuyenXe.DaLenLich)
+                                {
+                                    <span class="badge bg-info text-dark me-2">●</span> <span>Đã Lên Lịch (Sẵn sàng bán)</span>
+                                }
+                                else if (Model.TrangThai == TrangThaiChuyenXe.DangMoBanVe)
+                                {
+                                    <span class="badge bg-success me-2">●</span> <span>Đang Mở Bán Vé</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary me-2">●</span> <span>@Model.TrangThai</span>
+                                }
+                            </div>
+
+                            <input type="hidden" asp-for="TrangThai" />
+
+                            <small class="text-muted fst-italic mt-1 d-block">
+                                * Trạng thái được cập nhật tự động bởi hệ thống quản trị.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+                <div class="form-group-custom">
+                    <label class="control-label"><i class="fas fa-images"></i> Hình ảnh hiện tại</label>
+                    <input type="hidden" name="deletedImages" id="deletedImagesInput" />
+
+                    @if (Model.Images == null || !Model.Images.Any())
+                    {
+                        <p class="text-muted">Chưa có hình ảnh nào.</p>
+                    }
+                    else
+                    {
+                        <div class="row g-2 image-preview-list">
+                            @foreach (var image in Model.Images)
+                            {
+                                <div class="col-md-4 col-sm-6">
+                                    <div class="card h-100">
+                                        <img src="@image.ImageUrl" class="card-img-top" alt="Ảnh chuyến xe">
+                                        <div class="card-body p-2 text-center">
+                                            <div class="form-check">
+                                                <input class="form-check-input delete-image-cb" type="checkbox" value="@image.ImageId" id="delete-@image.ImageId">
+                                                <label class="form-check-label" for="delete-@image.ImageId">
+                                                    Xóa ảnh này
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="form-group-custom mt-3">
+                    <label class="control-label"><i class="fas fa-upload"></i> Tải lên hình ảnh mới</label>
+                    <input type="file" name="newImages" class="form-control" multiple />
+                </div>
+                <div class="text-center mt-4">
+                    <button type="submit">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div id="success-toast" class="toast-message">
+            <div class="toast-icon">✔</div>
+            <div class="toast-text">@TempData["SuccessMessage"]</div>
+            <button class="toast-close" onclick="closeToast()">×</button>
+            <div class="toast-progress"></div>
+        </div>
+    }
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Hàm đóng Toast (giữ nguyên)
+        function closeToast() {
+            const toast = document.getElementById("success-toast");
+            if (toast) {
+                toast.style.animation = "slideOut 0.5s forwards";
+                setTimeout(() => toast.remove(), 500);
+            }
+        }
+
+        // Tự động đóng Toast (giữ nguyên)
+        window.addEventListener("DOMContentLoaded", () => {
+            const toast = document.getElementById("success-toast");
+            if (toast) {
+                setTimeout(() => closeToast(), 3000);
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            
+            // Tìm form bằng ID
+            const form = document.getElementById('editForm');
+            
+            if (form) {
+                // Gán sự kiện "submit" cho form
+                form.addEventListener('submit', function(e) {
+                    
+                    let deletedIds = [];
+                    
+                    // Lấy tất cả checkbox xóa ảnh đã được check
+                    document.querySelectorAll('.delete-image-cb:checked').forEach(function(cb) {
+                        deletedIds.push(cb.value);
+                    });
+
+                    // Gán chuỗi ID (vd: "1,2,3") vào input ẩn
+                    document.getElementById('deletedImagesInput').value = deletedIds.join(',');
+                });
+            }
+        });
+    </script>
+}
+</body>

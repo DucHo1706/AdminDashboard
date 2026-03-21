@@ -1,0 +1,67 @@
+﻿@using AdminDashboard.Models.TrangThai
+@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+
+@{
+    var danhSachLoc = Model?
+        .Where(cx =>
+            cx.TrangThai == TrangThaiChuyenXe.DangMoBanVe
+            && cx.NgayDi.Date >= DateTime.Today
+        )
+        .OrderBy(cx => cx.NgayDi)
+        .ThenBy(cx => cx.GioDi)
+        .ToList();
+}
+
+<body>
+    @if (danhSachLoc == null || !danhSachLoc.Any())
+    {
+        <div class="alert alert-warning text-center">Không tìm thấy chuyến xe nào phù hợp.</div>
+    }
+    else
+    {
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tuyến xe</th>
+                        <th>Ngày đi</th>
+                        <th>Giờ đi</th>
+                        <th>Giờ đến dự kiến</th>
+                        <th>Biển số xe</th>
+                        <th>Giá vé</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cx in danhSachLoc)
+                    {
+                        <tr>
+                            <td>
+                                <span class="route">@cx.LoTrinh?.TramDiNavigation?.TenTram</span>
+                                <i class="bi bi-arrow-right arrow"></i>
+                                <span class="route">@cx.LoTrinh?.TramToiNavigation?.TenTram</span>
+                            </td>
+                            <td>@cx.NgayDi.ToString("dd/MM/yyyy")</td>
+                            <td>@cx.GioDi</td>
+                            <td>@cx.GioDenDuKien</td>
+                            <td>@cx.Xe?.BienSoXe</td>
+                            <td>
+                                <span class="price-card">
+                                    @String.Format("{0:N0} đ", cx.LoTrinh.GiaVeCoDinh)
+                                </span>
+                            </td>
+                            <td>
+                                <a asp-action="ChonGhe"
+                                   asp-controller="Booking"
+                                   asp-route-chuyenId="@cx.ChuyenId"
+                                   class="btn btn-tuyen">
+                                    Chọn chuyến
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</body>

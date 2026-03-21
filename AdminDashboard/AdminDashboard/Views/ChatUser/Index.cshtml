@@ -1,0 +1,111 @@
+﻿@{
+    ViewData["Title"] = "Chat với Admin";
+}
+
+<div class="container mt-5">
+    <div class="card shadow rounded-3">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">💬 Chat với Admin</h5>
+        </div>
+
+        <div class="card-body" style="height: 450px; overflow-y: auto;" id="chatBox">
+            <div id="messagesList"></div>
+        </div>
+
+        <div class="card-footer">
+            <div class="input-group">
+                <input id="messageInput" class="form-control" placeholder="Nhập tin nhắn..." />
+                <button id="sendButton" class="btn btn-primary">Gửi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chathub")
+            .build();
+
+        const userId = "@User.Identity?.Name ?? Guid.NewGuid().ToString()";
+        const adminId = "admin"; // 🔹 Bạn có thể thay bằng ID thực tế của admin trong DB hoặc Identity
+
+        // =============== KẾT NỐI ===============
+        connection.start().then(async () => {
+            console.log("✅ Connected to ChatHub");
+
+            // 🔹 Tải lịch sử tin nhắn từ Firebase
+            await loadChatHistory();
+        }).catch(err => console.error("❌ Lỗi kết nối:", err));
+
+        // =============== GỬI TIN NHẮN ===============
+        document.getElementById("sendButton").addEventListener("click", async function () {
+            const msg = document.getElementById("messageInput").value.trim();
+            if (msg === "") return;
+
+            await connection.invoke("SendPrivateMessage", adminId, msg);
+            document.getElementById("messageInput").value = "";
+        });
+
+        // =============== NHẬN TIN NHẮN ===============
+        connection.on("ReceivePrivateMessage", (senderId, senderName, message, timestamp) => {
+            const msgDiv = document.createElement("div");
+            const formattedTime = new Date(timestamp).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' });
+
+            if (senderId === userId) {
+                msgDiv.innerHTML = `
+                    <div class="text-end">
+                        <span class="badge bg-primary">${message}</span>
+                        <small class="text-muted">${formattedTime}</small>
+                    </div>`;
+            } else {
+                msgDiv.innerHTML = `
+                    <div class="text-start">
+                        <span class="badge bg-secondary">${message}</span>
+                        <small class="text-muted">${formattedTime}</small>
+                    </div>`;
+            }
+
+            document.getElementById("messagesList").appendChild(msgDiv);
+            document.getElementById("chatBox").scrollTop = document.getElementById("chatBox").scrollHeight;
+        });
+
+        // =============== LOAD LỊCH SỬ FIREBASE ===============
+        async function loadChatHistory() {
+            try {
+                const response = await fetch(`/api/chat/history/${adminId}`);
+                const messages = await response.json();
+
+                const chatBox = document.getElementById("messagesList");
+                chatBox.innerHTML = "";
+
+                messages.forEach(msg => {
+                    const msgDiv = document.createElement("div");
+                    const formattedTime = new Date(msg.timestamp).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' });
+
+                    if (msg.senderId === userId) {
+                        msgDiv.innerHTML = `
+                            <div class="text-end">
+                                <span class="badge bg-primary">${msg.message}</span>
+                                <small class="text-muted">${formattedTime}</small>
+                            </div>`;
+                    } else {
+                        msgDiv.innerHTML = `
+                            <div class="text-start">
+                                <span class="badge bg-secondary">${msg.message}</span>
+                                <small class="text-muted">${formattedTime}</small>
+                            </div>`;
+                    }
+
+                    chatBox.appendChild(msgDiv);
+                });
+
+                document.getElementById("chatBox").scrollTop = chatBox.scrollHeight;
+            } catch (err) {
+                console.error("❌ Lỗi tải lịch sử:", err);
+            }
+        }
+    </script>
+}

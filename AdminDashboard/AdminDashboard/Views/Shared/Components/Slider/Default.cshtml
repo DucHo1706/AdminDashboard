@@ -1,0 +1,85 @@
+﻿@model List<string>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+<style>
+    /* Toàn bộ slider */
+    .swiper {
+        width: 100%;
+        height: 300px; 
+    }
+
+    .swiper-wrapper {
+        align-items: stretch;
+    }
+
+    .swiper-slide {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #000; /* Nền đen nếu ảnh không phủ hết */
+    }
+
+    .swiper-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+    }
+
+    .swiper-slide img:hover {
+        transform: scale(1.03);
+    }
+
+    .swiper-button-next,
+    .swiper-button-prev {
+        color: white;
+    }
+
+    .swiper-button-next:hover,
+    .swiper-button-prev:hover {
+        color: #ffcc00;
+    }
+
+    /* Đảm bảo slider responsive */
+    @@media (max-width: 768px) {
+        .swiper {
+            height: 250px;
+        }
+    }
+</style>
+
+
+<div class="bg-dark">
+    <div class="swiper mySwiper">
+        <div class="swiper-wrapper">
+            @foreach (var img in Model)
+            {
+                <div class="swiper-slide">
+                    <img src="@img" alt="Slide" />
+                </div>
+            }
+        </div>
+        <!-- Nút điều hướng -->
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+    </div>
+</div>
+
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        new Swiper(".mySwiper", {
+            loop: true,
+            navigation: {
+                nextEl: ".swiper-button-next",
+                prevEl: ".swiper-button-prev",
+            },
+            autoplay: { delay: 3000, disableOnInteraction: false },
+        });
+    });
+
+</script>
