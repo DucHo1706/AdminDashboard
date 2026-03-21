@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using AdminDashboard.Models;
 using AdminDashboard.TransportDBContext;
 using Microsoft.AspNetCore.Authorization;
+using AdminDashboard.Patterns.TemplateMethod;
 
 namespace AdminDashboard.Areas.Admin.Controllers
 {
@@ -11,10 +12,12 @@ namespace AdminDashboard.Areas.Admin.Controllers
     public class TramController : Controller
     {
         private readonly Db27524Context _context;
+        private readonly CreateTramTemplate _createTramTemplate;
 
-        public TramController(Db27524Context context)
+        public TramController(Db27524Context context, CreateTramTemplate createTramTemplate)
         {
             _context = context;
+            _createTramTemplate = createTramTemplate;
         }
 
         public async Task<IActionResult> Index()
@@ -41,26 +44,8 @@ namespace AdminDashboard.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("TenTram,DiaChiTram,Tinh,Huyen,Xa")] Tram tram)
         {
-            ModelState.Remove("IdTram");
-
-            if (ModelState.IsValid)
-            {
-                string newId;
-                do
-                {
-                    newId = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
-                } while (await _context.Tram.AnyAsync(t => t.IdTram == newId));
-
-                tram.IdTram = newId;
-
-                _context.Add(tram);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(tram);
+            return await _createTramTemplate.ExecuteAsync(this, tram);
         }
-
 
         public async Task<IActionResult> Edit(string id)
         {

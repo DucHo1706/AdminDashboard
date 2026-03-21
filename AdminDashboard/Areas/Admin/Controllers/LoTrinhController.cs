@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
+using AdminDashboard.Patterns.TemplateMethod;
 
 namespace AdminDashboard.Areas.Admin.Controllers
 {
@@ -14,10 +15,11 @@ namespace AdminDashboard.Areas.Admin.Controllers
     public class LoTrinhController : Controller
     {
         private readonly Db27524Context _context;
-
-        public LoTrinhController(Db27524Context context)
+        private readonly CreateLoTrinhTemplate _createLoTrinhTemplate;
+        public LoTrinhController(Db27524Context context, CreateLoTrinhTemplate createLoTrinhTemplate)
         {
             _context = context;
+            _createLoTrinhTemplate = createLoTrinhTemplate;
         }
 
         public async Task<IActionResult> Index()
@@ -59,56 +61,7 @@ namespace AdminDashboard.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("TramDi,TramToi,GiaVeCoDinh")] LoTrinh loTrinh)
         {
-            ModelState.Remove("LoTrinhId");
-            ModelState.Remove("TramDiNavigation");
-            ModelState.Remove("TramToiNavigation");
-            if (!loTrinh.GiaVeCoDinh.HasValue)
-            {
-                ModelState.AddModelError("GiaVeCoDinh", "Giá vé là bắt buộc và phải lớn hơn hoặc bằng 5,000 VNĐ.");
-                ViewData["TramDi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramDi);
-                ViewData["TramToi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramToi);
-                return View(loTrinh);
-            }
-            decimal originalValue = loTrinh.GiaVeCoDinh.Value;
-            if (originalValue < 0)
-            {
-                ModelState.AddModelError("GiaVeCoDinh", "Giá vé không được là số âm! Vui lòng nhập số dương lớn hơn hoặc bằng 5,000 VNĐ.");
-                ViewData["TramDi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramDi);
-                ViewData["TramToi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramToi);
-                return View(loTrinh);
-            }
-            if (originalValue < 5000)
-            {
-                ModelState.AddModelError("GiaVeCoDinh", "Giá vé phải lớn hơn hoặc bằng 5,000 VNĐ. Vui lòng nhập lại!");
-                ViewData["TramDi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramDi);
-                ViewData["TramToi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramToi);
-                return View(loTrinh);
-            }
-            if (ModelState.IsValid)
-            {
-                if (loTrinh.TramDi == loTrinh.TramToi)
-                {
-                    ModelState.AddModelError("TramToi", "Trạm đến không được trùng với trạm đi.");
-                    ViewData["TramDi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramDi);
-                    ViewData["TramToi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramToi);
-                    return View(loTrinh);
-                }
-                if (!loTrinh.GiaVeCoDinh.HasValue || loTrinh.GiaVeCoDinh.Value < 0 || loTrinh.GiaVeCoDinh.Value < 5000)
-                {
-                    ModelState.AddModelError("GiaVeCoDinh", "Giá vé phải lớn hơn hoặc bằng 5,000 VNĐ và không được là số âm. Vui lòng nhập lại!");
-                    ViewData["TramDi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramDi);
-                    ViewData["TramToi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramToi);
-                    return View(loTrinh);
-                }
-                var newId = Guid.NewGuid().ToString();
-                loTrinh.LoTrinhId = newId;
-                _context.Add(loTrinh);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["TramDi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramDi);
-            ViewData["TramToi"] = new SelectList(_context.Tram, "IdTram", "TenTram", loTrinh.TramToi);
-            return View(loTrinh);
+            return await _createLoTrinhTemplate.ExecuteAsync(this, loTrinh);
         }
 
         public async Task<IActionResult> Edit(string id)

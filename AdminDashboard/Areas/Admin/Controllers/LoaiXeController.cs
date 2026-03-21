@@ -3,6 +3,7 @@ using AdminDashboard.TransportDBContext;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using AdminDashboard.Patterns.TemplateMethod;
 
 namespace AdminDashboard.Areas.Admin.Controllers
 {
@@ -11,9 +12,12 @@ namespace AdminDashboard.Areas.Admin.Controllers
     public class LoaiXeController : Controller
     {
         private readonly Db27524Context _context;
-        public LoaiXeController(Db27524Context context)
+        private readonly CreateLoaiXeTemplate _createLoaiXeTemplate;
+
+        public LoaiXeController(Db27524Context context, CreateLoaiXeTemplate createLoaiXeTemplate)
         {
             _context = context;
+            _createLoaiXeTemplate = createLoaiXeTemplate;
         }
         public async Task<IActionResult> Index()
         {
@@ -29,18 +33,7 @@ namespace AdminDashboard.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("TenLoaiXe")] LoaiXe loaixe)
         {
-        
-            ModelState.Remove("LoaiXeId");
-
-            if (ModelState.IsValid)
-            {
-                loaixe.LoaiXeId = Guid.NewGuid().ToString("N").Substring(0, 8);
-                _context.Add(loaixe);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(loaixe);
+            return await _createLoaiXeTemplate.ExecuteAsync(this, loaixe);
         }
         // GET: LoaiXe/Details/
         public async Task<IActionResult> Details(string id)

@@ -41,6 +41,10 @@ builder.Services.AddScoped<AdminDashboard.Services.IBanVeService, AdminDashboard
 builder.Services.AddScoped<IVeRepository, VeRepository>();
 builder.Services.AddScoped<AdminDashboard.Facades.IHomeFacade, AdminDashboard.Facades.HomeFacade>();
 
+builder.Services.AddScoped<AdminDashboard.Patterns.TemplateMethod.CreateTramTemplate>();
+builder.Services.AddScoped<AdminDashboard.Patterns.TemplateMethod.CreateLoaiXeTemplate>();
+builder.Services.AddScoped<AdminDashboard.Patterns.TemplateMethod.CreateLoTrinhTemplate>();
+
 var cloudinaryConfig = builder.Configuration.GetSection("Cloudinary");
 var cloudName = cloudinaryConfig["CloudName"];
 var apiKey = cloudinaryConfig["ApiKey"];
