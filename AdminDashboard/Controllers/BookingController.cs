@@ -2,6 +2,7 @@
 using AdminDashboard.Models;
 using AdminDashboard.Services;
 using AdminDashboard.TransportDBContext;
+using AdminDashboard.Patterns.Adapter;  
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -117,7 +118,7 @@ namespace AdminDashboard.Controllers
         [HttpPost]
         [Authorize]
         [Authorize(Roles = "KhachHang")]
-        public async Task<IActionResult> XacNhanBooking(string chuyenId, string danhSachGheId)
+        public async Task<IActionResult> XacNhanBooking(string chuyenId, string danhSachGheId, string gateway)
         {
             if (string.IsNullOrEmpty(chuyenId) || string.IsNullOrEmpty(danhSachGheId))
             {
@@ -177,15 +178,38 @@ namespace AdminDashboard.Controllers
                 _context.Ve.AddRange(danhSachVe);
                 await _context.SaveChangesAsync();
 
-                string paymentUrl = _vnpayService.CreatePaymentUrl(donHang, HttpContext);
-                return Redirect(paymentUrl);
+                var paymentRequest = new PaymentRequest
+                {
+                    OrderId = donHang.DonHangId,
+                    Amount = donHang.TongTien,
+                    OrderDescription = "Thanh toan don dat ve xe"
+                };
+
+                IPaymentGateway paymentGateway;
+
+                if (!string.IsNullOrEmpty(gateway) && gateway.ToLower() == "momo")
+                {
+                    paymentGateway = new MomoAdapter();
+                }
+                else
+                {
+                    paymentGateway = new VnPayServiceAdapter(_vnpayService, HttpContext);
+                }
+
+                var paymentResult = paymentGateway.ProcessPayment(paymentRequest);
+
+                if (!paymentResult.Success || string.IsNullOrEmpty(paymentResult.PaymentUrl))
+                {
+                    TempData["ErrorMessage"] = "Khong tao duoc URL thanh toan.";
+                    return RedirectToAction("ChonGhe", new { chuyenId = chuyenId });
+                }
+
+                return Redirect(paymentResult.PaymentUrl);
             }
             catch (Exception ex)
             {
-                // **Ghi log lỗi ra Console Output**
-                _logger.LogError(ex, "LỖI PHÁT SINH KHI TẠO URL VNPAY. DonHangId: {DonHangId}", donHang.DonHangId);
-
-                TempData["ErrorMessage"] = "LỖI VNPay: " + ex.Message + " | Inner: " + ex.InnerException?.Message;
+                _logger.LogError(ex, "Loi khi xu ly thanh toan. DonHangId: {DonHangId}", donHang.DonHangId);
+                TempData["ErrorMessage"] = "Loi thanh toan: " + ex.Message;
                 return RedirectToAction("ChonGhe", new { chuyenId = chuyenId });
             }
         }

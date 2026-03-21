@@ -168,6 +168,14 @@
                     <form asp-action="XacNhanBooking" asp-controller="Booking" method="post">
                         <input type="hidden" name="chuyenId" value="@Model.ChuyenId" />
                         <input type="hidden" name="danhSachGheId" id="selected-seats-input" />
+                        
+                        <div class="mb-3">
+                            <label for="gateway" class="form-label">Chọn cổng thanh toán</label>
+                            <select name="gateway" id="gateway" class="form-select">
+                                <option value="vnpay">VNPAY</option>
+                                <option value="momo">MoMo</option>
+                            </select>
+                        </div>
 
                         <button type="submit" class="btn btn-continue w-100" disabled id="btn-continue">
                             <i class="bi bi-arrow-right-circle me-2"></i>Tiếp tục
@@ -195,6 +203,31 @@
             font-weight: 600;
         }
 
+        #gateway,
+        #gateway:hover,
+        #gateway:focus,
+        #gateway:active {
+            color: #212529 !important;
+            background-color: #ffffff !important;
+            border: 1px solid #ced4da;
+            border-radius: 10px;
+            box-shadow: none !important;
+        }
+
+            #gateway option {
+                color: #212529 !important;
+                background-color: #ffffff !important;
+            }
+
+        .form-select {
+            color: #212529;
+            background-color: #fff;
+        }
+
+            .form-select option {
+                color: #212529;
+                background-color: #fff;
+            }
         .bus-image-wrapper {
             background: white;
             padding: 15px;
