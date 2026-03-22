@@ -1,10 +1,12 @@
-﻿namespace AdminDashboard.Patterns.Observer
+﻿using System.Collections.Generic;
+
+namespace AdminDashboard.Patterns.Observer
 {
     public class DashboardService : ISubject
     {
         private List<IObserver> observers = new List<IObserver>();
 
-        public void Attach(IObserver observer)
+        public void AddObserver(IObserver observer)
         {
             observers.Add(observer);
         }

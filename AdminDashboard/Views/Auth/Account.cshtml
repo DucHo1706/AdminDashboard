@@ -337,7 +337,7 @@
             $btnSubmit.prop('disabled', true).text('Đang lưu...');
 
             $.ajax({
-                url: '@Url.Action("EditAccount", "Auth")',
+                url: '@Url.Action("EditAccount", "Home_User")',
                 type: 'POST',
                 data: $(this).serialize(),
                 success: function (res) {
@@ -402,7 +402,11 @@
 
                         $("#editForm").slideUp();
                         $("#display-area .text-center").slideDown();
-                        alert(res.message);
+                            alert(
+                                res.message + "\n" +
+                                res.observer + "\n\n" +
+                                "📜 Log: " + res.log
+                                 );
                     } else {
                         alert('Cập nhật thất bại: ' + res.message);
                     }

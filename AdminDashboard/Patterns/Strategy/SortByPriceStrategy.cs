@@ -1,10 +1,10 @@
 ﻿using AdminDashboard.Models;
 using AdminDashboard.Patterns.Strategy;
 
-public class SortByDateStrategy : ISortStrategy
+public class SortByPriceStrategy : ISortStrategy
 {
     public List<ChuyenXe> Sort(List<ChuyenXe> data)
     {
-        return data.OrderBy(x => x.NgayDi).ToList();
+        return data.OrderBy(x => x.LoTrinh.GiaVeCoDinh).ToList();
     }
 }

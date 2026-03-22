@@ -6,6 +6,4 @@ namespace AdminDashboard.Patterns.Strategy
     {
         List<ChuyenXe> Sort(List<ChuyenXe> data);
     }
-
 }
-

@@ -6,11 +6,9 @@
     ViewData["Title"] = "Chuyến Xe";
 
     var danhSachChuyenXe = Model?
-        .Where(cx => cx.TrangThai == TrangThaiChuyenXe.DangMoBanVe
-        && cx.NgayDi.Date >= DateTime.Today)
-        .OrderBy(cx => cx.NgayDi)
-        .ThenBy(cx => cx.GioDi)
-        .ToList();
+     .Where(cx => cx.TrangThai == TrangThaiChuyenXe.DangMoBanVe
+     && cx.NgayDi.Date >= DateTime.Today)
+     .ToList();
 
 }
 
@@ -264,6 +262,16 @@
 
         <div id="ketQuaTimKiem" class="mt-5" style="display:none;">
             <div id="dsChuyenXe"></div>
+        </div>
+
+        
+        <div style="margin-top:20px; text-align:center;">
+            <a href="?sortType=date" class="btn btn-primary me-2">
+                <i class="bi bi-calendar"></i> Sort theo ngày
+            </a>
+            <a href="?sortType=price" class="btn btn-success">
+                <i class="bi bi-cash"></i> Sort theo giá
+            </a>
         </div>
 
         <div class="table-wrapper mt-5">

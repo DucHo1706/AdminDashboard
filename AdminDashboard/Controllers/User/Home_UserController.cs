@@ -86,20 +86,34 @@ namespace AdminDashboard.Controllers
 
             try
             {
-                // ✅ COMMAND
+                //  COMMAND
                 ICommand cmd = new UpdateUserCommand(_context, user, model);
                 cmd.Execute();
 
-                // ✅ OBSERVER
+
+
+                
+                // OBSERVER
                 DashboardService service = new DashboardService();
+                service.AddObserver(new LogObserver()); 
                 service.Notify("User updated");
 
-                return RedirectToAction("Account");
+                //  HIỂN THỊ RA WEB
+
+                var updateCmd = (UpdateUserCommand)cmd;
+                return Json(new
+                {
+                    success = true,
+                    message = "✔ Thay đổi thành công",
+                    observer = " Tên người dùng đã được cập nhật",
+                    log = updateCmd.LogMessage
+                });
+
+                
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", $"Lỗi khi lưu thông tin: {ex.Message}");
-                return View(model);
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
@@ -113,10 +127,11 @@ namespace AdminDashboard.Controllers
             return View(viewModel);
         }
 
-        public IActionResult ChuyenXe_User()
+        public IActionResult ChuyenXe_User(string sortType)
         {
             ViewBag.DanhSachTram = new SelectList(_context.Tram, "IdTram", "TenTram");
 
+            
             var danhSach = _context.ChuyenXe
                 .Include(c => c.LoTrinh).ThenInclude(l => l.TramDiNavigation)
                 .Include(c => c.LoTrinh).ThenInclude(l => l.TramToiNavigation)
@@ -125,6 +140,21 @@ namespace AdminDashboard.Controllers
                          || c.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh
                          || c.TrangThai == TrangThaiChuyenXe.DaLenLich)
                 .ToList();
+
+            //  STRATEGY
+            ISortStrategy strategy;
+
+            switch (sortType)
+            {
+                case "price":
+                    strategy = new SortByPriceStrategy();
+                    break;
+                default:
+                    strategy = new SortByDateStrategy();
+                    break;
+            }
+
+            danhSach = strategy.Sort(danhSach);
 
             return View(danhSach);
         }
