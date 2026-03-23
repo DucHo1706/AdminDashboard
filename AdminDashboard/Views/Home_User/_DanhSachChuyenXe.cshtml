@@ -1,67 +1,74 @@
-﻿@using AdminDashboard.Models.TrangThai
-@model IEnumerable<AdminDashboard.Models.ChuyenXe>
-
-@{
-    var danhSachLoc = Model?
-        .Where(cx =>
-            cx.TrangThai == TrangThaiChuyenXe.DangMoBanVe
-            && cx.NgayDi.Date >= DateTime.Today
-        )
-        .OrderBy(cx => cx.NgayDi)
-        .ThenBy(cx => cx.GioDi)
-        .ToList();
-}
-
-<body>
-    @if (danhSachLoc == null || !danhSachLoc.Any())
-    {
-        <div class="alert alert-warning text-center">Không tìm thấy chuyến xe nào phù hợp.</div>
+﻿
+<style>
+    .table-wrapper {
+        border-radius: 12px;
+        overflow: hidden;
+        background: white;
     }
-    else
-    {
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Tuyến xe</th>
-                        <th>Ngày đi</th>
-                        <th>Giờ đi</th>
-                        <th>Giờ đến dự kiến</th>
-                        <th>Biển số xe</th>
-                        <th>Giá vé</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var cx in danhSachLoc)
-                    {
-                        <tr>
-                            <td>
-                                <span class="route">@cx.LoTrinh?.TramDiNavigation?.TenTram</span>
-                                <i class="bi bi-arrow-right arrow"></i>
-                                <span class="route">@cx.LoTrinh?.TramToiNavigation?.TenTram</span>
-                            </td>
-                            <td>@cx.NgayDi.ToString("dd/MM/yyyy")</td>
-                            <td>@cx.GioDi</td>
-                            <td>@cx.GioDenDuKien</td>
-                            <td>@cx.Xe?.BienSoXe</td>
-                            <td>
-                                <span class="price-card">
-                                    @String.Format("{0:N0} đ", cx.LoTrinh.GiaVeCoDinh)
-                                </span>
-                            </td>
-                            <td>
-                                <a asp-action="ChonGhe"
-                                   asp-controller="Booking"
-                                   asp-route-chuyenId="@cx.ChuyenId"
-                                   class="btn btn-tuyen">
-                                    Chọn chuyến
-                                </a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+
+    .table thead th {
+        font-weight: bold;
+        text-transform: uppercase;
     }
-</body>
+
+    .table tbody tr:hover {
+        background-color: #fff3e6;
+        transition: 0.2s;
+    }
+
+    .badge {
+        border-radius: 10px;
+    }
+</style>
+<div class="table-wrapper shadow">
+    <table class="table table-hover align-middle text-center">
+        <thead class="table-warning">
+            <tr>
+                <th style="width: 20%">Tuyến xe</th>
+                <th style="width: 12%">Ngày đi</th>
+                <th style="width: 10%">Giờ đi</th>
+                <th style="width: 12%">Giờ đến</th>
+                <th style="width: 15%">Biển số</th>
+                <th style="width: 15%">Giá vé</th>
+                <th style="width: 16%"></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var cx in Model)
+            {
+                <tr>
+                    <td>
+                        <strong class="text-warning">
+                            @cx.LoTrinh?.TramDiNavigation?.TenTram
+                        </strong>
+                        <i class="bi bi-arrow-right mx-1"></i>
+                        <strong class="text-danger">
+                            @cx.LoTrinh?.TramToiNavigation?.TenTram
+                        </strong>
+                    </td>
+
+                    <td>@cx.NgayDi.ToString("dd/MM/yyyy")</td>
+                    <td>@cx.GioDi</td>
+                    <td>@cx.GioDenDuKien</td>
+                    <td>@cx.Xe?.BienSoXe</td>
+
+                    <td>
+                        <span class="badge bg-success fs-6 px-3 py-2">
+                            @String.Format("{0:N0} đ", cx.LoTrinh.GiaVeCoDinh)
+                        </span>
+                    </td>
+
+                    <td>
+                        <a asp-action="ChonGhe"
+                           asp-controller="Booking"
+                           asp-route-chuyenId="@cx.ChuyenId"
+                           class="btn btn-warning btn-sm px-3">
+                            Chọn
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

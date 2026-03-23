@@ -160,31 +160,33 @@ namespace AdminDashboard.Controllers
         }
 
         [HttpGet]
-        public IActionResult TimKiemAjax(string diemDi, string diemDen, string ngayDi)
+        public IActionResult TimKiemAjax(string diemDi, string diemDen, string ngayDi, string sortType)
         {
-            var query = _context.ChuyenXe
-                .Include(c => c.LoTrinh).ThenInclude(l => l.TramDiNavigation)
-                .Include(c => c.LoTrinh).ThenInclude(l => l.TramToiNavigation)
-                .Include(c => c.Xe)
-                .Where(c => c.TrangThai == TrangThaiChuyenXe.DangMoBanVe
-                         || c.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh
-                         || c.TrangThai == TrangThaiChuyenXe.DaLenLich)
+            var query = _context.ChuyenXes
+                .Include(x => x.LoTrinh) 
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(diemDi))
-                query = query.Where(c => c.LoTrinh.TramDi == diemDi);
+                query = query.Where(x => x.LoTrinh.TramDi == diemDi);
 
             if (!string.IsNullOrEmpty(diemDen))
-                query = query.Where(c => c.LoTrinh.TramToi == diemDen);
+                query = query.Where(x => x.LoTrinh.TramToi == diemDen);
 
-            if (!string.IsNullOrEmpty(ngayDi) && DateTime.TryParse(ngayDi, out DateTime parsedNgay))
-                query = query.Where(c => c.NgayDi.Date == parsedNgay.Date);
+            // SORT
+            switch (sortType)
+            {
+                case "price":
+                    query = query.OrderBy(x => x.LoTrinh.GiaVeCoDinh);
+                    break;
 
-            // ✅ STRATEGY
-            ISortStrategy strategy = new SortByDateStrategy();
-            var ketQua = strategy.Sort(query.ToList());
+                default:
+                    query = query.OrderBy(x => x.NgayDi);
+                    break;
+            }
 
-            return PartialView("_DanhSachChuyenXe", ketQua);
+            var result = query.ToList();
+
+            return PartialView("_DanhSachChuyenXe", result);
         }
 
         public IActionResult About()
