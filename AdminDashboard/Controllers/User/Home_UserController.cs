@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using AdminDashboard.Patterns.ChainOfResponsibility;
 
 namespace AdminDashboard.Controllers
 {
@@ -141,18 +142,28 @@ namespace AdminDashboard.Controllers
                          || c.TrangThai == TrangThaiChuyenXe.DaLenLich)
                 .AsQueryable();
 
-            if (!string.IsNullOrEmpty(diemDi))
-                query = query.Where(c => c.LoTrinh.TramDi == diemDi);
+            // 1. Gói dữ liệu vào Request
+            var request = new TimKiemRequest
+            {
+                Query = query,
+                DiemDi = diemDi,
+                DiemDen = diemDen,
+                NgayDi = ngayDi
+            };
 
-            if (!string.IsNullOrEmpty(diemDen))
-                query = query.Where(c => c.LoTrinh.TramToi == diemDen);
+            // 2. Khởi tạo các bộ lọc (Các mắt xích)
+            var locDiemDi = new LocTheoDiemDiHandler();
+            var locDiemDen = new LocTheoDiemDenHandler();
+            var locNgayDi = new LocTheoNgayDiHandler();
 
-            if (!string.IsNullOrEmpty(ngayDi) && DateTime.TryParse(ngayDi, out DateTime parsedNgay))
-                query = query.Where(c => c.NgayDi.Date == parsedNgay.Date);
+            // 3. Móc nối các bộ lọc lại thành 1 chuỗi và đưa Request vào xử lý
+            locDiemDi.SetNext(locDiemDen).SetNext(locNgayDi);
+            var querySauKhiLoc = locDiemDi.Handle(request);
 
-            // ✅ STRATEGY
+
             ISortStrategy strategy = new SortByDateStrategy();
-            var ketQua = strategy.Sort(query.ToList());
+
+            var ketQua = strategy.Sort(querySauKhiLoc.ToList());
 
             return PartialView("_DanhSachChuyenXe", ketQua);
         }
