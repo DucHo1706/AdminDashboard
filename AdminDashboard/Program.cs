@@ -33,6 +33,7 @@ builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IVnpayService, VnpayService>();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<AdminDashboard.Services.IChuyenXeService, AdminDashboard.Services.ChuyenXeService>();
+builder.Services.AddScoped<AdminDashboard.Services.IChuyenXePrototypeService, AdminDashboard.Services.ChuyenXePrototypeService>();
 builder.Services.AddScoped<AdminDashboard.Services.INhanVienService, AdminDashboard.Services.NhanVienService>();
 builder.Services.AddScoped<AdminDashboard.Services.IBanVeService, AdminDashboard.Services.BanVeService>();
 builder.Services.AddScoped<IVeRepository, VeRepository>();

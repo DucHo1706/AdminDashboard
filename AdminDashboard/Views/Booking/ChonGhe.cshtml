@@ -168,12 +168,15 @@
                     <form asp-action="XacNhanBooking" asp-controller="Booking" method="post">
                         <input type="hidden" name="chuyenId" value="@Model.ChuyenId" />
                         <input type="hidden" name="danhSachGheId" id="selected-seats-input" />
-                        
+
                         <div class="mb-3">
-                            <label for="gateway" class="form-label">Chọn cổng thanh toán</label>
+                            <label for="gateway" class="form-label fw-semibold">
+                                <i class="bi bi-credit-card me-2"></i>Chọn cổng thanh toán
+                            </label>
                             <select name="gateway" id="gateway" class="form-select">
-                                <option value="vnpay">VNPAY</option>
-                                <option value="momo">MoMo</option>
+                                <option value="">-- Chọn phương thức thanh toán --</option>
+                                <option value="VNPAY">VNPAY</option>
+                                <option value="MOMO">MoMo</option>
                             </select>
                         </div>
 

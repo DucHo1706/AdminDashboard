@@ -33,13 +33,14 @@ namespace AdminDashboard.Areas.NhaXe.Controllers
         [HttpGet]
         public async Task<IActionResult> BanVe(string id)
         {
+            if (string.IsNullOrEmpty(NhaXeId))
+                return RedirectToAction("Login", "Auth", new { area = "" });
+
             var data = await _banVeService.GetSoDoGheAsync(id, NhaXeId);
 
             if (data == null) return NotFound();
-            ViewBag.VeDaBan = data.VeDaBan;
-            ViewBag.TongSoGhe = data.ChuyenXe.Xe.SoLuongGhe;
 
-            return View(data.ChuyenXe);
+            return View(data);
         }
 
         [HttpPost]
@@ -91,7 +92,8 @@ namespace AdminDashboard.Areas.NhaXe.Controllers
         [HttpGet]
         public async Task<IActionResult> GetSoDoGheJSON(string chuyenId)
         {
-            // Tận dụng hàm GetSoDoGheAsync đã viết sẵn ở bài trước
+            if (string.IsNullOrEmpty(NhaXeId)) return Unauthorized();
+
             var data = await _banVeService.GetSoDoGheAsync(chuyenId, NhaXeId);
 
             if (data == null) return Json(new { success = false });
@@ -99,8 +101,10 @@ namespace AdminDashboard.Areas.NhaXe.Controllers
             return Json(new
             {
                 success = true,
-                tongSoGhe = data.ChuyenXe.Xe.SoLuongGhe, // Số lượng ghế
-                veDaBan = data.VeDaBan // Danh sách ghế đã bán
+                tongSoGhe = data.TongSoGhe,
+                veDaBan = data.VeDaBan,
+                soGheTrong = data.SoGheTrong,
+                soGheDaBan = data.SoGheDaBan
             });
         }
     }
