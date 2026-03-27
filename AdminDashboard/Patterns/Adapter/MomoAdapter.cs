@@ -13,16 +13,28 @@ namespace AdminDashboard.Patterns.Adapter
 
         public PaymentResult ProcessPayment(PaymentRequest request)
         {
+            if (request == null || string.IsNullOrEmpty(request.OrderId))
+            {
+                return new PaymentResult
+                {
+                    Success = false,
+                    GatewayName = "MOMO",
+                    PaymentUrl = string.Empty,
+                    TransactionCode = string.Empty,
+                    Message = "Du lieu thanh toan MOMO khong hop le"
+                };
+            }
+
             string paymentUrl = _momoApi.SendMomoRequest(
                 request.OrderId,
                 request.Amount,
                 request.OrderDescription,
-                "https://localhost:5001/Booking/PaymentCallback"
+                "/Booking/MomoConfirm"
             );
 
             return new PaymentResult
             {
-                Success = true,
+                Success = !string.IsNullOrEmpty(paymentUrl),
                 GatewayName = "MOMO",
                 PaymentUrl = paymentUrl,
                 TransactionCode = request.OrderId,

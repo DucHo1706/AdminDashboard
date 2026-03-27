@@ -85,12 +85,15 @@
 </div>
 
 <div class="modal-footer bg-light">
-    <a href="@Url.Action("Edit", "Chuyenxe", new { area = "NhaXe", id = Model.ChuyenId })" class="btn btn-sm btn-outline-success">
+    <a href="@Url.Action("NhanBan", "ChuyenXe", new { area = "NhaXe", id = Model.ChuyenId })" class="btn btn-sm btn-outline-primary">
+        <i class="bi bi-copy"></i> Nhân bản
+    </a>
+
+    <a href="@Url.Action("Edit", "ChuyenXe", new { area = "NhaXe", id = Model.ChuyenId })" class="btn btn-sm btn-outline-success">
         <i class="bi bi-pencil"></i> Chỉnh sửa
     </a>
 
     <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete('@Model.ChuyenId')">
         <i class="bi bi-trash"></i> Xóa
     </button>
-
 </div>

@@ -15,11 +15,13 @@ namespace AdminDashboard.Areas.NhaXe.Controllers
     {
         private readonly Db27524Context _context;
         private readonly IChuyenXeService _chuyenXeService;
+        private readonly IChuyenXePrototypeService _chuyenXePrototypeService;
 
-        public ChuyenXeController(Db27524Context context, IChuyenXeService chuyenXeService)
+        public ChuyenXeController(Db27524Context context, IChuyenXeService chuyenXeService, IChuyenXePrototypeService chuyenXePrototypeService)
         {
             _context = context;
             _chuyenXeService = chuyenXeService;
+            _chuyenXePrototypeService = chuyenXePrototypeService;
         }
 
         private string NhaXeId => User.FindFirst("NhaXeId")?.Value;
@@ -78,6 +80,67 @@ namespace AdminDashboard.Areas.NhaXe.Controllers
             return View(request);
         }
 
+        // Nhan Ban
+        [HttpGet]
+        public async Task<IActionResult> NhanBan(string id)
+        {
+            if (string.IsNullOrEmpty(NhaXeId))
+                return RedirectToAction("Login", "Auth", new { area = "" });
+
+            var sourceTrip = await _chuyenXePrototypeService.GetSourceTripAsync(id, NhaXeId);
+            if (sourceTrip == null) return NotFound();
+
+            var model = new NhanBanChuyenXeRequest
+            {
+                SourceChuyenId = sourceTrip.ChuyenId,
+                NgayDi = sourceTrip.NgayDi.AddDays(1),
+                GioDi = sourceTrip.GioDi,
+                GioDenDuKien = sourceTrip.GioDenDuKien,
+                XeId = sourceTrip.XeId,
+
+                // Để trống dropdown tài xế; checkbox bên dưới quyết định có sao chép tài xế cũ hay không
+                TaiXeId = null,
+
+                SaoChepHinhAnh = sourceTrip.Images.Any(),
+                SaoChepTaiXe = !string.IsNullOrWhiteSpace(sourceTrip.TaiXeId),
+                ResetTrangThaiChoDuyet = true
+            };
+
+            await LoadPrototypeDropdownsAsync(model.XeId, model.TaiXeId);
+            ViewBag.SourceTrip = sourceTrip;
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> NhanBan(NhanBanChuyenXeRequest request)
+        {
+            if (string.IsNullOrEmpty(NhaXeId))
+                return RedirectToAction("Login", "Auth", new { area = "" });
+
+            var sourceTrip = await _chuyenXePrototypeService.GetSourceTripAsync(request.SourceChuyenId, NhaXeId);
+            if (sourceTrip == null) return NotFound();
+
+            if (!ModelState.IsValid)
+            {
+                await LoadPrototypeDropdownsAsync(request.XeId, request.TaiXeId);
+                ViewBag.SourceTrip = sourceTrip;
+                return View(request);
+            }
+
+            var result = await _chuyenXePrototypeService.NhanBanTuMauAsync(request, NhaXeId);
+
+            if (result.Success)
+            {
+                TempData["SuccessMessage"] = result.Message;
+                return RedirectToAction(nameof(Index));
+            }
+
+            ModelState.AddModelError(string.Empty, result.Message);
+            await LoadPrototypeDropdownsAsync(request.XeId, request.TaiXeId);
+            ViewBag.SourceTrip = sourceTrip;
+            return View(request);
+        }
         // 3. EDIT (GET) - Giữ nguyên logic lấy dữ liệu để hiển thị
         public async Task<IActionResult> Edit(string id)
         {
@@ -158,6 +221,35 @@ namespace AdminDashboard.Areas.NhaXe.Controllers
             var xes = _context.Xe.Where(x => x.NhaXeId == NhaXeId).Select(x => new { x.XeId, x.BienSoXe }).ToList();
             ViewBag.LoTrinhId = new SelectList(loTrinhs, "LoTrinhId", "Name", selLoTrinh);
             ViewBag.XeId = new SelectList(xes, "XeId", "BienSoXe", selXe);
+        }
+
+        private async Task LoadPrototypeDropdownsAsync(object? selXe = null, object? selTaiXe = null)
+        {
+            var xes = await _context.Xe
+                .Include(x => x.LoaiXe)
+                .Where(x => x.NhaXeId == NhaXeId)
+                .OrderBy(x => x.BienSoXe)
+                .Select(x => new
+                {
+                    x.XeId,
+                    Name = x.BienSoXe + " - " + (x.LoaiXe != null ? x.LoaiXe.TenLoaiXe : "Chưa rõ loại")
+                })
+                .ToListAsync();
+
+            var taiXes = await _context.NhanVien
+                .Where(nv => nv.NhaXeId == NhaXeId
+                             && nv.VaiTro == VaiTroNhanVien.TaiXe
+                             && nv.DangLamViec)
+                .OrderBy(nv => nv.HoTen)
+                .Select(nv => new
+                {
+                    nv.NhanVienId,
+                    Name = nv.HoTen + " - " + nv.SoDienThoai
+                })
+                .ToListAsync();
+
+            ViewBag.PrototypeXeId = new SelectList(xes, "XeId", "Name", selXe);
+            ViewBag.PrototypeTaiXeId = new SelectList(taiXes, "NhanVienId", "Name", selTaiXe);
         }
 
         private async Task LoadTramDropdownForSearch()

@@ -560,8 +560,9 @@
                             </div>
 
                             <div class="trip-action-section">
-                                <a asp-page="/Booking/ChonGhe" 
-                                   asp-route-chuyenId="@cx.ChuyenId" 
+                                <a asp-action="ChonGhe"
+                                   asp-controller="Booking"
+                                   asp-route-chuyenId="@cx.ChuyenId"
                                    class="btn-select-trip w-100 justify-content-center">
                                     <i class="bi bi-ticket-perforated me-2"></i>
                                     Đặt vé ngay

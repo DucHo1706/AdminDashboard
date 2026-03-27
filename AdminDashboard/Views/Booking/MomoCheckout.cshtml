@@ -1,0 +1,44 @@
+﻿@model AdminDashboard.Models.DonHang
+
+@{
+    ViewData["Title"] = "Thanh toán MoMo";
+}
+
+<div class="container my-5">
+    <div class="card shadow-lg border-0 mx-auto" style="max-width: 600px; border-radius: 18px;">
+        <div class="card-header text-white text-center" style="background: linear-gradient(135deg, #b0006d, #8a0056); border-radius: 18px 18px 0 0;">
+            <h3 class="mb-0">Thanh toán MoMo (Giả lập)</h3>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="mb-3">
+                <strong>Mã đơn hàng:</strong> @Model.DonHangId
+            </div>
+
+            <div class="mb-3">
+                <strong>Tổng tiền:</strong> @Model.TongTien.ToString("N0") VNĐ
+            </div>
+
+            <div class="mb-3">
+                <strong>Trạng thái:</strong> @Model.TrangThaiThanhToan
+            </div>
+
+            <div class="alert alert-info">
+                Đây là trang thanh toán MoMo giả lập để demo Adapter Pattern.
+            </div>
+
+            <form asp-action="MomoConfirm" asp-controller="Booking" method="post" class="d-grid gap-2">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.DonHangId" />
+
+                <button type="submit" name="result" value="success" class="btn btn-lg text-white" style="background-color:#b0006d;">
+                    Thanh toán thành công
+                </button>
+
+                <button type="submit" name="result" value="fail" class="btn btn-outline-secondary btn-lg">
+                    Hủy / Thất bại
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
