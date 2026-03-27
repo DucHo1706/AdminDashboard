@@ -27,13 +27,15 @@ namespace AdminDashboard.Facades
 
         public List<TuyenXeViewModel> LayTuyenXeNoiBat()
         {
-            var today = DateTime.Today;
+            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var todayInVietnam = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone).Date;
 
             var allUpcomingTrips = _context.ChuyenXe
                 .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramDiNavigation)
                 .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramToiNavigation)
                 .Include(c => c.Images)
-                .Where(c => c.NgayDi.Date >= today &&
+                // Thay today bằng todayInVietnam
+                .Where(c => c.NgayDi.Date >= todayInVietnam &&
                             c.TrangThai == TrangThaiChuyenXe.DangMoBanVe)
                 .ToList();
 
@@ -79,16 +81,20 @@ namespace AdminDashboard.Facades
 
         public List<ChuyenXe> LayChuyenXeHomNay()
         {
-            var today = DateTime.Today;
-            return _context.ChuyenXe
+            // 1. Ép lấy múi giờ Việt Nam (UTC+7)
+            var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var todayInVietnam = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone).Date;
+
+            // 2. Truy vấn Database dựa trên giờ Việt Nam
+            var chuyenXeHomNay = _context.ChuyenXe
                 .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramDiNavigation)
                 .Include(c => c.LoTrinh).ThenInclude(lt => lt.TramToiNavigation)
-                .Include(c => c.Xe).ThenInclude(x => x.LoaiXe)
                 .Include(c => c.Images)
-                .Where(c => c.NgayDi.Date == today &&
-                            c.TrangThai == TrangThaiChuyenXe.DangMoBanVe)
-                .OrderBy(c => c.GioDi)
+                // Dùng biến todayInVietnam.Date để so sánh
+                .Where(c => c.NgayDi.Date == todayInVietnam)
                 .ToList();
+
+            return chuyenXeHomNay;
         }
 
         public LichSuMuaVeViewModel LayLichSuDonHang(string userId)
