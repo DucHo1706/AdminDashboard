@@ -1,105 +1,52 @@
-﻿using AdminDashboard.Models;
+﻿using AdminDashboard.Facades;
+using AdminDashboard.Models;
 using AdminDashboard.Models.TrangThai;
 using AdminDashboard.Models.ViewModels;
 using AdminDashboard.TransportDBContext;
+using AdminDashboard.Patterns.Command;
+using AdminDashboard.Patterns.Strategy;
+using AdminDashboard.Patterns.Observer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using AdminDashboard.Patterns.ChainOfResponsibility;
 
 namespace AdminDashboard.Controllers
 {
     public class Home_UserController : Controller
     {
         private readonly Db27524Context _context;
+        private readonly IHomeFacade _homeFacade;
 
-        public Home_UserController(Db27524Context context)
+        public Home_UserController(Db27524Context context, IHomeFacade homeFacade)
         {
             _context = context;
+            _homeFacade = homeFacade;
         }
 
         public IActionResult Home_User()
         {
-            // Lấy tất cả các trạm để hiển thị trong dropdown
             var danhSachTram = _context.Tram.ToList();
-
-            // Dùng ViewBag hoặc ViewModel để truyền danh sách này ra View
             ViewBag.DanhSachTram = new SelectList(danhSachTram, "IdTram", "TenTram");
 
-            // Tải các chuyến xe sắp tới để hiển thị trên trang Home User
-            var today = DateTime.Today;
-            var upcomingTrips = _context.ChuyenXe
-                .Include(c => c.LoTrinh)
-                    .ThenInclude(lt => lt.TramDiNavigation)
-                .Include(c => c.LoTrinh)
-                    .ThenInclude(lt => lt.TramToiNavigation)
-                .Include(c => c.Xe)
-                    .ThenInclude(x => x.LoaiXe)
-                .Include(c => c.Images)
-                .Where(c => c.NgayDi.Date >= today &&
-                            c.TrangThai == TrangThaiChuyenXe.DangMoBanVe) 
-                .OrderBy(c => c.NgayDi)
-                .ThenBy(c => c.GioDi)
-                .ToList();
+            ViewBag.RoutesByDeparture = _homeFacade.LayTuyenXeNoiBat();
+            var tripsToday = _homeFacade.LayChuyenXeHomNay();
 
-            // Nhóm chuyến xe theo điểm đi (Tên trạm)
-            var routesByDeparture = upcomingTrips
-                .Where(c => c.LoTrinh?.TramDiNavigation != null)
-                .GroupBy(c => new { 
-                    TenTram = c.LoTrinh.TramDiNavigation.TenTram,
-                    Tinh = c.LoTrinh.TramDiNavigation.Tinh ?? "",
-                    ImageUrl = c.Images?.FirstOrDefault()?.ImageUrl ?? "/images/slider/hcm.png"
-                })
-                .Select(g => new TuyenXeViewModel
-                {
-                    Tinh = g.Key.Tinh,
-                    TenTram = g.Key.TenTram,
-                    ImageUrl = g.Key.ImageUrl,
-                    TuyenXe = g
-                        .Where(c => c.LoTrinh?.TramToiNavigation != null)
-                        .GroupBy(c => c.LoTrinh.TramToiNavigation.TenTram)
-                        .Select(group => group.OrderBy(c => c.NgayDi).ThenBy(c => c.GioDi).First())
-                        .Select(c => new TuyenXeItemViewModel
-                        {
-                            ChuyenId = c.ChuyenId,
-                            DiemDen = c.LoTrinh.TramToiNavigation.TenTram,
-                            NgayDi = c.NgayDi,
-                            GioDi = c.GioDi,
-                            GioDenDuKien = c.GioDenDuKien,
-                            ThoiGian = (c.GioDenDuKien - c.GioDi).TotalHours >= 1 
-                                ? $"{(int)(c.GioDenDuKien - c.GioDi).TotalHours} giờ" 
-                                : $"{(int)((c.GioDenDuKien - c.GioDi).TotalMinutes)} phút",
-                            GiaVe = c.LoTrinh.GiaVeCoDinh ?? 0,
-                            ImageUrl = c.Images?.FirstOrDefault()?.ImageUrl ?? g.Key.ImageUrl
-                        })
-                        .OrderBy(t => t.DiemDen)
-                        .Take(3) // Lấy tối đa 3 tuyến đầu tiên
-                        .ToList()
-                })
-                .Where(r => r.TuyenXe != null && r.TuyenXe.Any()) // Chỉ lấy những nhóm có tuyến
-                .Take(3) // Lấy tối đa 3 điểm đi
-                .ToList();
-
-            ViewBag.RoutesByDeparture = routesByDeparture;
-
-            return View(upcomingTrips);
+            return View(tripsToday);
         }
 
         public async Task<IActionResult> Account()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
-            {
                 return RedirectToAction("Login", "Auth");
-            }
 
             var user = await _context.NguoiDung
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (user == null)
-            {
                 return NotFound("Không tìm thấy thông tin người dùng.");
-            }
 
             var role = await (from ur in _context.UserRole
                               join r in _context.VaiTro on ur.RoleId equals r.RoleId
@@ -115,15 +62,11 @@ namespace AdminDashboard.Controllers
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
-            {
                 return RedirectToAction("Login", "Auth");
-            }
 
             var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null)
-            {
                 return NotFound("Không tìm thấy thông tin người dùng.");
-            }
 
             return View(user);
         }
@@ -132,39 +75,26 @@ namespace AdminDashboard.Controllers
         public async Task<IActionResult> EditAccount(NguoiDung model)
         {
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
-            {
                 return RedirectToAction("Login", "Auth");
-            }
 
             var user = await _context.NguoiDung.FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null)
-            {
                 return NotFound("Không tìm thấy thông tin người dùng.");
-            }
-
-            user.HoTen = model.HoTen;
-            user.Email = model.Email;
-            user.SoDienThoai = model.SoDienThoai;
-            user.NgaySinh = model.NgaySinh;
-
-            var khachHang = await _context.NguoiDung.FirstOrDefaultAsync(kh => kh.UserId == userId);
-            if (khachHang != null)
-            {
-                khachHang.HoTen = model.HoTen;
-                khachHang.Email = model.Email;
-                khachHang.SoDienThoai = model.SoDienThoai;
-                khachHang.NgaySinh = model.NgaySinh;
-            }
 
             try
             {
-                await _context.SaveChangesAsync();
+                // ✅ COMMAND
+                ICommand cmd = new UpdateUserCommand(_context, user, model);
+                cmd.Execute();
+
+                // ✅ OBSERVER
+                DashboardService service = new DashboardService();
+                service.Notify("User updated");
+
                 return RedirectToAction("Account");
             }
             catch (Exception ex)
@@ -174,32 +104,20 @@ namespace AdminDashboard.Controllers
             }
         }
 
-
-
-        public async Task<IActionResult> PurchaseHistory()
+        public IActionResult PurchaseHistory()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
-            {
                 return RedirectToAction("Login", "Auth");
-            }
 
-            // Giữ nguyên các đơn hết hạn ở trạng thái Chờ thanh toán để hiển thị bên "Hiện tại".
-            // Không auto-cancel và không giải phóng ghế tại đây; việc hủy sẽ do người dùng hoặc tác vụ khác xử lý.
-
-            var donHangs = await _context.DonHang
-                .Where(d => d.IDKhachHang == userId)
-                .Include(d => d.ChuyenXe).ThenInclude(cx => cx.LoTrinh).ThenInclude(lt => lt.TramDiNavigation)
-                .Include(d => d.ChuyenXe).ThenInclude(cx => cx.LoTrinh).ThenInclude(lt => lt.TramToiNavigation)
-                .OrderByDescending(d => d.NgayDat)
-                .ToListAsync();
-
-            return View(donHangs);
+            var viewModel = _homeFacade.LayLichSuDonHang(userId);
+            return View(viewModel);
         }
-        // GET: ChuyenXe/DanhSach
+
         public IActionResult ChuyenXe_User()
         {
             ViewBag.DanhSachTram = new SelectList(_context.Tram, "IdTram", "TenTram");
+
             var danhSach = _context.ChuyenXe
                 .Include(c => c.LoTrinh).ThenInclude(l => l.TramDiNavigation)
                 .Include(c => c.LoTrinh).ThenInclude(l => l.TramToiNavigation)
@@ -224,23 +142,32 @@ namespace AdminDashboard.Controllers
                          || c.TrangThai == TrangThaiChuyenXe.DaLenLich)
                 .AsQueryable();
 
-            // So sánh theo ID Trạm vì dropdown chọn IdTram
-            if (!string.IsNullOrEmpty(diemDi))
-                query = query.Where(c => c.LoTrinh.TramDi == diemDi);
+            // 1. Gói dữ liệu vào Request
+            var request = new TimKiemRequest
+            {
+                Query = query,
+                DiemDi = diemDi,
+                DiemDen = diemDen,
+                NgayDi = ngayDi
+            };
 
-            if (!string.IsNullOrEmpty(diemDen))
-                query = query.Where(c => c.LoTrinh.TramToi == diemDen);
+            // 2. Khởi tạo các bộ lọc (Các mắt xích)
+            var locDiemDi = new LocTheoDiemDiHandler();
+            var locDiemDen = new LocTheoDiemDenHandler();
+            var locNgayDi = new LocTheoNgayDiHandler();
 
-            if (!string.IsNullOrEmpty(ngayDi) && DateTime.TryParse(ngayDi, out DateTime parsedNgay))
-                query = query.Where(c => c.NgayDi.Date == parsedNgay.Date);
+            // 3. Móc nối các bộ lọc lại thành 1 chuỗi và đưa Request vào xử lý
+            locDiemDi.SetNext(locDiemDen).SetNext(locNgayDi);
+            var querySauKhiLoc = locDiemDi.Handle(request);
 
-            var ketQua = query
-                .OrderBy(c => c.NgayDi)
-                .ThenBy(c => c.GioDi)
-                .ToList();
+
+            ISortStrategy strategy = new SortByDateStrategy();
+
+            var ketQua = strategy.Sort(querySauKhiLoc.ToList());
 
             return PartialView("_DanhSachChuyenXe", ketQua);
         }
+
         public IActionResult About()
         {
             return View();

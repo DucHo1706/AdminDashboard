@@ -2,6 +2,7 @@
 using AdminDashboard.Models.TrangThai;
 using AdminDashboard.Models.ViewModels;
 using AdminDashboard.Patterns;
+using AdminDashboard.Patterns.Iterator;
 using AdminDashboard.TransportDBContext;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -60,8 +61,89 @@ namespace AdminDashboard.Services
                })
                .ToListAsync();
 
-            // Lưu ý: VeDaBan trong SoDoGheDTO cần khai báo là List<VeBanInfo> hoặc dynamic
-            return new SoDoGheDTO { ChuyenXe = cx, VeDaBan = veDaBan };
+            var tongMacDinh = cx.Xe.SoLuongGhe > 0 ? cx.Xe.SoLuongGhe : 40;
+
+            var danhSachGhe = (cx.Xe.DanhSachGhe ?? new List<Ghe>())
+                .OrderBy(g => int.TryParse(g.SoGhe, out var seatNo) ? seatNo : int.MaxValue)
+                .ToList();
+
+            // Nếu xe chưa có đủ danh sách ghế trong DB, tự bù để sơ đồ không bị thiếu ghế
+            if (!danhSachGhe.Any())
+            {
+                danhSachGhe = Enumerable.Range(1, tongMacDinh)
+                    .Select(i => new Ghe
+                    {
+                        GheID = string.Empty,
+                        XeId = cx.XeId,
+                        SoGhe = i.ToString("D2"),
+                        TrangThai = "Trống"
+                    })
+                    .ToList();
+            }
+            else if (danhSachGhe.Count < tongMacDinh)
+            {
+                var existingSeatNumbers = danhSachGhe
+                    .Select(g => g.SoGhe)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                var gheConThieu = Enumerable.Range(1, tongMacDinh)
+                    .Select(i => i.ToString("D2"))
+                    .Where(so => !existingSeatNumbers.Contains(so))
+                    .Select(so => new Ghe
+                    {
+                        GheID = string.Empty,
+                        XeId = cx.XeId,
+                        SoGhe = so,
+                        TrangThai = "Trống"
+                    });
+
+                danhSachGhe.AddRange(gheConThieu);
+
+                danhSachGhe = danhSachGhe
+                    .OrderBy(g => int.TryParse(g.SoGhe, out var seatNo) ? seatNo : int.MaxValue)
+                    .ToList();
+            }
+
+            var soldLookup = veDaBan
+                .GroupBy(v => v.SoGhe, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+            var seatSource = danhSachGhe
+                .Select(g =>
+                {
+                    soldLookup.TryGetValue(g.SoGhe, out var ve);
+
+                    return new SeatDisplayItem
+                    {
+                        GheId = g.GheID,
+                        SoGhe = g.SoGhe,
+                        TrangThai = ve == null ? "Trong" : "DaBan",
+                        TenKhach = ve?.TenKhach,
+                        SoDienThoai = ve?.Sdt
+                    };
+                })
+                .ToList();
+
+            var seatCollection = new SeatCollection(seatSource);
+
+            // Iterator 1: lấy toàn bộ ghế để render
+            var soDoGhe = MaterializeIterator(seatCollection.CreateAllIterator());
+
+            // Iterator 2: đếm ghế trống
+            var soGheTrong = CountIterator(seatCollection.CreateAvailableIterator());
+
+            // Iterator 3: đếm ghế đã bán
+            var soGheDaBan = CountIterator(seatCollection.CreateSoldIterator());
+
+            return new SoDoGheDTO
+            {
+                ChuyenXe = cx,
+                VeDaBan = veDaBan,
+                SoDoGhe = soDoGhe,
+                TongSoGhe = seatCollection.Count,
+                SoGheTrong = soGheTrong,
+                SoGheDaBan = soGheDaBan
+            };
         }
 
         public async Task<KetQuaBanVe> DatVeTaiQuayAsync(DatVeTaiQuayRequest req, string nhaXeId, string tenNhanVien)
@@ -203,6 +285,33 @@ namespace AdminDashboard.Services
 
             await _context.SaveChangesAsync();
             return new KetQuaBanVe { Success = true, Message = $"Đổi thành công sang ghế {soGheMoi}." };
+        }
+
+        private static List<SeatDisplayItem> MaterializeIterator(ISeatIterator iterator)
+        {
+            var result = new List<SeatDisplayItem>();
+            iterator.Reset();
+
+            while (iterator.HasNext())
+            {
+                result.Add(iterator.Next());
+            }
+
+            return result;
+        }
+
+        private static int CountIterator(ISeatIterator iterator)
+        {
+            var count = 0;
+            iterator.Reset();
+
+            while (iterator.HasNext())
+            {
+                iterator.Next();
+                count++;
+            }
+
+            return count;
         }
     }
 }

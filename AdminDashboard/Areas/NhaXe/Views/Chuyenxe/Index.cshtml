@@ -15,7 +15,7 @@
 
     <style>
         body {
-            background-color: #f3f4f6; 
+            background-color: #f3f4f6;
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             color: #374151;
         }
@@ -40,7 +40,7 @@
             font-weight: 700;
             color: #111827;
             margin: 0;
-            text-transform: none; 
+            text-transform: none;
         }
 
         .btn-primary-custom {
@@ -115,7 +115,7 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             overflow: hidden;
             border: 1px solid #e5e7eb;
-            min-height: 400px; 
+            min-height: 400px;
         }
 
         .table {
@@ -166,6 +166,7 @@
             align-items: center;
             margin: 50px auto;
         }
+
             #wifi-loader svg {
                 position: absolute;
                 display: flex;
@@ -410,27 +411,53 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" id="detailModalContainer"></div>
+        </div>
+    </div>
 
     @section Scripts {
         <script>
+            // ==========================================
+            // THÊM MỚI: HÀM HỖ TRỢ XÓA TỪ MODAL CHI TIẾT
+            // Phải khai báo global (window) để inline onclick trong Partial View gọi được
+            // ==========================================
+            window.confirmDelete = function (id) {
+                // 1. Ẩn modal chi tiết đi
+                const detailModalEl = document.getElementById('detailModal');
+                if (detailModalEl) {
+                    const detailModal = bootstrap.Modal.getInstance(detailModalEl);
+                    if (detailModal) detailModal.hide();
+                }
+
+                // 2. Hiện modal xác nhận xóa (đã có sẵn ở trang Index)
+                const deleteModalEl = document.getElementById('deleteModal');
+                if (deleteModalEl) {
+                    const deleteModal = new bootstrap.Modal(deleteModalEl) || bootstrap.Modal.getInstance(deleteModalEl);
+                    document.getElementById('deleteChuyenId').value = id;
+                    deleteModal.show();
+                }
+            };
+
             $(function () {
                 function loadPage(page, diemDi, diemDen) {
                     $('#ajax-results-container').html(`
-                                     <div style="min-height: 300px; display: flex; align-items: center; justify-content: center;">
-                                        <div id="wifi-loader">
-                                            <svg viewBox="0 0 86 86" class="circle-outer">
-                                                <circle r="40" cy="43" cx="43" class="back"></circle>
-                                                <circle r="40" cy="43" cx="43" class="front"></circle>
-                                                <circle r="40" cy="43" cx="43" class="new"></circle>
-                                            </svg>
-                                            <svg viewBox="0 0 60 60" class="circle-middle">
-                                                <circle r="27" cy="30" cx="30" class="back"></circle>
-                                                <circle r="27" cy="30" cx="30" class="front"></circle>
-                                            </svg>
-                                            <div data-text="Đang tải..." class="text"></div>
-                                        </div>
-                                     </div>
-                                `);
+                                                             <div style="min-height: 300px; display: flex; align-items: center; justify-content: center;">
+                                                                <div id="wifi-loader">
+                                                                    <svg viewBox="0 0 86 86" class="circle-outer">
+                                                                        <circle r="40" cy="43" cx="43" class="back"></circle>
+                                                                        <circle r="40" cy="43" cx="43" class="front"></circle>
+                                                                        <circle r="40" cy="43" cx="43" class="new"></circle>
+                                                                    </svg>
+                                                                    <svg viewBox="0 0 60 60" class="circle-middle">
+                                                                        <circle r="27" cy="30" cx="30" class="back"></circle>
+                                                                        <circle r="27" cy="30" cx="30" class="front"></circle>
+                                                                    </svg>
+                                                                    <div data-text="Đang tải..." class="text"></div>
+                                                                </div>
+                                                             </div>
+                                                        `);
 
                     $.ajax({
                         url: '@Url.Action("TimKiemAjax", "ChuyenXe")',
@@ -482,15 +509,58 @@
                     }
                 });
 
+                // XỬ LÝ NÚT XÓA CHUYẾN XE (Nút thùng rác ở giao diện gốc nếu có)
                 const deleteModal = document.getElementById('deleteModal');
                 if (deleteModal) {
                     deleteModal.addEventListener('show.bs.modal', function (event) {
                         const button = event.relatedTarget;
-                        const id = button.getAttribute('data-id');
-                        deleteModal.querySelector('#deleteChuyenId').value = id;
+                        if (button) { // Kiểm tra nếu được trigger bằng nút có data-id
+                            const id = button.getAttribute('data-id');
+                            if (id) {
+                                deleteModal.querySelector('#deleteChuyenId').value = id;
+                            }
+                        }
                     });
                 }
 
+                // ==========================================
+                // XỬ LÝ NÚT XEM CHI TIẾT CHUYẾN XE
+                // ==========================================
+                $(document).on('click', '.btn-detail', function (e) {
+                    e.preventDefault();
+                    const chuyenId = $(this).data('id');
+
+                    if (!chuyenId) return;
+
+                    // Hiển thị loading trong lúc đợi
+                    $('#detailModalContainer').html(`
+                                <div class="text-center p-5">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                    <p class="mt-2">Đang tải thông tin...</p>
+                                </div>
+                                `);
+
+                    // Bật modal lên luôn
+                    const detailModalEl = document.getElementById('detailModal');
+                    let detailModal = bootstrap.Modal.getInstance(detailModalEl);
+                    if (!detailModal) detailModal = new bootstrap.Modal(detailModalEl);
+                    detailModal.show();
+
+                    // Call AJAX
+                    $.ajax({
+                        url: '@Url.Action("GetDetailsPartial", "ChuyenXe", new { area = "NhaXe" })',
+                        type: 'GET',
+                        data: { id: chuyenId },
+                        success: function (resultHtml) {
+                            $('#detailModalContainer').html(resultHtml);
+                        },
+                        error: function () {
+                            $('#detailModalContainer').html('<div class="p-4 text-danger text-center">Lỗi tải dữ liệu. Vui lòng thử lại.</div>');
+                        }
+                    });
+                });
+
+                // Tự động đóng thông báo sau 3 giây
                 setTimeout(() => {
                     $('.alert.alert-dismissible').each(function () {
                         const bsAlert = new bootstrap.Alert(this);

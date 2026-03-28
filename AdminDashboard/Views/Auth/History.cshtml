@@ -6,7 +6,6 @@
     var hienTai = Model
         .Where(d => d.ChuyenXe != null)
         .Where(d => d.TrangThaiThanhToan == "DangChoThanhToan" || d.TrangThaiThanhToan == "Da thanh toan")
-        // Giả định tên Enum của bạn là DangMoBan. Hãy sửa lại nếu tên khác.
         .Where(d => d.ChuyenXe.TrangThai == AdminDashboard.Models.TrangThai.TrangThaiChuyenXe.DangMoBanVe)
         .OrderBy(d => d.ChuyenXe.NgayDi).ThenBy(d => d.ChuyenXe.GioDi);
     var daDi = Model
@@ -74,7 +73,6 @@
                     color: #007bff;
                 }
 
-        /* Thanh underline chung */
         .nav-underline {
             position: absolute;
             bottom: -2px;
@@ -101,7 +99,6 @@
             #historyTabs .nav-link:hover {
                 color: #FF9900;
             }
-        /* phần tiêu đề  */
         .header-fixed {
             background-color: rgba(255, 255, 255, 0.8);
             border-bottom: 2px solid #eee;
@@ -116,7 +113,6 @@
             padding: 20px 30px;
         }
 
-            /* thanh cuộn đẹp */
             .tab-scroll-area::-webkit-scrollbar {
                 width: 6px;
             }

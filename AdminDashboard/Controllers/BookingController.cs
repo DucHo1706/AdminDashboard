@@ -1,11 +1,14 @@
 ﻿using AdminDashboard.Helpers;
 using AdminDashboard.Models;
+using AdminDashboard.Patterns.State;
 using AdminDashboard.Services;
 using AdminDashboard.TransportDBContext;
+using AdminDashboard.Patterns.Adapter;  
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using AdminDashboard.Patterns.State;
 
 namespace AdminDashboard.Controllers
 {
@@ -89,9 +92,14 @@ namespace AdminDashboard.Controllers
                 {
                     foreach (var dh in expiredOrders)
                     {
-                        var vesExpired = await _context.Ve.Where(v => v.DonHangId == dh.DonHangId).ToListAsync();
+                        var vesExpired = await _context.Ve
+                            .Where(v => v.DonHangId == dh.DonHangId)
+                            .ToListAsync();
+
                         _context.Ve.RemoveRange(vesExpired);
-                        dh.TrangThaiThanhToan = "Da huy";
+
+                        var donHangContext = new DonHangContext(dh);
+                        donHangContext.HuyDon(); //Áp dụng State 
                     }
                     await _context.SaveChangesAsync();
                 }
@@ -117,7 +125,7 @@ namespace AdminDashboard.Controllers
         [HttpPost]
         [Authorize]
         [Authorize(Roles = "KhachHang")]
-        public async Task<IActionResult> XacNhanBooking(string chuyenId, string danhSachGheId)
+        public async Task<IActionResult> XacNhanBooking(string chuyenId, string danhSachGheId, string gateway)
         {
             if (string.IsNullOrEmpty(chuyenId) || string.IsNullOrEmpty(danhSachGheId))
             {
@@ -177,19 +185,113 @@ namespace AdminDashboard.Controllers
                 _context.Ve.AddRange(danhSachVe);
                 await _context.SaveChangesAsync();
 
-                string paymentUrl = _vnpayService.CreatePaymentUrl(donHang, HttpContext);
-                return Redirect(paymentUrl);
+                var paymentRequest = new PaymentRequest
+                {
+                    OrderId = donHang.DonHangId,
+                    Amount = donHang.TongTien,
+                    OrderDescription = "Thanh toan don dat ve xe"
+                };
+
+                IPaymentGateway paymentGateway;
+
+                if (!string.IsNullOrEmpty(gateway) && gateway.ToLower() == "momo")
+                {
+                    paymentGateway = new MomoAdapter();
+                }
+                else
+                {
+                    paymentGateway = new VnPayServiceAdapter(_vnpayService, HttpContext);
+                }
+
+                var paymentResult = paymentGateway.ProcessPayment(paymentRequest);
+
+                if (!paymentResult.Success || string.IsNullOrEmpty(paymentResult.PaymentUrl))
+                {
+                    TempData["ErrorMessage"] = paymentResult.Message ?? "Khong tao duoc URL thanh toan.";
+                    return RedirectToAction("ChonGhe", new { chuyenId = chuyenId });
+                }
+
+                return Redirect(paymentResult.PaymentUrl);
             }
             catch (Exception ex)
             {
-                // **Ghi log lỗi ra Console Output**
-                _logger.LogError(ex, "LỖI PHÁT SINH KHI TẠO URL VNPAY. DonHangId: {DonHangId}", donHang.DonHangId);
-
-                TempData["ErrorMessage"] = "LỖI VNPay: " + ex.Message + " | Inner: " + ex.InnerException?.Message;
+                _logger.LogError(ex, "Loi khi xu ly thanh toan. DonHangId: {DonHangId}", donHang.DonHangId);
+                TempData["ErrorMessage"] = "Loi thanh toan: " + ex.Message;
                 return RedirectToAction("ChonGhe", new { chuyenId = chuyenId });
             }
         }
 
+
+        [Authorize]
+        [Authorize(Roles = "KhachHang")]
+        [HttpGet]
+        public async Task<IActionResult> MomoCheckout(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return NotFound();
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var donHang = await _context.DonHang
+                .Include(d => d.ChuyenXe)
+                .ThenInclude(cx => cx.LoTrinh)
+                .FirstOrDefaultAsync(d => d.DonHangId == id && d.IDKhachHang == userId);
+
+            if (donHang == null) return NotFound();
+
+            return View(donHang);
+        }
+
+        [Authorize]
+        [Authorize(Roles = "KhachHang")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MomoConfirm(string id, string result)
+        {
+            if (string.IsNullOrEmpty(id)) return BadRequest();
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var donHang = await _context.DonHang
+                .FirstOrDefaultAsync(d => d.DonHangId == id && d.IDKhachHang == userId);
+
+            if (donHang == null) return NotFound();
+
+            if (donHang.TrangThaiThanhToan != "DangChoThanhToan")
+            {
+                TempData["ErrorMessage"] = "Don hang khong hop le de thanh toan.";
+                return RedirectToAction("BookingSuccess", new { id });
+            }
+
+            if (DateTime.Now > donHang.ThoiGianHetHan)
+            {
+                var ves = await _context.Ve
+                    .Where(v => v.DonHangId == donHang.DonHangId)
+                    .ToListAsync();
+
+                _context.Ve.RemoveRange(ves);
+
+                var donHangContext = new DonHangContext(donHang);
+                donHangContext.HuyDon();
+
+                await _context.SaveChangesAsync();
+
+                TempData["ErrorMessage"] = "Don hang da het thoi gian thanh toan.";
+                return RedirectToAction("BookingSuccess", new { id });
+            }
+
+            if (result == "success")
+            {
+                var donHangContext = new DonHangContext(donHang);
+                donHangContext.ThanhToan();
+
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Thanh toan MoMo thanh cong.";
+                return RedirectToAction("BookingSuccess", new { id });
+            }
+
+            TempData["ErrorMessage"] = "Thanh toan MoMo that bai hoac da bi huy.";
+            return RedirectToAction("BookingSuccess", new { id });
+        }
         public IActionResult VnpayReturn()
         {
             var vnpayData = new VnpayLibrary();
@@ -208,11 +310,17 @@ namespace AdminDashboard.Controllers
             if (isSignatureValid && vnp_ResponseCode == "00")
             {
                 var donHang = _context.DonHang.Find(vnp_TxnRef);
-                if (donHang != null && donHang.TrangThaiThanhToan == "DangChoThanhToan" && DateTime.Now <= donHang.ThoiGianHetHan)
+
+                if (donHang != null
+                    && donHang.TrangThaiThanhToan == "DangChoThanhToan"
+                    && DateTime.Now <= donHang.ThoiGianHetHan)
                 {
-                    donHang.TrangThaiThanhToan = "Da thanh toan"; // Sửa: Tiếng Việt không dấu
+                    var donHangContext = new DonHangContext(donHang);
+                    donHangContext.ThanhToan(); //Áp dụng State 
+
                     _context.SaveChanges();
                 }
+
                 return RedirectToAction("BookingSuccess", new { id = vnp_TxnRef });
             }
 
@@ -260,10 +368,17 @@ namespace AdminDashboard.Controllers
 
             if (DateTime.Now > donHang.ThoiGianHetHan)
             {
-                var ves = await _context.Ve.Where(v => v.DonHangId == donHang.DonHangId).ToListAsync();
+                var ves = await _context.Ve
+                    .Where(v => v.DonHangId == donHang.DonHangId)
+                    .ToListAsync();
+
                 _context.Ve.RemoveRange(ves);
-                donHang.TrangThaiThanhToan = "Da huy"; // Sửa
+
+                var donHangContext = new DonHangContext(donHang);
+                donHangContext.HuyDon(); // Áp dụng State
+
                 await _context.SaveChangesAsync();
+
                 TempData["ErrorMessage"] = "Don hang da het thoi gian thanh toan.";
                 return RedirectToAction("BookingSuccess", new { id });
             }
@@ -283,18 +398,25 @@ namespace AdminDashboard.Controllers
             if (string.IsNullOrEmpty(id)) return BadRequest();
 
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var donHang = await _context.DonHang.FirstOrDefaultAsync(d => d.DonHangId == id && d.IDKhachHang == userId);
+            var donHang = await _context.DonHang
+                .FirstOrDefaultAsync(d => d.DonHangId == id && d.IDKhachHang == userId);
+
             if (donHang == null) return NotFound();
 
-            if (donHang.TrangThaiThanhToan == "Da thanh toan") // Sửa
+            if (donHang.TrangThaiThanhToan == "Da thanh toan")
             {
                 TempData["ErrorMessage"] = "Don hang da thanh toan khong the huy.";
                 return RedirectToAction("BookingSuccess", new { id });
             }
 
-            var ves = await _context.Ve.Where(v => v.DonHangId == donHang.DonHangId).ToListAsync();
+            var ves = await _context.Ve
+                .Where(v => v.DonHangId == donHang.DonHangId)
+                .ToListAsync();
             _context.Ve.RemoveRange(ves);
-            donHang.TrangThaiThanhToan = "Da huy"; // Sửa
+
+            var donHangContext = new DonHangContext(donHang);
+            donHangContext.HuyDon(); //Áp dụng State
+
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Da huy don hang va giai phong ghe.";
@@ -342,10 +464,17 @@ namespace AdminDashboard.Controllers
 
             if (DateTime.Now > donHang.ThoiGianHetHan)
             {
-                var ves = await _context.Ve.Where(v => v.DonHangId == donHang.DonHangId).ToListAsync();
+                var ves = await _context.Ve
+                    .Where(v => v.DonHangId == donHang.DonHangId)
+                    .ToListAsync();
+
                 _context.Ve.RemoveRange(ves);
-                donHang.TrangThaiThanhToan = "Da huy"; // Sửa
+
+                var donHangContext = new DonHangContext(donHang);
+                donHangContext.HuyDon(); //Áp dụng State
+
                 await _context.SaveChangesAsync();
+
                 response = new { RspCode = "98", Message = "Order expired" };
                 return Json(response);
             }

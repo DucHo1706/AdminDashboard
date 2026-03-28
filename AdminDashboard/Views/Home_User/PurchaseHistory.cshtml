@@ -1,5 +1,5 @@
-@model IEnumerable<AdminDashboard.Models.DonHang>
-
+@using AdminDashboard.Models.Decorators 
+@model AdminDashboard.Models.ViewModels.LichSuMuaVeViewModel
 @{
     ViewData["Title"] = "Lịch sử mua vé";
 }
@@ -13,13 +13,12 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
     <style>
         :root {
-            --primary-color: #4f46e5; 
+            --primary-color: #4f46e5;
             --secondary-color: #64748b;
             --success-color: #10b981;
-            --warning-color: #f59e0b; 
+            --warning-color: #f59e0b;
             --bg-color: #f3f4f6;
         }
 
@@ -39,24 +38,24 @@
             margin-bottom: 24px;
         }
 
-        .nav-pills .nav-link {
-            border-radius: 12px;
-            color: var(--secondary-color);
-            font-weight: 600;
-            padding: 10px 24px;
-            transition: all 0.3s ease;
-        }
+            .nav-pills .nav-link {
+                border-radius: 12px;
+                color: var(--secondary-color);
+                font-weight: 600;
+                padding: 10px 24px;
+                transition: all 0.3s ease;
+            }
 
-        .nav-pills .nav-link:hover {
-            background-color: #f8fafc;
-            color: var(--primary-color);
-        }
+                .nav-pills .nav-link:hover {
+                    background-color: #f8fafc;
+                    color: var(--primary-color);
+                }
 
-        .nav-pills .nav-link.active {
-            background-color: var(--primary-color);
-            color: white;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-        }
+                .nav-pills .nav-link.active {
+                    background-color: var(--primary-color);
+                    color: white;
+                    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+                }
 
         .ticket-item {
             background: white;
@@ -71,17 +70,23 @@
             position: relative;
         }
 
-        .ticket-item:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        }
+            .ticket-item:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            }
 
-        /* Status Border Left */
-        .ticket-item.status-pending { border-left: 6px solid var(--warning-color); }
-        .ticket-item.status-paid { border-left: 6px solid var(--success-color); }
-        .ticket-item.status-cancelled { border-left: 6px solid var(--secondary-color); }
+            .ticket-item.status-pending {
+                border-left: 6px solid var(--warning-color);
+            }
 
-        /* Left Content (Route & Time) */
+            .ticket-item.status-paid {
+                border-left: 6px solid var(--success-color);
+            }
+
+            .ticket-item.status-cancelled {
+                border-left: 6px solid var(--secondary-color);
+            }
+
         .ticket-content {
             flex: 1;
             padding: 24px;
@@ -89,7 +94,6 @@
             position: relative;
         }
 
-        /* Right Content (Price & Actions) */
         .ticket-action {
             width: 280px;
             background-color: #f8fafc;
@@ -102,18 +106,23 @@
             position: relative;
         }
 
-        /* The "Cutout" effect circles */
-        .ticket-action::before, .ticket-action::after {
-            content: "";
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: var(--bg-color);
-            border-radius: 50%;
-            left: -11px;
-        }
-        .ticket-action::before { top: -10px; }
-        .ticket-action::after { bottom: -10px; }
+            .ticket-action::before, .ticket-action::after {
+                content: "";
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                background-color: var(--bg-color);
+                border-radius: 50%;
+                left: -11px;
+            }
+
+            .ticket-action::before {
+                top: -10px;
+            }
+
+            .ticket-action::after {
+                bottom: -10px;
+            }
 
         .route-visual {
             display: flex;
@@ -121,7 +130,7 @@
             gap: 15px;
             margin-bottom: 20px;
         }
-        
+
         .station-point {
             font-weight: 700;
             font-size: 1.1rem;
@@ -135,14 +144,15 @@
             position: relative;
             min-width: 50px;
         }
-        .route-arrow::after {
-            content: "\F135"; /* Bootstrap Icon Chevron Right */
-            font-family: "bootstrap-icons";
-            position: absolute;
-            right: 0;
-            top: -9px;
-            color: #9ca3af;
-        }
+
+            .route-arrow::after {
+                content: "\F135";
+                font-family: "bootstrap-icons";
+                position: absolute;
+                right: 0;
+                top: -9px;
+                color: #9ca3af;
+            }
 
         .info-grid {
             display: grid;
@@ -151,7 +161,7 @@
             font-size: 0.95rem;
             color: #4b5563;
         }
-        
+
         .info-item i {
             color: var(--primary-color);
             margin-right: 8px;
@@ -171,9 +181,24 @@
             font-weight: 600;
             margin-bottom: 20px;
         }
-        .badge-pending { background: #fffbeb; color: var(--warning-color); border: 1px solid #fcd34d; }
-        .badge-paid { background: #ecfdf5; color: var(--success-color); border: 1px solid #6ee7b7; }
-        .badge-cancelled { background: #f3f4f6; color: var(--secondary-color); border: 1px solid #d1d5db; }
+
+        .badge-pending {
+            background: #fffbeb;
+            color: var(--warning-color);
+            border: 1px solid #fcd34d;
+        }
+
+        .badge-paid {
+            background: #ecfdf5;
+            color: var(--success-color);
+            border: 1px solid #6ee7b7;
+        }
+
+        .badge-cancelled {
+            background: #f3f4f6;
+            color: var(--secondary-color);
+            border: 1px solid #d1d5db;
+        }
 
         .countdown-timer {
             font-size: 0.9rem;
@@ -200,17 +225,28 @@
             color: white;
             border: none;
         }
-        .btn-primary-custom:hover { background: #4338ca; color: white; }
+
+            .btn-primary-custom:hover {
+                background: #4338ca;
+                color: white;
+            }
 
         .btn-outline-custom {
             border: 2px solid #e5e7eb;
             color: #374151;
             background: transparent;
         }
-        .btn-outline-custom:hover { border-color: var(--primary-color); color: var(--primary-color); }
+
+            .btn-outline-custom:hover {
+                border-color: var(--primary-color);
+                color: var(--primary-color);
+            }
 
         @@media (max-width: 768px) {
-            .ticket-item { flex-direction: column; }
+            .ticket-item {
+                flex-direction: column;
+            }
+
             .ticket-action {
                 width: 100%;
                 border-left: none;
@@ -221,38 +257,42 @@
                 flex-wrap: wrap;
                 gap: 15px;
             }
-            .ticket-action::before { left: -10px; top: -11px; }
-            .ticket-action::after { right: -10px; top: -11px; left: auto; }
-            
-            .btn-group-mobile { width: 100%; display: flex; gap: 10px; flex-direction: column; }
-            .price-section { text-align: left; }
+
+                .ticket-action::before {
+                    left: -10px;
+                    top: -11px;
+                }
+
+                .ticket-action::after {
+                    right: -10px;
+                    top: -11px;
+                    left: auto;
+                }
+
+            .btn-group-mobile {
+                width: 100%;
+                display: flex;
+                gap: 10px;
+                flex-direction: column;
+            }
+
+            .price-section {
+                text-align: left;
+            }
         }
     </style>
 </head>
 <body>
-
     <div class="container my-5">
         <h3 class="fw-bold mb-4 ps-2 border-start border-4 border-primary text-white">Lịch sử vé của bạn</h3>
 
         <ul class="nav nav-pills" id="historyTabs" role="tablist">
-            <li class="nav-item">
-                <button class="nav-link active" id="tab-current" data-bs-toggle="pill" data-bs-target="#pane-current" type="button">
-                    <i class="bi bi-ticket-perforated me-2"></i>Hiện tại
-                </button>
-            </li>
-            <li class="nav-item">
-                <button class="nav-link" id="tab-dadi" data-bs-toggle="pill" data-bs-target="#pane-dadi" type="button">
-                    <i class="bi bi-check-circle me-2"></i>Đã đi
-                </button>
-            </li>
-            <li class="nav-item">
-                <button class="nav-link" id="tab-dahuy" data-bs-toggle="pill" data-bs-target="#pane-dahuy" type="button">
-                    <i class="bi bi-x-circle me-2"></i>Đã hủy
-                </button>
-            </li>
+            <li class="nav-item"><button class="nav-link active" id="tab-current" data-bs-toggle="pill" data-bs-target="#pane-current" type="button"><i class="bi bi-ticket-perforated me-2"></i>Hiện tại</button></li>
+            <li class="nav-item"><button class="nav-link" id="tab-dadi" data-bs-toggle="pill" data-bs-target="#pane-dadi" type="button"><i class="bi bi-check-circle me-2"></i>Đã đi</button></li>
+            <li class="nav-item"><button class="nav-link" id="tab-dahuy" data-bs-toggle="pill" data-bs-target="#pane-dahuy" type="button"><i class="bi bi-x-circle me-2"></i>Đã hủy</button></li>
         </ul>
 
-        @if (Model == null || !Model.Any())
+        @if (Model == null || (!Model.DonHangHienTai.Any() && !Model.DonHangDaDi.Any() && !Model.DonHangDaHuy.Any()))
         {
             <div class="text-center py-5">
                 <img src="https://cdn-icons-png.flaticon.com/512/7486/7486747.png" alt="Empty" width="120" class="mb-3 opacity-50">
@@ -262,55 +302,28 @@
         }
         else
         {
-            var hienTai = Model
-                .Where(d => d.ChuyenXe != null)
-                .Where(d => d.ChuyenXe.TrangThai != AdminDashboard.Models.TrangThai.TrangThaiChuyenXe.DaHoanThanh)
-                .Where(d => d.TrangThaiThanhToan == "DangChoThanhToan" || d.TrangThaiThanhToan == "Da thanh toan")
-                .OrderBy(d => d.ChuyenXe.NgayDi).ThenBy(d => d.ChuyenXe.GioDi);
-
-            var daDi = Model
-                .Where(d => d.ChuyenXe != null)
-                .Where(d => d.TrangThaiThanhToan == "Da thanh toan")
-                .Where(d => d.ChuyenXe.TrangThai == AdminDashboard.Models.TrangThai.TrangThaiChuyenXe.DaHoanThanh)
-                .OrderByDescending(d => d.ChuyenXe.NgayDi);
-
-            var daHuy = Model
-                .Where(d => d.TrangThaiThanhToan == "Da huy" || d.TrangThaiThanhToan == "Giao dich that bai")
-                .OrderByDescending(d => d.NgayDat);
-
             <div class="tab-content">
                 <div class="tab-pane fade show active" id="pane-current">
-                    @foreach (var d in hienTai)
+                    @foreach (var d in Model.DonHangHienTai)
                     {
-                        var isPaid = string.Equals(d.TrangThaiThanhToan, "Da thanh toan", StringComparison.OrdinalIgnoreCase);
-                        var isPending = string.Equals(d.TrangThaiThanhToan, "DangChoThanhToan", StringComparison.OrdinalIgnoreCase);
-                        var statusClass = isPaid ? "status-paid" : (isPending ? "status-pending" : "status-cancelled");
-                        var badgeClass = isPaid ? "badge-paid" : (isPending ? "badge-pending" : "badge-cancelled");
-                        var statusText = isPaid ? "Đã thanh toán" : (isPending ? "Chờ thanh toán" : "Đã hủy");
-
-                        <div class="ticket-item @statusClass">
+                        // ----- DECORATOR -----
+                        var decor = new DonHangDecorator(d);
+                        <div class="ticket-item @decor.LayMauSacTrangThai()">
+                            @* Dùng Decorator lấy màu *@
                             <div class="ticket-content">
                                 <div class="d-flex justify-content-between mb-3 text-muted" style="font-size: 0.85rem;">
                                     <span>Mã đơn: <strong>#@d.DonHangId</strong></span>
                                     <span>Ngày đặt: @d.NgayDat.ToString("dd/MM/yyyy HH:mm")</span>
                                 </div>
-                                
                                 <div class="route-visual">
                                     <div class="station-point">@d.ChuyenXe?.LoTrinh?.TramDiNavigation?.TenTram</div>
                                     <div class="route-arrow"></div>
                                     <div class="station-point">@d.ChuyenXe?.LoTrinh?.TramToiNavigation?.TenTram</div>
                                 </div>
-
                                 <div class="info-grid mt-4">
-                                    <div class="info-item">
-                                        <i class="bi bi-calendar-event"></i>
-                                        @d.ChuyenXe?.NgayDi.ToString("dd/MM/yyyy")
-                                    </div>
-                                    <div class="info-item">
-                                        <i class="bi bi-clock"></i>
-                                        @d.ChuyenXe?.GioDi
-                                    </div>
-                                    @if(isPending)
+                                    <div class="info-item"><i class="bi bi-calendar-event"></i> @d.ChuyenXe?.NgayDi.ToString("dd/MM/yyyy")</div>
+                                    <div class="info-item"><i class="bi bi-clock"></i> @d.ChuyenXe?.GioDi</div>
+                                    @if (d.TrangThaiThanhToan == "DangChoThanhToan")
                                     {
                                         <div class="info-item text-danger">
                                             <i class="bi bi-hourglass-split"></i>
@@ -319,16 +332,14 @@
                                     }
                                 </div>
                             </div>
-
                             <div class="ticket-action">
                                 <div class="price-section text-center mb-3">
-                                    <div class="status-badge @badgeClass">@statusText</div>
+                                    <div class="status-badge @decor.LayBadgeClass()">@decor.LayNhanTrangThai()</div>
                                     <div class="price-tag">@d.TongTien.ToString("N0")đ</div>
                                 </div>
                                 <div class="btn-group-mobile w-100">
                                     <a asp-controller="Booking" asp-action="BookingSuccess" asp-route-id="@d.DonHangId" class="btn btn-action btn-outline-custom">Chi tiết</a>
-                                    
-                                    @if (isPending)
+                                    @if (d.TrangThaiThanhToan == "DangChoThanhToan")
                                     {
                                         <form asp-controller="Booking" asp-action="PayAgain" method="post" class="w-100">
                                             <input type="hidden" name="id" value="@d.DonHangId" />
@@ -344,13 +355,17 @@
                             </div>
                         </div>
                     }
-                    @if (!hienTai.Any()) { <div class="text-center text-muted">Không có vé nào sắp đi.</div> }
+                    @if (!Model.DonHangHienTai.Any())
+                    {
+                        <div class="text-center text-muted">Không có vé nào sắp đi.</div>
+                    }
                 </div>
 
                 <div class="tab-pane fade" id="pane-dadi">
-                    @foreach (var d in daDi)
+                    @foreach (var d in Model.DonHangDaDi)
                     {
-                        <div class="ticket-item status-paid">
+                        var decor = new DonHangDecorator(d); // Gọi Decorator
+                        <div class="ticket-item @decor.LayMauSacTrangThai()">
                             <div class="ticket-content">
                                 <div class="d-flex justify-content-between mb-3 text-muted" style="font-size: 0.85rem;">
                                     <span>Mã đơn: <strong>#@d.DonHangId</strong></span>
@@ -368,7 +383,7 @@
                             </div>
                             <div class="ticket-action">
                                 <div class="price-section text-center mb-3">
-                                    <div class="status-badge badge-paid">Hoàn thành</div>
+                                    <div class="status-badge @decor.LayBadgeClass()">@decor.LayNhanTrangThai()</div>
                                     <div class="price-tag text-dark">@d.TongTien.ToString("N0")đ</div>
                                 </div>
                                 <div class="btn-group-mobile w-100">
@@ -378,13 +393,17 @@
                             </div>
                         </div>
                     }
-                     @if (!daDi.Any()) { <div class="text-center text-muted">Chưa có lịch sử chuyến đi.</div> }
+                    @if (!Model.DonHangDaDi.Any())
+                    {
+                        <div class="text-center text-muted">Chưa có lịch sử chuyến đi.</div>
+                    }
                 </div>
 
                 <div class="tab-pane fade" id="pane-dahuy">
-                     @foreach (var d in daHuy)
+                    @foreach (var d in Model.DonHangDaHuy)
                     {
-                        <div class="ticket-item status-cancelled opacity-75">
+                        var decor = new DonHangDecorator(d); // Gọi Decorator
+                        <div class="ticket-item @decor.LayMauSacTrangThai() opacity-75">
                             <div class="ticket-content">
                                 <div class="d-flex justify-content-between mb-3 text-muted" style="font-size: 0.85rem;">
                                     <span>Mã đơn: <strong>#@d.DonHangId</strong></span>
@@ -398,7 +417,7 @@
                             </div>
                             <div class="ticket-action">
                                 <div class="price-section text-center mb-3">
-                                    <div class="status-badge badge-cancelled">Đã hủy</div>
+                                    <div class="status-badge @decor.LayBadgeClass()">@decor.LayNhanTrangThai()</div>
                                     <div class="price-tag text-muted" style="text-decoration: line-through">@d.TongTien.ToString("N0")đ</div>
                                 </div>
                                 <div class="btn-group-mobile w-100">
@@ -407,7 +426,10 @@
                             </div>
                         </div>
                     }
-                    @if (!daHuy.Any()) { <div class="text-center text-muted">Không có vé đã hủy.</div> }
+                    @if (!Model.DonHangDaHuy.Any())
+                    {
+                        <div class="text-center text-muted">Không có vé đã hủy.</div>
+                    }
                 </div>
             </div>
         }
@@ -418,7 +440,6 @@
         (function () {
             const nodes = document.querySelectorAll('.countdown');
             if (!nodes.length) return;
-
             function format(ms) {
                 if (ms <= 0) return '00:00:00';
                 const totalSec = Math.floor(ms / 1000);
@@ -427,22 +448,16 @@
                 const s = String(totalSec % 60).padStart(2, '0');
                 return `${h}:${m}:${s}`;
             }
-
             function tick() {
                 const now = new Date();
                 nodes.forEach(el => {
                     const expire = new Date(el.getAttribute('data-expire'));
                     const remain = expire - now;
-                    if (remain <= 0) {
-                        el.textContent = 'Hết hạn';
-                        el.parentElement.classList.add('text-muted');
-                    } else {
-                        el.textContent = format(remain);
-                    }
+                    if (remain <= 0) { el.textContent = 'Hết hạn'; el.parentElement.classList.add('text-muted'); }
+                    else { el.textContent = format(remain); }
                 });
             }
-            tick();
-            setInterval(tick, 1000);
+            tick(); setInterval(tick, 1000);
         })();
     </script>
 </body>
