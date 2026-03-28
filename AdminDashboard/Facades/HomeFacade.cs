@@ -111,7 +111,6 @@ namespace AdminDashboard.Facades
             var viewModel = new LichSuMuaVeViewModel();
 
             // 3. Lọc danh sách "Hiện tại"
-            // (Logic cũ: Chưa hoàn thành chuyến VÀ (Đang chờ thanh toán HOẶC Đã thanh toán))
             viewModel.DonHangHienTai = allOrders
                 .Where(d => d.ChuyenXe != null)
                 .Where(d => d.ChuyenXe.TrangThai != TrangThaiChuyenXe.DaHoanThanh)
@@ -120,7 +119,6 @@ namespace AdminDashboard.Facades
                 .ToList();
 
             // 4. Lọc danh sách "Đã đi"
-            // (Logic cũ: Đã thanh toán VÀ Chuyến xe đã hoàn thành)
             viewModel.DonHangDaDi = allOrders
                 .Where(d => d.ChuyenXe != null)
                 .Where(d => d.TrangThaiThanhToan == "Da thanh toan")
