@@ -28,6 +28,9 @@ builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
 builder.Services.AddServerSideBlazor();
 
+builder.Services.AddScoped<ThongKeService>();
+builder.Services.AddScoped<IThongKeService, ThongKeProxy>();
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IVnpayService, VnpayService>();
@@ -38,6 +41,10 @@ builder.Services.AddScoped<AdminDashboard.Services.INhanVienService, AdminDashbo
 builder.Services.AddScoped<AdminDashboard.Services.IBanVeService, AdminDashboard.Services.BanVeService>();
 builder.Services.AddScoped<IVeRepository, VeRepository>();
 builder.Services.AddScoped<AdminDashboard.Facades.IHomeFacade, AdminDashboard.Facades.HomeFacade>();
+
+builder.Services.AddScoped<AdminDashboard.Patterns.TemplateMethod.CreateTramTemplate>();
+builder.Services.AddScoped<AdminDashboard.Patterns.TemplateMethod.CreateLoaiXeTemplate>();
+builder.Services.AddScoped<AdminDashboard.Patterns.TemplateMethod.CreateLoTrinhTemplate>();
 
 var cloudinaryConfig = builder.Configuration.GetSection("Cloudinary");
 var cloudName = cloudinaryConfig["CloudName"];
