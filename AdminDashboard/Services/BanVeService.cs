@@ -182,7 +182,6 @@ namespace AdminDashboard.Services
 
             try
             {
-                // Sử dụng Factory Pattern để tạo đối tượng
                 var donHang = TicketFactory.CreateDonHang(
                     req.ChuyenId,
                     req.GiaVe,
@@ -254,8 +253,8 @@ namespace AdminDashboard.Services
             };
         }
 
-        // --- ĐỔI GHẾ ---
-        public async Task<KetQuaBanVe> DoiGheAsync(string veId, string soGheMoi, string nhaXeId)
+        // --- ĐỔI GHẾ (Đã hỗ trợ đổi sang chuyến khác) ---
+        public async Task<KetQuaBanVe> DoiGheAsync(string veId, string soGheMoi, string chuyenIdMoi, string nhaXeId)
         {
             // 1. Lấy thông tin vé cũ
             var veCu = await _context.Ve
@@ -264,27 +263,39 @@ namespace AdminDashboard.Services
 
             if (veCu == null) return new KetQuaBanVe { Success = false, Message = "Không tìm thấy vé." };
 
-            // 2. Kiểm tra ghế mới (Số ghế mới phải tồn tại và TRỐNG ở chuyến đó)
-            // Lưu ý: Dùng logic tạo ghế tự động hoặc tìm ghế có sẵn
-            // Ở đây ta tìm ghế có sẵn (vì chuyến này chắc chắn đã bán vé rồi nên đã có danh sách ghế)
+            // 2. Xác định chuyến xe khách muốn đổi sang (Nếu không chọn chuyến mới thì giữ chuyến cũ)
+            string targetChuyenId = string.IsNullOrEmpty(chuyenIdMoi) ? veCu.DonHang.ChuyenId : chuyenIdMoi;
+
+            var chuyenMoi = await _context.ChuyenXe
+                .FirstOrDefaultAsync(c => c.ChuyenId == targetChuyenId);
+
+            if (chuyenMoi == null) return new KetQuaBanVe { Success = false, Message = "Chuyến xe không tồn tại." };
+
+            // 3. Kiểm tra ghế mới trên chuyến xe mục tiêu
             var gheMoi = await _context.Ghe
-                .FirstOrDefaultAsync(g => g.XeId == veCu.DonHang.ChuyenXe.XeId && g.SoGhe == soGheMoi);
+                .FirstOrDefaultAsync(g => g.XeId == chuyenMoi.XeId && g.SoGhe == soGheMoi);
 
             if (gheMoi == null) return new KetQuaBanVe { Success = false, Message = $"Ghế {soGheMoi} không tồn tại trên xe này." };
 
-            // 3. Check xem ghế mới có ai ngồi chưa
+            // 4. Check xem ghế mới đã có ai mua ở chuyến xe mục tiêu chưa
             bool daCoNguoiDat = await _context.Ve.AnyAsync(v =>
-                v.DonHang.ChuyenId == veCu.DonHang.ChuyenId &&
+                v.DonHang.ChuyenId == targetChuyenId &&
                 v.GheID == gheMoi.GheID &&
                 v.DonHang.TrangThaiThanhToan != "Da huy");
 
             if (daCoNguoiDat) return new KetQuaBanVe { Success = false, Message = $"Ghế {soGheMoi} đã có người khác đặt rồi." };
 
-            // 4. Cập nhật vé sang ghế mới
+            // 5. Cập nhật vé sang ghế mới
             veCu.GheID = gheMoi.GheID;
 
+            // 6. Nếu là đổi sang chuyến khác -> Cập nhật ChuyenId của Đơn Hàng
+            if (veCu.DonHang.ChuyenId != targetChuyenId)
+            {
+                veCu.DonHang.ChuyenId = targetChuyenId;
+            }
+
             await _context.SaveChangesAsync();
-            return new KetQuaBanVe { Success = true, Message = $"Đổi thành công sang ghế {soGheMoi}." };
+            return new KetQuaBanVe { Success = true, Message = $"Đổi vé thành công!" };
         }
 
         private static List<SeatDisplayItem> MaterializeIterator(ISeatIterator iterator)

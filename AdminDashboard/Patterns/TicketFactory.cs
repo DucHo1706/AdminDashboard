@@ -3,10 +3,8 @@ using System;
 
 namespace AdminDashboard.Patterns
 {
-    // Mẫu Factory Method: Chuyên trách việc sản xuất đối tượng
     public static class TicketFactory
     {
-        // Hàm tạo Đơn hàng chuẩn
         public static DonHang CreateDonHang(string chuyenId, decimal tongTien, string hoTen, string sdt, string ghiChu, bool daThanhToan, string nhanVienName)
         {
             return new DonHang
@@ -24,7 +22,6 @@ namespace AdminDashboard.Patterns
             };
         }
 
-        // Hàm tạo Vé chuẩn
         public static Ve CreateVe(string donHangId, string gheId, decimal giaVe)
         {
             return new Ve

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AdminDashboard.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    // [Authorize(Roles = "Admin")] // Nhớ bật lại sau
+    [Authorize(Roles = "Admin")] // Nhớ bật lại sau
     public class QuanLyChuyenController : Controller
     {
         private readonly Db27524Context _context; // Vẫn cần context để load danh sách (Read)

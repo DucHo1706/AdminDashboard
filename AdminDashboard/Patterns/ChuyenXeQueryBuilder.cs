@@ -26,7 +26,10 @@ namespace AdminDashboard.Patterns
         {
             if (date.HasValue)
             {
-                _query = _query.Where(c => c.NgayDi.Date == date.Value.Date);
+                DateTime ngayBatDau = date.Value.Date;
+                DateTime ngayKetThuc = ngayBatDau.AddDays(6);
+
+                _query = _query.Where(c => c.NgayDi.Date >= ngayBatDau && c.NgayDi.Date <= ngayKetThuc);
             }
             return this;
         }

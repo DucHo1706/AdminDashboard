@@ -1,0 +1,248 @@
+﻿@using AdminDashboard.Models.TrangThai
+@using AdminDashboard.Helpers
+@using System.Globalization
+@model IEnumerable<AdminDashboard.Models.ChuyenXe>
+
+@{
+    var today = DateTime.Today;
+    var startDate = today;
+    var endDate = today.AddDays(6);
+    int startHour = 5;
+    int endHour = 22;
+
+    if (Model != null && Model.Any())
+    {
+        startDate = Model.Min(x => x.NgayDi.Date);
+        endDate = Model.Max(x => x.NgayDi.Date);
+
+        if ((endDate - startDate).TotalDays < 6)
+        {
+            endDate = startDate.AddDays(6);
+        }
+
+        var minHour = Model.Min(x => x.GioDi.Hours);
+        var maxHour = Model.Max(x => x.GioDi.Hours);
+        if (minHour < startHour) startHour = minHour;
+        if (maxHour > endHour) endHour = maxHour;
+    }
+
+    var totalDays = (int)(endDate - startDate).TotalDays + 1;
+    if (totalDays > 30) totalDays = 30;
+
+    var dateRange = Enumerable.Range(0, totalDays).Select(offset => startDate.AddDays(offset)).ToList();
+    var cultureVi = new CultureInfo("vi-VN");
+}
+
+<style>
+    :root {
+        --header-bg: #f5f5f5;
+        --header-text: #333;
+        --border-color: #dee2e6;
+        --cell-height: 60px;
+        --accent-blue: #007bff;
+    }
+
+    .timetable-compact-container {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        max-height: 85vh;
+        overflow-y: auto;
+        font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    .table-compact {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+        .table-compact thead th {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: #003366;
+            color: white;
+            text-align: center;
+            padding: 10px 5px;
+            border: 1px solid #ddd;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+    .col-hour-compact {
+        background-color: #eef2f5;
+        color: #333;
+        font-weight: 700;
+        text-align: center;
+        vertical-align: middle;
+        border: 1px solid var(--border-color);
+        width: 60px;
+        font-size: 12px;
+    }
+
+    .table-compact tbody td {
+        border: 1px solid var(--border-color);
+        padding: 4px;
+        vertical-align: top;
+        height: var(--cell-height);
+        background: #fff;
+        font-size: 11px;
+    }
+
+        .table-compact tbody td:hover {
+            background-color: #fafafa;
+        }
+
+    .trip-box {
+        display: block;
+        background-color: #fffbf0;
+        border: 1px solid #f0e0c0;
+        border-radius: 2px;
+        padding: 4px;
+        margin-bottom: 2px;
+        cursor: pointer;
+        text-decoration: none !important; /* Đảm bảo thẻ a không bị gạch chân */
+        color: #333;
+        transition: all 0.1s;
+    }
+
+        .trip-box:hover {
+            border-color: #ff9900;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+            color: #333;
+        }
+
+    .trip-code {
+        color: #003366;
+        font-weight: 700;
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    .trip-route {
+        color: #cc0000;
+        font-weight: 600;
+        display: block;
+        line-height: 1.2;
+        margin-bottom: 2px;
+    }
+
+    .trip-info {
+        color: #007bff;
+        display: block;
+        font-size: 10px;
+    }
+
+    .th-today {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
+
+    /* MÀU TRẠNG THÁI */
+    .style-success {
+        background-color: #f0fff4;
+        border: 1px solid #c6f6d5;
+    }
+        .style-success:hover { border-color: #38a169; }
+
+    .style-warning {
+        background-color: #fffaf0;
+        border: 1px solid #feebc8;
+    }
+        .style-warning:hover { border-color: #dd6b20; }
+
+    .style-danger {
+        background-color: #fff5f5;
+        border: 1px solid #fed7d7;
+    }
+        .style-danger:hover { border-color: #e53e3e; }
+
+    .header-bar {
+        background: white;
+        padding: 10px 15px;
+        border-radius: 8px 8px 0 0;
+        border: 1px solid #e2e8f0;
+        border-bottom: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .status-legend span {
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-weight: 600;
+        margin-left: 5px;
+    }
+</style>
+
+<div class="container-fluid p-0">
+    <div class="header-bar">
+        <div>
+            <h6 class="fw-bold m-0" style="color: #2d3748; font-size: 14px;">
+                <i class="bi bi-grid-3x3 me-2" style="color: #FF6600;"></i>
+                LỊCH TRÌNH BÁN VÉ
+            </h6>
+            <small class="text-muted" style="font-size: 10px;">Ngày: @startDate.ToString("dd/MM") - @endDate.ToString("dd/MM")</small>
+        </div>
+
+        <div class="status-legend">
+            <span style="background: #c6f6d5; color: #22543d;">Đang bán</span>
+            <span style="background: #feebc8; color: #744210;">Chờ chạy</span>
+            <span style="background: #fed7d7; color: #822727;">Đã hủy</span>
+        </div>
+    </div>
+
+    <div class="timetable-compact-container">
+        <table class="table-compact">
+            <thead>
+                <tr>
+                    <th style="width: 60px; background: #002855;">Giờ</th>
+                    @foreach (var date in dateRange)
+                    {
+                        var isToday = date == DateTime.Today;
+                        <th class="@(isToday ? "th-today" : "")">
+                            @date.ToString("dddd", cultureVi)<br />
+                            <span style="font-weight: normal; font-size: 11px;">@date.ToString("dd/MM")</span>
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @for (int hour = startHour; hour <= endHour; hour++)
+                {
+                    <tr>
+                        <td class="col-hour-compact">@hour<span>h</span></td>
+                        @foreach (var date in dateRange)
+                        {
+                            var trips = Model.Where(x => x.NgayDi.Date == date && x.GioDi.Hours == hour).OrderBy(x => x.GioDi).ToList();
+                            <td>
+                                @if (trips.Any())
+                                {
+                                    @foreach (var item in trips)
+                                    {
+                                        string styleClass = "border-secondary";
+                                        if (item.TrangThai == TrangThaiChuyenXe.DangMoBanVe) { styleClass = "style-success"; }
+                                        else if (item.TrangThai == TrangThaiChuyenXe.ChoKhoiHanh) { styleClass = "style-warning"; }
+                                        else if (item.TrangThai == TrangThaiChuyenXe.DaHuy) { styleClass = "style-danger"; }
+
+                                        <a href="@Url.Action("BanVe", "BanVe", new { area = "NhaXe", id = item.ChuyenId })"
+                                           class="trip-box @styleClass"
+                                           style="border-left: 3px solid #ccc;">
+                                            <span class="trip-code">@item.GioDi.ToString(@"hh\:mm") - @(item.Xe?.BienSoXe ?? "Chưa gán xe")</span>
+                                            <span class="trip-route">@item.LoTrinh?.TramDiNavigation?.TenTram &rarr; @item.LoTrinh?.TramToiNavigation?.TenTram</span>
+                                            <span class="trip-info"><i class="bi bi-person-badge"></i> TX: @(string.IsNullOrEmpty(item.TaiXeId) ? "--" : item.TaiXe?.HoTen)</span>
+                                        </a>
+                                    }
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

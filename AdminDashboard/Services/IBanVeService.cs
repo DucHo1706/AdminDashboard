@@ -20,7 +20,7 @@ namespace AdminDashboard.Services
         Task<VeBanInfo> TraCuuVeAsync(string keyword, string nhaXeId);
 
         // Đổi ghế (Vé ID cũ -> Số ghế mới muốn ngồi)
-        Task<KetQuaBanVe> DoiGheAsync(string veId, string soGheMoi, string nhaXeId);
+        Task<KetQuaBanVe> DoiGheAsync(string veId, string soGheMoi, string chuyenIdMoi, string nhaXeId);
     }
 
 

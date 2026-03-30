@@ -30,24 +30,40 @@
             pointer-events: none;
             opacity: 0.6;
         }
-        /* Ghế đã bán */
+
         .seat.current {
             background-color: #ffc107;
             color: black;
             border-color: #ffc107;
             pointer-events: none;
         }
-        /* Ghế hiện tại của khách */
+
         .seat.selected {
             background-color: #198754;
             color: white;
             border-color: #198754;
             box-shadow: 0 0 10px #198754;
         }
-        /* Ghế đang chọn đổi */
+
         .seat:hover:not(.sold):not(.current) {
             border-color: #0d6efd;
             background: #e3f2fd;
+        }
+
+    /* MỚI: Thêm style cho thẻ danh sách chuyến xe */
+    .trip-item {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .trip-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .trip-item.active {
+            background-color: #e7f1ff !important;
+            border-color: #0d6efd !important;
+            color: #000 !important;
         }
 </style>
 
@@ -60,7 +76,7 @@
                 </div>
                 <div class="card-body">
                     <div class="input-group mb-3">
-                        <input type="text" id="keyword" class="form-control" placeholder="Nhập Mã vé hoặc SĐT..." />
+                        <input type="text" id="keyword" class="form-control" placeholder="Nhập SĐT hoặc Mã vé..." />
                         <button class="btn btn-dark" onclick="timVe()"><i class="fas fa-search"></i> Tìm</button>
                     </div>
 
@@ -75,19 +91,36 @@
                             <p class="mb-0"><strong>Trạng thái:</strong> <span id="lblTrangThai"></span></p>
                         </div>
 
-                        <hr />
+                        <div class="card bg-light border-success mb-3">
+                            <div class="card-body p-3">
+                                <h6 class="text-success fw-bold mb-3"><i class="fas fa-bus"></i> Chọn chuyến muốn đổi:</h6>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">1. Chọn Ngày:</label>
+                                    <input type="date" id="txtNgayDoi" class="form-control" onchange="loadDanhSachChuyenXe()" />
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold">2. Danh sách chuyến (Click để chọn):</label>
+                                    <div id="listChuyenMoi" class="list-group shadow-sm" style="max-height: 220px; overflow-y: auto; border-radius: 6px; border: 1px solid #dee2e6;">
+                                        <div class="text-muted small p-2 text-center">Vui lòng chọn ngày để xem chuyến</div>
+                                    </div>
+                                    <input type="hidden" id="hdChuyenIdMoi" />
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="mb-3">
-                            <label class="fw-bold text-success">Ghế mới muốn đổi:</label>
+                            <label class="fw-bold text-success">Ghế mới đang chọn:</label>
                             <input type="text" id="txtGheMoi" class="form-control fw-bold text-center text-success fs-4" readonly placeholder="---" />
-                            <small class="text-muted fst-italic">* Vui lòng chọn ghế Trống trên sơ đồ bên cạnh</small>
+                            <small class="text-muted fst-italic">* Click vào ghế Trống trên sơ đồ bên cạnh</small>
                         </div>
 
                         <input type="hidden" id="hdVeId" />
-                        <input type="hidden" id="hdChuyenId" />
+                        <input type="hidden" id="hdChuyenIdHienTai" />
 
                         <button class="btn btn-success w-100 fw-bold" onclick="doiGhe()">
-                            <i class="fas fa-exchange-alt me-2"></i> XÁC NHẬN ĐỔI GHẾ
+                            <i class="fas fa-exchange-alt me-2"></i> XÁC NHẬN ĐỔI VÉ
                         </button>
                     </div>
                 </div>
@@ -127,29 +160,95 @@
 
             $.get('/NhaXe/BanVe/TimKiemVe?keyword=' + kw, function (res) {
                 if (res.success) {
-                    // Điền thông tin
                     $('#lblTenKhach').text(res.data.tenKhach);
                     $('#lblSdt').text(res.data.sdt);
                     $('#lblSoGhe').text(res.data.soGhe);
                     $('#lblTrangThai').text(res.data.trangThai);
-                    $('#hdVeId').val(res.data.gheID);
-                    $('#hdChuyenId').val(res.data.chuyenId);
 
-                    // Hiển thị khu vực kết quả
+                    $('#hdVeId').val(res.data.gheID);
+                    $('#hdChuyenIdHienTai').val(res.data.chuyenId);
+
                     $('#result-area').removeClass('d-none');
 
-                    // --- GỌI HÀM VẼ SƠ ĐỒ GHẾ ---
-                    loadSoDoGhe(res.data.chuyenId, res.data.soGhe);
+                    // Set ngày mặc định là hôm nay và load danh sách chuyến
+                    document.getElementById('txtNgayDoi').valueAsDate = new Date();
+                    loadDanhSachChuyenXe(res.data.chuyenId);
                 } else {
                     $('#error-msg').text(res.message).removeClass('d-none');
                 }
             });
         }
 
-        // 2. Hàm tải và vẽ sơ đồ ghế
-        function loadSoDoGhe(chuyenId, gheHienTai) {
+        // 2. Load danh sách chuyến xe khi đổi ngày
+        function loadDanhSachChuyenXe(chuyenHienTaiId = null) {
+            var ngayDi = $('#txtNgayDoi').val();
+            if (!ngayDi) return;
+
+            var container = $('#listChuyenMoi');
+            container.html('<div class="text-center p-3"><div class="spinner-border spinner-border-sm text-success"></div> Đang tải...</div>');
+
+            $.get('/NhaXe/BanVe/GetChuyenXeTheoNgay?ngayDi=' + ngayDi, function (res) {
+                if (res.success) {
+                    container.empty();
+
+                    if (res.data.length === 0) {
+                        container.html('<div class="p-3 text-center text-danger small">Không có chuyến xe nào chạy trong ngày này.</div>');
+                        return;
+                    }
+
+                    // MỚI: Render từng chuyến xe thành 1 item dạng Card nhỏ
+                    res.data.forEach(function (c) {
+                        var isSelected = c.chuyenId === chuyenHienTaiId ? 'active' : '';
+                        var html = `
+                                    <button type="button" class="list-group-item list-group-item-action ${isSelected} p-2 trip-item"
+                                            onclick="chonChuyenDoi(this, '${c.chuyenId}')">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="fw-bold text-primary" style="font-size: 15px;"><i class="bi bi-clock me-1"></i> ${c.gioDi}</span>
+                                            <span class="badge bg-secondary"><i class="bi bi-bus-front"></i> ${c.bienSo}</span>
+                                        </div>
+                                        <small class="text-muted d-block" style="font-size: 12px;">${c.tuyenDuong}</small>
+                                    </button>
+                                `;
+                        container.append(html);
+                    });
+
+                    // Nếu có ID chuyến hiện tại, tự động chọn nó và load sơ đồ
+                    if (chuyenHienTaiId) {
+                        $('#hdChuyenIdMoi').val(chuyenHienTaiId);
+                        loadSoDoGhe(chuyenHienTaiId);
+                    }
+                } else {
+                    container.html('<div class="p-3 text-center text-danger small">Lỗi khi tải dữ liệu.</div>');
+                }
+            });
+        }
+
+        // MỚI: 2.5 Hàm xử lý khi click vào 1 chuyến xe trong danh sách
+        function chonChuyenDoi(element, chuyenId) {
+            // Bỏ active các chuyến khác
+            $('.trip-item').removeClass('active');
+            // Active chuyến vừa click
+            $(element).addClass('active');
+
+            // Lưu ID và load sơ đồ ghế
+            $('#hdChuyenIdMoi').val(chuyenId);
+            loadSoDoGhe(chuyenId);
+        }
+
+        // 3. Hàm tải và vẽ sơ đồ ghế
+        function loadSoDoGhe(chuyenId) {
+            if (!chuyenId) {
+                $('#map-card').hide();
+                return;
+            }
+
+            var gheHienTai = $('#lblSoGhe').text();
+            var chuyenHienTai = $('#hdChuyenIdHienTai').val();
+
             $('#map-card').show();
             $('#seat-map-container').html('<div class="text-center w-100"><div class="spinner-border text-primary"></div></div>');
+            $('#txtGheMoi').val('');
+            // Reset ghế đang chọn
 
             $.get('/NhaXe/BanVe/GetSoDoGheJSON?chuyenId=' + chuyenId, function (res) {
                 if (res.success) {
@@ -158,17 +257,16 @@
                     var veDaBan = res.veDaBan || [];
 
                     for (var i = 1; i <= tongGhe; i++) {
-                        var soGhe = i.toString().padStart(2, '0'); // Tạo số 01, 02...
-
+                        var soGhe = i.toString().padStart(2, '0');
                         var statusClass = "";
 
-                        // Kiểm tra ghế này có ai mua chưa
                         var isSold = veDaBan.some(v => v.soGhe == soGhe);
 
-                        if (soGhe == gheHienTai) {
-                            statusClass = "current"; // Ghế hiện tại của khách -> Màu vàng
+                        // Chỉ bôi màu vàng (ghế cũ) nếu khách đang xem đúng chuyến hiện tại của họ
+                        if (soGhe == gheHienTai && chuyenId == chuyenHienTai) {
+                            statusClass = "current";
                         } else if (isSold) {
-                            statusClass = "sold"; // Ghế người khác mua -> Màu đỏ
+                            statusClass = "sold";
                         }
 
                         html += `<div class="seat ${statusClass}" onclick="chonGheDoi(this, '${soGhe}')">${soGhe}</div>`;
@@ -178,28 +276,25 @@
             });
         }
 
-        // 3. Hàm chọn ghế trên sơ đồ
+        // 4. Hàm chọn ghế trên sơ đồ
         function chonGheDoi(el, soGhe) {
-            // Nếu ghế đỏ hoặc ghế vàng thì không cho chọn
             if ($(el).hasClass('sold') || $(el).hasClass('current')) return;
-
-            // Xóa chọn cũ
             $('.seat.selected').removeClass('selected');
-
-            // Chọn mới
             $(el).addClass('selected');
-            $('#txtGheMoi').val(soGhe); // Điền vào ô input
+            $('#txtGheMoi').val(soGhe);
         }
 
-        // 4. Hàm xác nhận đổi
+        // 5. Hàm xác nhận đổi
         function doiGhe() {
             var veId = $('#hdVeId').val();
             var gheMoi = $('#txtGheMoi').val();
+            var chuyenIdMoi = $('#hdChuyenIdMoi').val(); // Đã sửa lại thành lấy từ hidden input mới
 
+            if (!chuyenIdMoi) { alert("Vui lòng chọn chuyến xe!"); return; }
             if (!gheMoi || gheMoi === "---") { alert("Vui lòng chọn ghế mới trên sơ đồ!"); return; }
 
             if (confirm("Xác nhận đổi sang ghế " + gheMoi + "?")) {
-                $.post('/NhaXe/BanVe/DoiGhe', { veId: veId, soGheMoi: gheMoi }, function (res) {
+                $.post('/NhaXe/BanVe/DoiGhe', { veId: veId, soGheMoi: gheMoi, chuyenIdMoi: chuyenIdMoi }, function (res) {
                     if (res.success) {
                         alert(res.message);
                         location.reload();

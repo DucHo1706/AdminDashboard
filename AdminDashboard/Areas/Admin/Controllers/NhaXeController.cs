@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AdminDashboard.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class NhaXeController : Controller
     {
         private readonly Db27524Context _context;
