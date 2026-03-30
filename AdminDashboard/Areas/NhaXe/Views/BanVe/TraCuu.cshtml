@@ -122,6 +122,9 @@
                         <button class="btn btn-success w-100 fw-bold" onclick="doiGhe()">
                             <i class="fas fa-exchange-alt me-2"></i> XÁC NHẬN ĐỔI VÉ
                         </button>
+                        <button class="btn btn-danger w-100 fw-bold mt-2" onclick="huyVe()">
+                            <i class="fas fa-trash-alt me-2"></i> HỦY VÉ
+                        </button>
                     </div>
                 </div>
             </div>
@@ -295,6 +298,22 @@
 
             if (confirm("Xác nhận đổi sang ghế " + gheMoi + "?")) {
                 $.post('/NhaXe/BanVe/DoiGhe', { veId: veId, soGheMoi: gheMoi, chuyenIdMoi: chuyenIdMoi }, function (res) {
+                    if (res.success) {
+                        alert(res.message);
+                        location.reload();
+                    } else {
+                        alert("Lỗi: " + res.message);
+                    }
+                });
+            }
+        }
+        function huyVe() {
+            var chuyenId = $('#hdChuyenIdHienTai').val();
+            var soGhe = $('#lblSoGhe').text();
+            if (!chuyenId || !soGhe) return;
+
+            if (confirm("Xác nhận HỦY vé ghế " + soGhe + "? Thao tác này không thể hoàn tác!")) {
+                $.post('/NhaXe/BanVe/HuyVe', { chuyenId: chuyenId, soGhe: soGhe }, function (res) {
                     if (res.success) {
                         alert(res.message);
                         location.reload();

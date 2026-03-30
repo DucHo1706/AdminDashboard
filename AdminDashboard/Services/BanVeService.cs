@@ -154,55 +154,61 @@ namespace AdminDashboard.Services
 
             if (chuyenXe == null) return new KetQuaBanVe { Success = false, Message = "Chuyến xe không tồn tại." };
 
-            var gheDb = await _context.Ghe
-                .FirstOrDefaultAsync(g => g.XeId == chuyenXe.XeId && g.SoGhe == req.SoGhe);
+            // 1. Tách danh sách số ghế từ chuỗi (Vd: "01, 02" -> ["01", "02"])
+            var danhSachSoGhe = req.SoGhe.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-            if (gheDb == null)
-            {
-                gheDb = new Ghe
-                {
-                    GheID = Guid.NewGuid().ToString(),
-                    SoGhe = req.SoGhe,
-                    XeId = chuyenXe.XeId,
-                    TrangThai = "Trong"
-                };
-                _context.Ghe.Add(gheDb);
-                await _context.SaveChangesAsync();
-            }
-
-            var gheDaDat = await _context.Ve.AnyAsync(v =>
-                v.DonHang.ChuyenId == req.ChuyenId &&
-                v.GheID == gheDb.GheID &&
-                v.DonHang.TrangThaiThanhToan != "Da huy");
-
-            if (gheDaDat)
-            {
-                return new KetQuaBanVe { Success = false, Message = $"Ghế {req.SoGhe} đã có người đặt." };
-            }
+            if (danhSachSoGhe.Length > 5)
+                return new KetQuaBanVe { Success = false, Message = "Không được đặt quá 5 vé một lần." };
 
             try
             {
+                // 2. Tạo MỘT đơn hàng chung cho tất cả các ghế này
                 var donHang = TicketFactory.CreateDonHang(
                     req.ChuyenId,
-                    req.GiaVe,
+                    req.GiaVe, // Đây là tổng tiền đã tính ở giao diện
                     req.HoTen,
                     req.SoDienThoai,
                     req.GhiChu,
                     req.DaThanhToan,
                     tenNhanVien
                 );
-
-                var ve = TicketFactory.CreateVe(donHang.DonHangId, gheDb.GheID, req.GiaVe);
-
                 _context.DonHang.Add(donHang);
-                _context.Ve.Add(ve);
-                await _context.SaveChangesAsync();
 
-                return new KetQuaBanVe { Success = true, Message = "Xuất vé thành công!" };
+                // 3. Lặp qua từng số ghế để tạo vé tương ứng
+                foreach (var soGhe in danhSachSoGhe)
+                {
+                    var sGhe = soGhe.Trim();
+                    // Tìm hoặc tạo Ghế trong DB
+                    var gheDb = await _context.Ghe
+                        .FirstOrDefaultAsync(g => g.XeId == chuyenXe.XeId && g.SoGhe == sGhe);
+
+                    if (gheDb == null)
+                    {
+                        gheDb = new Ghe { GheID = Guid.NewGuid().ToString(), SoGhe = sGhe, XeId = chuyenXe.XeId, TrangThai = "Trong" };
+                        _context.Ghe.Add(gheDb);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    // Kiểm tra xem ghế đã bị ai khác đặt chưa (Race condition)
+                    var gheDaDat = await _context.Ve.AnyAsync(v =>
+                        v.DonHang.ChuyenId == req.ChuyenId &&
+                        v.GheID == gheDb.GheID &&
+                        v.DonHang.TrangThaiThanhToan != "Da huy");
+
+                    if (gheDaDat) return new KetQuaBanVe { Success = false, Message = $"Ghế {sGhe} đã có người đặt trước đó." };
+
+                    // Tạo vé cho từng ghế
+                    var giaVeMoiGhe = req.GiaVe / danhSachSoGhe.Length; // Chia đều tổng tiền cho mỗi vé
+                    var ve = TicketFactory.CreateVe(donHang.DonHangId, gheDb.GheID, giaVeMoiGhe);
+                    _context.Ve.Add(ve);
+                }
+
+                await _context.SaveChangesAsync();
+                return new KetQuaBanVe { Success = true, Message = $"Xuất thành công {danhSachSoGhe.Length} vé!" };
             }
             catch (Exception ex)
             {
-                return new KetQuaBanVe { Success = false, Message = "Lỗi: " + ex.Message };
+                return new KetQuaBanVe { Success = false, Message = "Lỗi hệ thống: " + ex.Message };
             }
         }
 

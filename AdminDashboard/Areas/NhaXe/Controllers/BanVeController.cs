@@ -81,27 +81,23 @@ namespace AdminDashboard.Areas.NhaXe.Controllers
 
             return Json(new { success = true, data = ve });
         }
+        // 1. API Lấy chuyến xe theo ngày (Dùng cho trang Tra cứu đổi vé)
         [HttpGet]
         public async Task<IActionResult> GetChuyenXeTheoNgay(DateTime ngayDi)
         {
             if (string.IsNullOrEmpty(NhaXeId)) return Json(new { success = false });
-
-            // Gọi hàm cũ (nó sẽ lấy 7 ngày)
             var rawData = await _banVeService.GetChuyenXeBanVeAsync(NhaXeId, ngayDi);
-
-            // LỌC LẠI: Chỉ lấy chính xác các chuyến chạy trong đúng ngày khách chọn
             var filteredData = rawData.Where(c => c.NgayDi.Date == ngayDi.Date).ToList();
-
             var result = filteredData.Select(c => new {
                 chuyenId = c.ChuyenId,
                 gioDi = c.GioDi.ToString(@"hh\:mm"),
                 tuyenDuong = c.LoTrinh.TramDiNavigation.TenTram + " - " + c.LoTrinh.TramToiNavigation.TenTram,
                 bienSo = c.Xe?.BienSoXe ?? "Chưa gán xe"
             });
-
             return Json(new { success = true, data = result });
         }
-        // API Đổi ghế
+
+        // 2. Cập nhật Action DoiGhe để nhận thêm chuyenIdMoi
         [HttpPost]
         public async Task<IActionResult> DoiGhe(string veId, string soGheMoi, string chuyenIdMoi)
         {

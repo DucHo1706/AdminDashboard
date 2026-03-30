@@ -187,10 +187,8 @@
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <label class="fw-bold">Giá vé niêm yết:</label>
                             <div class="input-group" style="width: 200px;">
-                                <input type="number"
-                                       id="GiaVe"
-                                       class="form-control text-end fw-bold"
-                                       value="@(Model.ChuyenXe.LoTrinh.GiaVeCoDinh ?? 200000)" />
+                                <input type="number" id="GiaVe" class="form-control text-end fw-bold"
+                                       value="@(Model.ChuyenXe.LoTrinh.GiaVeCoDinh ?? 200000)" readonly />
                                 <span class="input-group-text">VND</span>
                             </div>
                         </div>
@@ -219,65 +217,98 @@
         </div>
     </div>
 </div>
-
 @section Scripts {
     <script>
+        let selectedSeats = [];
+        const giaVeDonVi = parseFloat(document.getElementById('GiaVe').value || "0");
+
         function selectSeat(element, soGhe) {
-            if (element.classList.contains('sold')) {
-                return;
+            if (element.classList.contains('sold')) return;
+
+            if (element.classList.contains('selected')) {
+                // BỎ CHỌN
+                element.classList.remove('selected');
+                selectedSeats = selectedSeats.filter(s => s !== soGhe);
+            } else {
+                // KIỂM TRA GIỚI HẠN 5 VÉ
+                if (selectedSeats.length >= 5) {
+                    alert("Bạn chỉ được chọn tối đa 5 vé cho mỗi lượt bán!");
+                    return;
+                }
+                // THÊM VÀO
+                element.classList.add('selected');
+                selectedSeats.push(soGhe);
             }
 
-            document.querySelectorAll('.seat.selected')
-                .forEach(el => el.classList.remove('selected'));
+            // Cập nhật ô input hiển thị
+            document.getElementById('SoGhe').value = selectedSeats.length > 0 ? selectedSeats.join(', ') : "---";
 
-            element.classList.add('selected');
-            document.getElementById('SoGhe').value = soGhe;
+            // Tính tổng tiền
+            const tongTien = selectedSeats.length * giaVeDonVi;
+            document.getElementById('GiaVe').value = tongTien;
+
             document.getElementById('msg-error').innerText = "";
         }
 
         function submitBanVe() {
-            var soGhe = document.getElementById('SoGhe').value;
-
-            if (!soGhe || soGhe === "---") {
-                alert("Vui lòng chọn một ghế trống trên sơ đồ!");
+            const soGheStr = document.getElementById('SoGhe').value;
+            if (!soGheStr || soGheStr === "---") {
+                alert("Vui lòng chọn ít nhất một ghế trống trên sơ đồ!");
                 return;
             }
 
-            var hoTen = document.getElementById('HoTen').value;
+            const hoTen = document.getElementById('HoTen').value.trim();
             if (!hoTen) {
-                alert("Vui lòng nhập tên khách hàng!");
+                alert("Vui lòng nhập họ tên khách hàng!");
                 document.getElementById('HoTen').focus();
                 return;
             }
 
-            var data = {
+            // KIỂM TRA SỐ ĐIỆN THOẠI (Regex chuẩn Việt Nam)
+            const sdt = document.getElementById('SoDienThoai').value.trim();
+            const sdtRegex = /^(03|05|07|08|09|01[2|6|8|9])([0-9]{8})$/;
+            if (!sdt) {
+                alert("Vui lòng nhập số điện thoại để liên hệ khách!");
+                document.getElementById('SoDienThoai').focus();
+                return;
+            }
+            if (!sdtRegex.test(sdt)) {
+                alert("Số điện thoại không hợp lệ (Phải có 10 số và đúng đầu số nhà mạng)!");
+                document.getElementById('SoDienThoai').focus();
+                return;
+            }
+
+            const data = {
                 ChuyenId: document.getElementById('ChuyenId').value,
-                SoGhe: soGhe,
+                SoGhe: soGheStr, // Gửi chuỗi "01, 02, 03"
                 HoTen: hoTen,
-                SoDienThoai: document.getElementById('SoDienThoai').value,
+                SoDienThoai: sdt,
                 GhiChu: document.getElementById('GhiChu').value,
                 GiaVe: parseFloat(document.getElementById('GiaVe').value || "0"),
                 DaThanhToan: document.getElementById('DaThanhToan').checked
             };
+
+            // Hiện loading hoặc disable nút để tránh bấm 2 lần
+            if (!confirm("Xác nhận xuất vé cho ghế: " + soGheStr + "?")) return;
 
             fetch('/NhaXe/BanVe/XacNhanBanVe', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             })
-            .then(res => res.json())
-            .then(res => {
-                if (res.success) {
-                    alert(res.message);
-                    location.reload();
-                } else {
-                    alert("LỖI: " + res.message);
-                }
-            })
-            .catch(err => {
-                alert("Lỗi kết nối máy chủ!");
-                console.error(err);
-            });
+                .then(res => res.json())
+                .then(res => {
+                    if (res.success) {
+                        alert(res.message);
+                        location.reload();
+                    } else {
+                        alert("LỖI: " + res.message);
+                    }
+                })
+                .catch(err => {
+                    alert("Lỗi kết nối máy chủ! Vui lòng kiểm tra lại mạng.");
+                    console.error(err);
+                });
         }
     </script>
 }
